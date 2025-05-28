@@ -1,7 +1,7 @@
 // Utils
-import { utils } from '../utils.mjs'
+import { log, utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
+import { addNonEnumProp, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Modvar instance
@@ -30,34 +30,61 @@ export function Modvar(id = false) {
  * @param {string} mod - The Modvar module
  * @return {Modvar} this - The Modvar instance
  */
-Modvar.prototype.create = async function ({ id, val, info, mod }) {
-  /*
-   * Do not bother without an id
-   */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
-
-  /*
-   * Insert into the database
-   */
-  let result = false
-  try {
-    result = await utils.db.write(
-      `INSERT INTO inventory_modvars(id, val, info, mod) VALUES(:id, :val, :info, :mod)`,
-      { id, val, info, mod }
-    )
-  } catch (err) {
-    return this.setError(err)
+Modvar.prototype.create = async function (id, val, info, mod) {
+  if (!id) {
+    return false
   }
 
-  /*
-   * If it worked, store the internal id
-   */
-  return result &&
-    Array.isArray(result) &&
-    result[0] === 200 &&
-    result[1]?.results?.[0]?.last_insert_id
-    ? this.setId(id).setSaved(true).setError(false)
-    : this.setError('Failed to create record')
+  const sql = `
+    INSERT INTO inventory_modvars(
+      id, val, info, mod
+    ) VALUES (
+      :id, :val, :info, :mod
+    )
+  `
+
+  const params = {
+    id,
+    val,
+    info,
+    mod,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to update an inventory (host) modvar
+ *
+ * @return {object} updated - true if it the modvar is updated, false if not
+ */
+Modvar.prototype.update = async function (id, val = '', info = '', mod = '') {
+  if (!id) return false
+
+  // Run query
+  const updateResult = await utils.db.write(
+    `UPDATE inventory_modvars SET val=:val, info=:info, mod=:mod WHERE id=:id`,
+    {
+      val,
+      info,
+      mod,
+      id,
+    }
+  )
+
+  if (updateResult.rowCount === 0) {
+    return false
+  }
+
+  return await this.read(id)
 }
 
 /*
@@ -175,49 +202,29 @@ Modvar.prototype.delete = async function () {
  *
  * @param {string} id - The Modvar id
  */
-Modvar.prototype.read = async function (id = false) {
-  /*
-   * Do not bother without an id
-   */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
+Modvar.prototype.read = async function (id) {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_modvars WHERE id=:id`, {
+    id,
+  })
 
-  /*
-   * Read from database
-   */
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_modvars WHERE id = :id`, {
-      id: id || this.getId(),
-    })
-    const data = resultAsRecord(result[1])
-    if (data.id) this.setId(data.id)
-    if (data.val) this.setRecordField('val', data.val)
-    if (data.info) this.setRecordField('info', data.info)
-    if (data.mod) this.setRecordField('mod', data.mod)
-    this.setSaved(true)
-  } catch (err) {
-    return this.setError(err)
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one modvar in loadModvar. This is unexpected.`)
+    return false
   }
-
-  return result && Array.isArray(result) && result[0] === 200
-    ? this
-    : this.setError('Failed to create record')
 }
 
 /**
  * List all Modvar records
  */
 Modvar.prototype.list = async function () {
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_modvars ORDER BY mod`)
-  } catch (err) {
-    return this.setError(err)
-  }
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_modvars ORDER BY id`)
 
-  return result && Array.isArray(result) && result[0] === 200
-    ? result[1].results
-    : this.setError('Failed to fetch OS list')
+  return status === 200 ? resultsAsList(result) : false
 }
 
 /**
@@ -226,9 +233,9 @@ Modvar.prototype.list = async function () {
  * @param {string} val - The Modvar val
  * @return {object} available - true if it is available, false if not
  */
-Modvar.prototype.isAvailable = async function (val) {
-  const [status, result] = await utils.db.read(`SELECT val FROM inventory_modvars where val=:val`, {
-    val,
+Modvar.prototype.isAvailable = async function (id) {
+  const [status, result] = await utils.db.read(`SELECT id FROM inventory_modvars where id=:id`, {
+    id,
   })
   if (status === 200) {
     const hits = resultsAsList(result)

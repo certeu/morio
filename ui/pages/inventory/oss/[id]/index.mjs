@@ -20,7 +20,7 @@ export default function InventoryOsPage({ id = false }) {
     if (id)
       runOsApiCall(api, id).then((result) => {
         setData(result)
-        setTitle(result.name)
+        setTitle(result.id)
       })
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [id])

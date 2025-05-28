@@ -9,12 +9,23 @@ export default function InventoryModPage({ mod = false }) {
   const { api } = useApi()
   const [data, setData] = useState([])
   const [title, setTitle] = useState('Loading module data...')
+  const [refresh, setRefresh] = useState(0)
 
   const meta = {
     title: title ? mod : 'Loading module data',
     page: ['inventory', 'mods', mod ? mod : 'unknown'],
     Icon: PuzzleIcon,
   }
+
+  useEffect(() => {
+    if (refresh > 0) {
+      runModApiCall(api, mod).then((result) => {
+        setData(result)
+        setTitle(result.mod)
+        setRefresh(0)
+      })
+    }
+  }, [refresh])
 
   useEffect(() => {
     if (mod)
@@ -29,7 +40,7 @@ export default function InventoryModPage({ mod = false }) {
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
-          <ModDetail data={data} />
+          <ModDetail data={data} refresh={refresh} setRefresh={setRefresh} />
         </div>
       </ContentWrapper>
     </PageWrapper>

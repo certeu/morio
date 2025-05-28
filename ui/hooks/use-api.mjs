@@ -672,6 +672,15 @@ MorioClient.prototype.isGroupAvailable = async function (group) {
 }
 
 /**
+ * Get if a host id is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isHostAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-host-available/${id}`)
+}
+
+/**
  * Get if a ip address is available
  *
  * @return {object} - The result
@@ -690,21 +699,21 @@ MorioClient.prototype.isMacAvailable = async function (mac) {
 }
 
 /**
- * Get if a os name is available
+ * Get if a os id is available
  *
  * @return {object} - The result
  */
-MorioClient.prototype.isOsAvailable = async function (name) {
-  return await this.call(`${morioConfig.api}/inventory/is-os-available/${name}`)
+MorioClient.prototype.isOsAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-os-available/${id}`)
 }
 
 /**
- * Get if a pkg name is available
+ * Get if a pkg id is available
  *
  * @return {object} - The result
  */
-MorioClient.prototype.isPkgAvailable = async function (name) {
-  return await this.call(`${morioConfig.api}/inventory/is-pkg-available/${name}`)
+MorioClient.prototype.isPkgAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-pkg-available/${id}`)
 }
 
 /**
@@ -717,21 +726,30 @@ MorioClient.prototype.isModAvailable = async function (mod) {
 }
 
 /**
- * Get if a modvar val is available
+ * Get if a modvar id is available
  *
  * @return {object} - The result
  */
-MorioClient.prototype.isModvarAvailable = async function (val) {
-  return await this.call(`${morioConfig.api}/inventory/is-modvar-available/${val}`)
+MorioClient.prototype.isModvarAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-modvar-available/${id}`)
 }
 
 /**
- * Get if a hostvar key is available
+ * Get if a hostvar id is available
  *
  * @return {object} - The result
  */
-MorioClient.prototype.isHostvarAvailable = async function (key) {
-  return await this.call(`${morioConfig.api}/inventory/is-hostvar-available/${key}`)
+MorioClient.prototype.isHostvarAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-hostvar-available/${id}`)
+}
+
+/**
+ * Get if a modfile id is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isModfileAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-modfile-available/${id}`)
 }
 
 /**
@@ -779,8 +797,8 @@ MorioClient.prototype.getInventoryGroup = async function (group) {
  *
  * @return {object} - The result
  */
-MorioClient.prototype.getInventoryGroupvar = async function (name) {
-  return await this.call(`${morioConfig.api}/inventory/groupvars/${name}`)
+MorioClient.prototype.getInventoryGroupvar = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/groupvars/${id}`)
 }
 
 /**
@@ -820,6 +838,139 @@ MorioClient.prototype.updateInventoryGroupDescription = async function (group, d
     headers: this.jsonHeaders,
     method: 'PATCH',
     body: JSON.stringify({ description }),
+  })
+}
+
+/**
+ * Update the info of an inventory host
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryHostInfo = async function (
+  host,
+  arch,
+  cores,
+  fqdn,
+  memory,
+  name,
+  notes,
+  tags
+) {
+  return await this.call(`${morioConfig.api}/inventory/hosts/${host}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ arch, cores, fqdn, memory, name, notes, tags }),
+  })
+}
+
+/**
+ * Update the description of an inventory ip
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryIpVersion = async function (ip, version) {
+  return await this.call(`${morioConfig.api}/inventory/ips/${ip}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ version }),
+  })
+}
+
+/**
+ * Update the name, version of an inventory os
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryOsVersion = async function (id, name, version) {
+  return await this.call(`${morioConfig.api}/inventory/oss/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ name, version }),
+  })
+}
+
+/**
+ * Update the name, version of an inventory os
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryPkgVersion = async function (id, name, version) {
+  return await this.call(`${morioConfig.api}/inventory/pkgs/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ name, version }),
+  })
+}
+
+/**
+ * Update the data of an inventory mod
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryModData = async function (mod, data) {
+  return await this.call(`${morioConfig.api}/inventory/mods/${mod}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ data }),
+  })
+}
+
+/**
+ * Update the data of an inventory modvar
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryModvarInfo = async function (id, val, info, mod) {
+  return await this.call(`${morioConfig.api}/inventory/modvars/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ val, info, mod }),
+  })
+}
+
+/**
+ * Update the data of an inventory groupvar
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryGroupvarInfo = async function (id, group, key, val, info) {
+  return await this.call(`${morioConfig.api}/inventory/groupvars/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ group, key, val, info }),
+  })
+}
+
+/**
+ * Update the data of an inventory hostvar
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryHostvarInfo = async function (id, key, val, info, host) {
+  return await this.call(`${morioConfig.api}/inventory/hostvars/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ key, val, info, host }),
+  })
+}
+
+/**
+ * Update the data of an inventory modfile
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryModfile = async function (
+  id,
+  mod,
+  folder,
+  file,
+  content,
+  source
+) {
+  return await this.call(`${morioConfig.api}/inventory/modfiles/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ mod, folder, file, content, source }),
   })
 }
 
@@ -895,13 +1046,45 @@ MorioClient.prototype.removeInventoryGroupvar = async function (id) {
 }
 
 /**
- * Removes a group from the inventory
+ * Remove groupvars from the inventory
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
-MorioClient.prototype.removeInventoryGroup = async function (id) {
+MorioClient.prototype.removeInventoryGroupvars = async function (group_id) {
   return await this.call(
-    `${morioConfig.api}/inventory/groups/${id}`,
+    `${morioConfig.api}/inventory/groupvars/group/${group_id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Remove groups from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryGroups = async function (group_id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/group/${group_id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Remove members from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryMembers = async function (member_id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/member/${member_id}`,
     {
       headers: this.jsonHeaders,
       method: 'DELETE',
@@ -917,6 +1100,51 @@ MorioClient.prototype.removeInventoryGroup = async function (id) {
  */
 MorioClient.prototype.getInventoryHosts = async function () {
   return await this.call(`${morioConfig.api}/inventory/hosts`)
+}
+
+/**
+ * Get all host-ips from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostIps = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hosts/ips`)
+}
+
+/**
+ * Get all host-macs from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostMacs = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hosts/macs`)
+}
+
+/**
+ * Get all host-oss from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostOss = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hosts/oss`)
+}
+
+/**
+ * Get all host-pkgs from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostPkgs = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hosts/pkgs`)
+}
+
+/**
+ * Get all host-mods from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostMods = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hosts/mods`)
 }
 
 /**
@@ -936,6 +1164,16 @@ MorioClient.prototype.getInventoryHostsObject = async function () {
  */
 MorioClient.prototype.getInventoryIp = async function (id) {
   return await this.call(`${morioConfig.api}/inventory/ips/${id}`)
+}
+
+/**
+ * Get an IP address from the inventory
+ *
+ * @param {string} - The id of the IP address
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryOs = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/oss/${id}`)
 }
 
 /**
@@ -1346,11 +1584,11 @@ MorioClient.prototype.createClientInvite = async function (type) {
  * @param {string} version - An ip version
  * @return {object} - The result
  */
-MorioClient.prototype.createIP = async function (ip, version) {
+MorioClient.prototype.createIp = async function (ip, host) {
   return await this.call(`${morioConfig.api}/inventory/ip`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ ip, version }),
+    body: JSON.stringify({ ip, host }),
   })
 }
 
@@ -1393,11 +1631,11 @@ MorioClient.prototype.createMod = async function (mod, data) {
  * @param {string} info - The module variable description
  * @return {object} - The result
  */
-MorioClient.prototype.createModvar = async function (id, val, info) {
+MorioClient.prototype.createModvar = async function (id, val, info, mod) {
   return await this.call(`${morioConfig.api}/inventory/modvar`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ id, val, info }),
+    body: JSON.stringify({ id, val, info, mod }),
   })
 }
 
@@ -1410,11 +1648,11 @@ MorioClient.prototype.createModvar = async function (id, val, info) {
  * @param {string} info - The host variable description
  * @return {object} - The result
  */
-MorioClient.prototype.createHostvar = async function (id, key, val, info) {
+MorioClient.prototype.createHostvar = async function (id, key, val, info, host) {
   return await this.call(`${morioConfig.api}/inventory/hostvar`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ id, key, val, info }),
+    body: JSON.stringify({ id, key, val, info, host }),
   })
 }
 
@@ -1456,9 +1694,9 @@ MorioClient.prototype.createMac = async function (mac) {
  *
  * @param {string} id - The host id
  * @param {string} arch - The host arch
- * @param {string} cores - The cores detail
+ * @param {number} cores - The cores number
  * @param {string} fqdn - The fqdn name
- * @param {string} memory - The memory size
+ * @param {number} memory - The memory size
  * @param {string} name - The host name
  * @param {string} notes - The notes
  * @param {string} tags - The tags
@@ -1496,6 +1734,146 @@ MorioClient.prototype.createOs = async function (id, name, version) {
     headers: this.jsonHeaders,
     method: 'POST',
     body: JSON.stringify({ id, name, version }),
+  })
+}
+
+/**
+ * Link an IP to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} ip - The IP address (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.linkHostToIp = async function (host, ip) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/ip/${ip}`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+  })
+}
+
+/**
+ * Unlink an IP to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} ip - The IP address (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.unlinkHostToIp = async function (host, ip) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/ip/${ip}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  })
+}
+
+/**
+ * Link an MAC to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} mac - The MAC address (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.linkHostToMac = async function (host, mac) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/mac/${mac}`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+  })
+}
+
+/**
+ * Unlink an MAC to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} mac - The MAC address (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.unlinkHostToMac = async function (host, mac) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/mac/${mac}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  })
+}
+
+/**
+ * Link an OS to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} id - The OS id (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.linkHostToOs = async function (host, id) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/os/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+  })
+}
+
+/**
+ * Unlink an OS to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} id - The OS id (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.unlinkHostToOs = async function (host, id) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/os/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  })
+}
+
+/**
+ * Link an Pkg to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} id - The Pkg id (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.linkHostToPkg = async function (host, id) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/pkg/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+  })
+}
+
+/**
+ * Unlink an Pkg to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} id - The Pkg id (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.unlinkHostToPkg = async function (host, id) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/pkg/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  })
+}
+
+/**
+ * Link an Mod to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} mod - The Mod (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.linkHostToMod = async function (host, mod) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/mod/${mod}`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+  })
+}
+
+/**
+ * Unlink an Mod to a host
+ *
+ * @param {string} host - The host ID (TEXT)
+ * @param {string} mod - The Mod (TEXT)
+ * @return {object} - The result of the API call
+ */
+MorioClient.prototype.unlinkHostToMod = async function (host, mod) {
+  return await this.call(`${morioConfig.api}/inventory/link/host/${host}/mod/${mod}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
   })
 }
 

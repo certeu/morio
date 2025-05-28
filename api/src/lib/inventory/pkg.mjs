@@ -1,7 +1,7 @@
 // Utils
-import { utils } from '../utils.mjs'
+import { log, utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
+import { addNonEnumProp, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Pkg instance
@@ -29,34 +29,59 @@ export function Pkg(id = false) {
  * @param {string} id - The Pkg version
  * @return {Pkg} this - The Pkg instance
  */
-Pkg.prototype.create = async function ({ id, name, version }) {
-  /*
-   * Do not bother without an id
-   */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
-
-  /*
-   * Insert into the database
-   */
-  let result = false
-  try {
-    result = await utils.db.write(
-      `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version)`,
-      { id, name, version }
-    )
-  } catch (err) {
-    return this.setError(err)
+Pkg.prototype.create = async function (id, name, version) {
+  if (!id) {
+    return false
   }
 
-  /*
-   * If it worked, store the internal id
-   */
-  return result &&
-    Array.isArray(result) &&
-    result[0] === 200 &&
-    result[1]?.results?.[0]?.last_insert_id
-    ? this.setId(id).setSaved(true).setError(false)
-    : this.setError('Failed to create record')
+  const sql = `
+    INSERT INTO inventory_pkgs(
+      id, name, version
+    ) VALUES (
+      :id, :name, :version
+    )
+  `
+
+  const params = {
+    id,
+    name,
+    version,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to update an inventory (host) pkg
+ *
+ * @return {object} updated - true if it the pkg is updated, false if not
+ */
+Pkg.prototype.update = async function (id, name = '', version = '') {
+  if (!id) return false
+
+  // Run query
+  const updateResult = await utils.db.write(
+    `UPDATE inventory_pkgs SET name=:name, version=:version WHERE id=:id`,
+    {
+      name,
+      version,
+      id,
+    }
+  )
+
+  if (updateResult.rowCount === 0) {
+    return false
+  }
+
+  return await this.read(id)
 }
 
 /*
@@ -164,48 +189,29 @@ Pkg.prototype.delete = async function () {
  *
  * @param {string} id - The Pkg id
  */
-Pkg.prototype.read = async function (id = false) {
-  /*
-   * Do not bother without an id
-   */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
+Pkg.prototype.read = async function (id) {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_pkgs WHERE id=:id`, {
+    id,
+  })
 
-  /*
-   * Read from database
-   */
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_pkgs WHERE id = :id`, {
-      id: id || this.getId(),
-    })
-    const data = resultAsRecord(result[1])
-    if (data.id) this.setId(data.id)
-    if (data.name) this.setRecordField('name', data.name)
-    if (data.version) this.setRecordField('version', data.version)
-    this.setSaved(true)
-  } catch (err) {
-    return this.setError(err)
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one pkg in loadPkg. This is unexpected.`)
+    return false
   }
-
-  return result && Array.isArray(result) && result[0] === 200
-    ? this
-    : this.setError('Failed to create record')
 }
 
 /**
  * List all Package records
  */
 Pkg.prototype.list = async function () {
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_pkgs ORDER BY name`)
-  } catch (err) {
-    return this.setError(err)
-  }
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_pkgs ORDER BY id`)
 
-  return result && Array.isArray(result) && result[0] === 200
-    ? result[1].results
-    : this.setError('Failed to fetch OS list')
+  return status === 200 ? resultsAsList(result) : false
 }
 
 /**
@@ -214,10 +220,8 @@ Pkg.prototype.list = async function () {
  * @param {string} name - The pkg name
  * @return {object} available - true if it is available, false if not
  */
-Pkg.prototype.isAvailable = async function (name) {
-  const [status, result] = await utils.db.read(`SELECT name FROM inventory_pkgs where name=:name`, {
-    name,
-  })
+Pkg.prototype.isAvailable = async function (id) {
+  const [status, result] = await utils.db.read(`SELECT id FROM inventory_pkgs where id=:id`, { id })
   if (status === 200) {
     const hits = resultsAsList(result)
     return hits.length === 0

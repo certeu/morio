@@ -1,5 +1,4 @@
 // Dependencies
-import { slugify } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
 import { ModalContext } from 'context/modal.mjs'
@@ -11,11 +10,10 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { CogIcon, AddPackageIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { AddPackageIcon, RightIcon, TrashIcon, TipIcon } from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { InventoryHostname } from './host.mjs'
 
 /**
  * This component renders a table with all Software packages and allows removal
@@ -24,12 +22,11 @@ export const PkgsTable = () => {
   // State
   const [pkgs, setPkgs] = useState({})
   const [refresh, setRefresh] = useState(0)
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('id')
   const [desc, setDesc] = useState(false)
 
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-  const { pushModal } = useContext(ModalContext)
 
   // Hooks
   const { api } = useApi()
@@ -61,25 +58,12 @@ export const PkgsTable = () => {
   return (
     <>
       <div className="flex flex-row item-center gap-2">
-        <button
-          className="btn btn-primary"
-          onClick={() =>
-            pushModal(
-              <ModalWrapper keepOpenOnClick>
-                <BulkPkgUpdate pkgs={Object.keys(selection)} {...{ refresh, setRefresh }} />
-              </ModalWrapper>
-            )
-          }
-          disabled={count < 1}
-        >
-          <CogIcon /> Update {count} Pkgs
-        </button>
         <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
           <TrashIcon /> Remove {count} Pkgs
         </button>
         <NewPkgButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -90,7 +74,7 @@ export const PkgsTable = () => {
                 checked={pkgs.length === count}
               />
             </th>
-            {['pkg', 'host', 'version'].map((field) => (
+            {['id', 'name', 'version'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -118,13 +102,9 @@ export const PkgsTable = () => {
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkgs.name}</PageLink>
+                <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkg.id}</PageLink>
               </td>
-              <td className="">
-                <PageLink href={`/inventory/hosts/${pkg.host}`}>
-                  <InventoryHostname uuid={pkg.host} />
-                </PageLink>
-              </td>
+              <td className="">{pkg.name}</td>
               <td className="">{pkg.version}</td>
             </tr>
           ))}
@@ -135,7 +115,7 @@ export const PkgsTable = () => {
   )
 }
 
-async function runPkgsTableApiCall(api) {
+export async function runPkgsTableApiCall(api) {
   const result = await api.getInventoryPkgs()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
@@ -167,9 +147,15 @@ export const NewPkg = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
+  const [id, setId] = useState('')
   const [name, setName] = useState('')
   const [version, setVersion] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
+
+  useEffect(() => {
+    if (name !== '' || version !== '') setId(name.toLowerCase() + '_' + version.toLowerCase())
+    else setId('')
+  }, [name, version])
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
@@ -177,17 +163,17 @@ export const NewPkg = ({ refresh, setRefresh }) => {
   // Effects
   useEffect(() => {
     const checkPkgAvailability = async () => {
-      const result = await api.isPkgAvailable(name)
+      const result = await api.isPkgAvailable(id)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (name) checkPkgAvailability()
-  }, [name, api])
+    if (id) checkPkgAvailability()
+  }, [id, api])
 
   // Handler method to create a new pkg
   const createPkg = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createPkg(name, version)
+    const result = await api.createPkg(id, name, version)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Pkg created', true, true])
@@ -198,31 +184,36 @@ export const NewPkg = ({ refresh, setRefresh }) => {
   return (
     <div>
       <h3>Create a new pkg</h3>
-      <p>Give your new pkg a name, and version. The pkg name will become its unique ID.</p>
+      <p>Give your new pkg a id, name, and version. The pkg id will become its unique ID.</p>
+      <StringInput label="Name" update={setName} current={name} placeholder="modular package" />
+      <StringInput label="Version" update={setVersion} current={version} placeholder="v_01" />
       <StringInput
-        label="Name"
-        update={(val) => setName(slugify(val))}
-        current={name}
-        placeholder="Package001"
+        label="Id"
+        update={(val) => setId(val)}
+        current={id}
+        disabled
+        labelTR={
+          <div className="flex gap-1 flex-row items-center flex-wrap">
+            <TipIcon className="w-5 h-5 text-success" />
+            <span>
+              Pkg <code>id</code> will be auto-generated from name, version like{' '}
+              <code>name_version</code>
+            </span>
+          </div>
+        }
+        placeholder="pkg_01"
         valid={(val) =>
           val && isAvailable
             ? true
             : val === ''
-              ? { error: { details: [{ message: 'name cannot be empty' }] } }
-              : { error: { details: [{ message: 'This name is taken' }] } }
+              ? { error: { details: [{ message: 'id cannot be empty' }] } }
+              : { error: { details: [{ message: 'This id is taken' }] } }
         }
-      />
-
-      <StringInput
-        label="Version"
-        update={setVersion}
-        current={version}
-        placeholder="Pkg version"
       />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(name && isAvailable)}
+          disabled={!(name && version && isAvailable)}
           onClick={createPkg}
         >
           Create Pkg
@@ -261,48 +252,12 @@ export const PkgDetail = ({ data }) => {
   )
 }
 
-export const BulkPkgUpdate = ({ pkgs, refresh, setRefresh }) => {
-  // State
-  const [version, setVersion] = useState('')
-  // Hooks
-  const { api } = useApi()
-  // Context
-  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-
-  // Helper method to bulk-update versions
-  const updateVersions = async () => {
-    let i = 0
-    const count = pkgs.length
-    for (const id in pkgs) {
-      i++
-      await api.updateInventoryOsVersion(pkgs[id], version)
-      setLoadingStatus([
-        true,
-        <LoadingProgress val={i} max={count} msg="Updating pkg versions" key="linter" />,
-      ])
-    }
-    if (setRefresh) setRefresh(refresh + 1)
-    setLoadingStatus([true, 'Nailed it', true, true])
-  }
-
-  return (
-    <div className="">
-      <h2>Update version</h2>
-      <p>This will set the same version for all the selected pkgs.</p>
-      <StringInput current={version} update={setVersion} label="version" />
-      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateVersions}>
-        Update pkg versions
-      </button>
-    </div>
-  )
-}
-
 /**
  * This component renders a table with Software packages
  */
 export const PkgsDisplayTable = ({ pkgs }) => {
   // State
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('id')
   const [desc, setDesc] = useState(false)
 
   // Hooks
@@ -312,7 +267,7 @@ export const PkgsDisplayTable = ({ pkgs }) => {
     <table>
       <thead>
         <tr>
-          {['id', 'name', 'host', 'version'].map((field) => (
+          {['id', 'name', 'version'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -332,12 +287,10 @@ export const PkgsDisplayTable = ({ pkgs }) => {
         {sorted.map((pkg) => (
           <tr key={pkg.id}>
             <td className="py-0.5 pr-4 font-mono text-sm">
-              <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkg.name}</PageLink>
+              <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkg.id}</PageLink>
             </td>
-            <td className="py-0.5 pr-4 font-mono text-sm">
-              <PageLink href={`/inventory/hosts/${pkg.host}`}>
-                <InventoryHostname uuid={pkg.host} />
-              </PageLink>
+            <td className="">
+              <Markdown>{pkg.name}</Markdown>
             </td>
             <td className="">
               <Markdown>{pkg.version}</Markdown>

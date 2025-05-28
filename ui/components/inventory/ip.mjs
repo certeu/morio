@@ -11,11 +11,10 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { CogIcon, AddLocationIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { AddLocationIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { InventoryHostname } from './host.mjs'
 
 /**
  * This component renders a table with all IP addresses and allows removal
@@ -29,7 +28,6 @@ export const IpsTable = () => {
 
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-  const { pushModal } = useContext(ModalContext)
 
   // Hooks
   const { api } = useApi()
@@ -61,25 +59,12 @@ export const IpsTable = () => {
   return (
     <>
       <div className="flex flex-row item-center gap-2">
-        <button
-          className="btn btn-primary"
-          onClick={() =>
-            pushModal(
-              <ModalWrapper keepOpenOnClick>
-                <BulkIpUpdate ips={Object.keys(selection)} {...{ refresh, setRefresh }} />
-              </ModalWrapper>
-            )
-          }
-          disabled={count < 1}
-        >
-          <CogIcon /> Update {count} Ips
-        </button>
         <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
           <TrashIcon /> Remove {count} Ips
         </button>
         <NewIpButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -90,7 +75,7 @@ export const IpsTable = () => {
                 checked={ips.length === count}
               />
             </th>
-            {['ip', 'host', 'version'].map((field) => (
+            {['ip', 'version'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
@@ -120,14 +105,7 @@ export const IpsTable = () => {
               <td className="">
                 <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
               </td>
-              <td className="pr-6 py-0.5 text-sm">
-                <PageLink href={`/inventory/hosts/${ip.host}`}>
-                  <InventoryHostname uuid={ip.host} />
-                </PageLink>
-              </td>
-              <td className="">
-                <Markdown>{ip.version}</Markdown>
-              </td>
+              <td className="">{ip.version}</td>
             </tr>
           ))}
         </tbody>
@@ -137,7 +115,7 @@ export const IpsTable = () => {
   )
 }
 
-async function runIpsTableApiCall(api) {
+export async function runIpsTableApiCall(api) {
   const result = await api.getInventoryIps()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
@@ -170,7 +148,6 @@ export const NewIp = ({ refresh, setRefresh }) => {
 
   // State
   const [ip, setIp] = useState('')
-  const [version, setVersion] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
 
   // Context
@@ -189,7 +166,7 @@ export const NewIp = ({ refresh, setRefresh }) => {
   // Handler method to create a new ip
   const createIp = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createIp(ip, version)
+    const result = await api.createIp(ip)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Ip created', true, true])
@@ -200,10 +177,7 @@ export const NewIp = ({ refresh, setRefresh }) => {
   return (
     <div>
       <h3>Create a new ip</h3>
-      <p>
-        Give your new ip a address, and an optional version. The ip address will become its unique
-        ID.
-      </p>
+      <p>Give your new ip a address. The ip address will become its unique ID.</p>
       <StringInput
         label="Ip address"
         update={(val) => setIp(slugify(val))}
@@ -216,13 +190,6 @@ export const NewIp = ({ refresh, setRefresh }) => {
               ? { error: { details: [{ message: 'Ip address cannot be empty' }] } }
               : { error: { details: [{ message: 'This ip address is taken' }] } }
         }
-      />
-
-      <StringInput
-        label="Ip version"
-        update={setVersion}
-        current={version}
-        placeholder="Ip version"
       />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button className="btn btn-primary grow" disabled={!(ip && isAvailable)} onClick={createIp}>
@@ -262,42 +229,6 @@ export const IpDetail = ({ data }) => {
   )
 }
 
-export const BulkIpUpdate = ({ ips, refresh, setRefresh }) => {
-  // State
-  const [version, setVersion] = useState('')
-  // Hooks
-  const { api } = useApi()
-  // Context
-  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-
-  // Helper method to bulk-update versions
-  const updateVersions = async () => {
-    let i = 0
-    const count = ips.length
-    for (const ip in ips) {
-      i++
-      await api.updateInventoryIpVersion(ips[ip], version)
-      setLoadingStatus([
-        true,
-        <LoadingProgress val={i} max={count} msg="Updating ip versions" key="linter" />,
-      ])
-    }
-    if (setRefresh) setRefresh(refresh + 1)
-    setLoadingStatus([true, 'Nailed it', true, true])
-  }
-
-  return (
-    <div className="">
-      <h2>Update version</h2>
-      <p>This will set the same version for all the selected ips.</p>
-      <StringInput current={version} update={setVersion} label="version" />
-      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateVersions}>
-        Update ip versions
-      </button>
-    </div>
-  )
-}
-
 export const IpsDisplayTable = ({ ips }) => {
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
@@ -308,7 +239,7 @@ export const IpsDisplayTable = ({ ips }) => {
     <table>
       <thead>
         <tr>
-          {['ip', 'host', 'version'].map((field) => (
+          {['ip', 'version'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -329,11 +260,6 @@ export const IpsDisplayTable = ({ ips }) => {
           <tr key={ip.ip}>
             <td className="pr-6 py-0.5 font-mono text-sm">
               <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
-            </td>
-            <td className="pr-6 py-0.5 text-sm">
-              <PageLink href={`/inventory/hosts/${ip.host}`}>
-                <InventoryHostname uuid={ip.host} />
-              </PageLink>
             </td>
             <td className="">
               <Markdown>{ip.version}</Markdown>

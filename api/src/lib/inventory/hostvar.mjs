@@ -1,7 +1,7 @@
 // Utils
-import { utils } from '../utils.mjs'
+import { log, utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
+import { addNonEnumProp, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Hostvar instance
@@ -31,34 +31,63 @@ export function Hostvar(id = false) {
  * @param {string} host - The Host name
  * @return {Hostvar} this - The Hostvar instance
  */
-Hostvar.prototype.create = async function ({ id, key, val, info, host }) {
-  /*
-   * Do not bother without an id
-   */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
-
-  /*
-   * Insert into the database
-   */
-  let result = false
-  try {
-    result = await utils.db.write(
-      `INSERT INTO inventory_hostvars(id, key, val, info, host) VALUES(:id, :key, :val, :info, :host)`,
-      { id, key, val, info, host }
-    )
-  } catch (err) {
-    return this.setError(err)
+Hostvar.prototype.create = async function (id, key, val, info, host) {
+  if (!id) {
+    return false
   }
 
-  /*
-   * If it worked, store the internal id
-   */
-  return result &&
-    Array.isArray(result) &&
-    result[0] === 200 &&
-    result[1]?.results?.[0]?.last_insert_id
-    ? this.setId(id).setSaved(true).setError(false)
-    : this.setError('Failed to create record')
+  const sql = `
+    INSERT INTO inventory_hostvars(
+      id, key, val, info, host
+    ) VALUES (
+      :id, :key, :val, :info, :host
+    )
+  `
+
+  const params = {
+    id,
+    key,
+    val,
+    info,
+    host,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to update an inventory (host) hostvar
+ *
+ * @return {object} updated - true if it the hostvar is updated, false if not
+ */
+Hostvar.prototype.update = async function (id, key = '', val = '', info = '', host = '') {
+  if (!id) return false
+
+  // Run query
+  const updateResult = await utils.db.write(
+    `UPDATE inventory_hostvars SET key=:key, val=:val, info=:info, host=:host WHERE id=:id`,
+    {
+      key,
+      val,
+      info,
+      host,
+      id,
+    }
+  )
+
+  if (updateResult.rowCount === 0) {
+    return false
+  }
+
+  return await this.read(id)
 }
 
 /*
@@ -184,65 +213,41 @@ Hostvar.prototype.delete = async function () {
  *
  * @param {string} id - The Hostvar id
  */
-Hostvar.prototype.read = async function (id = false) {
-  /*
-   * Do not bother without an id
-   */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
+Hostvar.prototype.read = async function (id) {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_hostvars WHERE id=:id`, {
+    id,
+  })
 
-  /*
-   * Read from database
-   */
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_hostvars WHERE id = :id`, {
-      id: id || this.getId(),
-    })
-    const data = resultAsRecord(result[1])
-    if (data.id) this.setId(data.id)
-    if (data.key) this.setRecordField('key', data.key)
-    if (data.val) this.setRecordField('val', data.val)
-    if (data.info) this.setRecordField('info', data.info)
-    if (data.host) this.setRecordField('host', data.host)
-    this.setSaved(true)
-  } catch (err) {
-    return this.setError(err)
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one hostvar in loadHostvar. This is unexpected.`)
+    return false
   }
-
-  return result && Array.isArray(result) && result[0] === 200
-    ? this
-    : this.setError('Failed to create record')
 }
 
 /**
  * List all Hostvar records
  */
 Hostvar.prototype.list = async function () {
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_hostvars ORDER BY host`)
-  } catch (err) {
-    return this.setError(err)
-  }
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_hostvars ORDER BY id`)
 
-  return result && Array.isArray(result) && result[0] === 200
-    ? result[1].results
-    : this.setError('Failed to fetch OS list')
+  return status === 200 ? resultsAsList(result) : false
 }
 
 /**
  * Helper method to see if a Hostvar is available
  *
- * @param {string} key - The key Hostvar
+ * @param {string} id - The id Hostvar
  * @return {object} available - true if it is available, false if not
  */
-Hostvar.prototype.isAvailable = async function (key) {
-  const [status, result] = await utils.db.read(
-    `SELECT key FROM inventory_hostvars where key=:key`,
-    {
-      key,
-    }
-  )
+Hostvar.prototype.isAvailable = async function (id) {
+  const [status, result] = await utils.db.read(`SELECT id FROM inventory_hostvars where id=:id`, {
+    id,
+  })
   if (status === 200) {
     const hits = resultsAsList(result)
     return hits.length === 0

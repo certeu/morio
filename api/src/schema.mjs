@@ -275,14 +275,9 @@ export const schema = {
   // Inventory - Ips
   'req.inventory.createIp': Joi.object({
     ip: Joi.string().required(),
-    version: Joi.string(),
   }),
   'req.inventory.readIp': Joi.object({
     ip: Joi.string().required(),
-  }),
-  'req.inventory.updateIp': Joi.object({
-    ip: Joi.string().required(),
-    version: Joi.string(),
   }),
   // Inventory - Macs
   'req.inventory.createMac': Joi.object({
@@ -297,14 +292,14 @@ export const schema = {
   // Inventory - Mods
   'req.inventory.createMod': Joi.object({
     mod: Joi.string().required(),
-    data: Joi.string(),
+    data: Joi.string().allow(''),
   }),
   'req.inventory.readMod': Joi.object({
     mod: Joi.string().required(),
   }),
   'req.inventory.updateMod': Joi.object({
     mod: Joi.string().required(),
-    data: Joi.string(),
+    data: Joi.string().allow(''),
   }),
   // Inventory - Modvars
   'req.inventory.createModvar': Joi.object({
@@ -363,12 +358,12 @@ export const schema = {
   'req.inventory.createHost': Joi.object({
     id: Joi.string().required(),
     arch: Joi.string(),
-    cores: Joi.string(),
+    cores: Joi.number(),
     fqdn: Joi.string(),
     memory: Joi.number(),
     name: Joi.string(),
-    notes: Joi.string(),
-    tags: Joi.string(),
+    notes: Joi.string().allow(''),
+    tags: Joi.string().allow(''),
     last_update: Joi.string().isoDate(),
   }),
   'req.inventory.createGroup': Joi.object({
@@ -380,6 +375,13 @@ export const schema = {
     val: Joi.string().allow(''),
     group: Joi.string().required(),
     info: Joi.string().allow(''),
+  }),
+  'req.inventory.updateGroupvar': Joi.object({
+    id: Joi.string().required(),
+    key: Joi.string().required(),
+    val: Joi.string().allow(''),
+    info: Joi.string().allow(''),
+    group: Joi.string().required(),
   }),
   'req.inventory.writeHost': Joi.object({
     arch: Joi.string(),
@@ -394,8 +396,17 @@ export const schema = {
   'req.inventory.readGroup': Joi.object({
     id: Joi.string().required(),
   }),
+  'req.inventory.readGroups': Joi.object({
+    group_id: Joi.string().required(),
+  }),
+  'req.inventory.readMembers': Joi.object({
+    member_id: Joi.string().required(),
+  }),
   'req.inventory.readGroupvar': Joi.object({
     id: Joi.string().required(),
+  }),
+  'req.inventory.readGroupvars': Joi.object({
+    group_id: Joi.string().required(),
   }),
   'req.inventory.updateGroup': Joi.object({
     id: Joi.string().required(),
@@ -404,8 +415,58 @@ export const schema = {
     groups: Joi.array().items(Joi.string()),
     hosts: Joi.array().items(Joi.string()),
   }),
+  'req.inventory.updateHost': Joi.object({
+    id: Joi.string().required(),
+    arch: Joi.string(),
+    cores: Joi.number(),
+    fqdn: Joi.string(),
+    memory: Joi.number(),
+    name: Joi.string(),
+    notes: Joi.string().allow(''),
+    tags: Joi.string().allow(''),
+  }),
   'req.inventory.readHost': Joi.object({
     id: Joi.string().required(),
+  }),
+  'req.inventory.createHostIp': Joi.object({
+    host: Joi.string().required(),
+    ip: Joi.string().required(),
+  }),
+  'req.inventory.readHostIp': Joi.object({
+    host: Joi.string().required(),
+    ip: Joi.string().required(),
+  }),
+  'req.inventory.createHostMac': Joi.object({
+    host: Joi.string().required(),
+    mac: Joi.string().required(),
+  }),
+  'req.inventory.readHostMac': Joi.object({
+    host: Joi.string().required(),
+    mac: Joi.string().required(),
+  }),
+  'req.inventory.createHostOs': Joi.object({
+    host: Joi.string().required(),
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readHostOs': Joi.object({
+    host: Joi.string().required(),
+    id: Joi.string().required(),
+  }),
+  'req.inventory.createHostPkg': Joi.object({
+    host: Joi.string().required(),
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readHostPkg': Joi.object({
+    host: Joi.string().required(),
+    id: Joi.string().required(),
+  }),
+  'req.inventory.createHostMod': Joi.object({
+    host: Joi.string().required(),
+    mod: Joi.string().required(),
+  }),
+  'req.inventory.readHostMod': Joi.object({
+    host: Joi.string().required(),
+    mod: Joi.string().required(),
   }),
   // This is for the request body
   'req.kv.write': Joi.object({ value: kv.value }),

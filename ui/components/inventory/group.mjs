@@ -28,7 +28,7 @@ import {
   InventoryGroupInput,
   InventoryHostInput,
 } from 'components/inputs.mjs'
-import { InventoryHostname, runHostsTableApiCall } from './host.mjs'
+import { InventoryHostname } from './host.mjs'
 import { Uuid } from 'components/uuid.mjs'
 import { Tab, Tabs } from 'components/tabs.mjs'
 
@@ -62,6 +62,9 @@ export const GroupsTable = () => {
     let i = 0
     for (const id in selection) {
       i++
+      await api.removeInventoryGroupvars(id)
+      await api.removeInventoryGroups(id)
+      await api.removeInventoryMembers(id)
       await api.removeInventoryGroup(id)
       setLoadingStatus([
         true,
@@ -149,6 +152,12 @@ export const GroupsTable = () => {
 
 export async function runGroupsTableApiCall(api) {
   const result = await api.getInventoryGroups()
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
+export async function runGroupApiCall(id, api) {
+  const result = await api.getInventoryGroup(id)
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
 }
@@ -255,11 +264,25 @@ export const NewGroup = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const GroupDetail = ({ data, members = false, memberOf = false }) => {
+export const GroupDetail = ({ data, refresh, setRefresh, members = false, memberOf = false }) => {
+  const { pushModal } = useContext(ModalContext)
+
   if (!data) return null
 
   return (
     <>
+      <button
+        className="btn btn-primary mt-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkGroupUpdate groups={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Group
+      </button>
       {data.description ? (
         <>
           <h2>Description</h2>
@@ -336,27 +359,52 @@ const ResolvedGroupMembersTable = ({ members = [] }) => (
 )
 
 export const BulkGroupUpdate = ({ groups, refresh, setRefresh }) => {
+  // Normalize hosts to always be an array
+  const normalizedGroups = Array.isArray(groups) ? groups : [groups.id]
+
   // State
   const [description, setDescription] = useState('')
   const [allGroups, setAllGroups] = useState([])
+
   // Hooks
   const { api } = useApi()
+
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+
   // Effects
   useEffect(() => {
     runGroupsTableApiCall(api).then((result) =>
-      setAllGroups(result.filter((entry) => !groups.includes(entry.id)).map((entry) => entry.id))
+      setAllGroups(
+        result.filter((entry) => !normalizedGroups.includes(entry.id)).map((entry) => entry.id)
+      )
     )
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh, groups])
+
+  // Prefill values if groups is a single object
+  useEffect(() => {
+    if (!Array.isArray(groups)) {
+      if (groups) {
+        setDescription(groups.description || '')
+      }
+    } else if (groups.length === 1) {
+      const loadGroup = async () => {
+        const result = await runGroupApiCall(groups[0], api)
+        if (result) {
+          setDescription(result.description || '')
+        }
+      }
+      loadGroup()
+    }
+  }, [groups])
+
   // Helper method to bulk-update descriptions
   const updateDescriptions = async () => {
-    let i = 0
-    const count = groups.length
-    for (const id in groups) {
-      i++
-      await api.updateInventoryGroupDescription(groups[id], description)
+    const count = normalizedGroups.length
+    for (let i = 0; i < count; i++) {
+      const group = normalizedGroups[i]
+      await api.updateInventoryGroupDescription(group, description)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating group descriptions" key="linter" />,
@@ -382,28 +430,37 @@ export const BulkGroupUpdate = ({ groups, refresh, setRefresh }) => {
 
   return (
     <div className="">
-      <h2>Update multiple groups</h2>
-      <Tabs tabs="Add to group, Update description">
-        <Tab tabId="Add to group">
-          <p>Click any group name to instantly add these groups to an existing group.</p>
-          {allGroups.map((group) => (
-            <button
-              key={group}
-              className="badge badge-neutral hover:badge-primary"
-              onClick={() => addToGroup(group)}
-            >
-              {group}
+      <h2>{normalizedGroups.length == 1 ? 'Update group' : 'Update multiple groups'}</h2>
+      {normalizedGroups.length > 1 ? (
+        <Tabs tabs="Add to group, Update description">
+          <Tab tabId="Add to group">
+            <p>Click any group name to instantly add these groups to an existing group.</p>
+            {allGroups.map((group) => (
+              <button
+                key={group}
+                className="badge badge-neutral hover:badge-primary"
+                onClick={() => addToGroup(group)}
+              >
+                {group}
+              </button>
+            ))}
+          </Tab>
+          <Tab tabId="Update description">
+            <p>This will set the same description for all the selected groups.</p>
+            <TextInput current={description} update={setDescription} label="Description" />
+            <button className="btn btn-primary mt-4 mx-auto block" onClick={updateDescriptions}>
+              Update group descriptions
             </button>
-          ))}
-        </Tab>
-        <Tab tabId="Update description">
-          <p>This will set the same description for all the selected groups.</p>
+          </Tab>
+        </Tabs>
+      ) : (
+        <>
           <TextInput current={description} update={setDescription} label="Description" />
           <button className="btn btn-primary mt-4 mx-auto block" onClick={updateDescriptions}>
-            Update group descriptions
+            Update group description
           </button>
-        </Tab>
-      </Tabs>
+        </>
+      )}
     </div>
   )
 }
@@ -588,24 +645,12 @@ export const AddMembersToGroup = ({ to, refresh, setRefresh }) => {
   // State
   const [hosts, setHosts] = useState({})
   const [groups, setGroups] = useState({})
-  const [allHosts, setAllHosts] = useState([])
-  const [allGroups, setAllGroups] = useState([])
   // Hooks
   const { api } = useApi()
-
-  console.log('hosts and groups', allHosts, allGroups)
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
   const { clearModal } = useContext(ModalContext)
-  // Effects
-  useEffect(() => {
-    runHostsTableApiCall(api).then((result) => setAllHosts(result))
-    runGroupsTableApiCall(api).then((result) =>
-      setAllGroups(result.filter((entry) => entry.id !== to).map((entry) => entry.id))
-    )
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [refresh, to])
 
   // Helper method to add hosts/groups to group
   const updateMembers = async () => {

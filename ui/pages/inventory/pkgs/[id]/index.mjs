@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { PackageIcon } from 'components/icons.mjs'
-import { PkgDetail } from 'components/inventory/os.mjs'
+import { PkgDetail } from 'components/inventory/pkg.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 
 export default function InventoryPkgPage({ id = false }) {
@@ -20,7 +20,7 @@ export default function InventoryPkgPage({ id = false }) {
     if (id)
       runPkgApiCall(api, id).then((result) => {
         setData(result)
-        setTitle(result.name)
+        setTitle(result.id)
       })
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [id])
