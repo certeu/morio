@@ -285,55 +285,80 @@ export const Flags = ({ update, data }) => {
     ...(data.tokens?.flags || {}),
   }
 
-  return (
-    <>
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-row items-center gap-2 flex-wrap mb-4">
-          <ul className="list list-inside ml-4 list-disc">
-            {Object.keys(mergedFlags || {})
-              .sort()
-              .map((key) => (
-                <li key={key} className="flex flex-row items-center gap-2 flex-wrap py-0.5">
-                  {data.tokens?.flags?.[key] ? <BoolYesIcon /> : <BoolNoIcon />}
-                  <a href={`#${key.toLowerCase()}`} className="textsm">
-                    {key}
-                  </a>
-                </li>
-              ))}
-          </ul>
+  const enabledFlags = Object.keys(mergedFlags || {})
+    .filter((key) => data.tokens?.flags?.[key])
+    .sort()
+
+  const disabledFlags = Object.keys(mergedFlags || {})
+    .filter((key) => !data.tokens?.flags?.[key])
+    .sort()
+
+  const FlagItem = ({ flagKey, isEnabled }) => (
+    <div
+      id={flagKey.toLowerCase()}
+      className="scroll-mt-20 p-4 border border-base-300 rounded-lg bg-base-100 shadow-sm"
+      key={flagKey}
+    >
+      <div className="flex flex-row gap-4 items-start justify-between">
+        <div className="flex-1">
+          <div className="flex flex-row items-center gap-2 mb-2">
+            {isEnabled ? (
+              <BoolYesIcon className="text-success" />
+            ) : (
+              <BoolNoIcon className="text-error" />
+            )}
+            <h4 className="font-semibold text-lg">{flagKey}</h4>
+          </div>
+          <p className="text-base-content/70 mb-3">{flags[flagKey]}</p>
+          {fdocs[flagKey] && (
+            <div className="prose prose-sm max-w-none text-base-content/80">
+              <Markdown>{fdocs[flagKey]}</Markdown>
+            </div>
+          )}
         </div>
-        {Object.keys(mergedFlags || {})
-          .sort()
-          .map((key) => (
-            <label
-              id={key.toLowerCase()}
-              className={`scroll-mt-20 hover:cursor-pointer border-4 border-y-0 border-r-0 p-2 px-4 shadow
-              hover:bg-base-100 hover:bg-opacity-10 rounded bg-opacity-10
-              ${data?.tokens?.flags?.[key] ? 'border-success bg-success' : 'border-error bg-error'}
-              `}
-              key={key}
-              htmlFor={key}
-            >
-              <div htmlFor={key} className="flex flex-row gap-4 items-center">
-                <h5 className={data?.tokens?.flags?.[key] ? '' : ''}>{key}</h5>
-                <span className="grow"></span>
-                <input
-                  id={key}
-                  type="checkbox"
-                  value={data.tokens?.flags?.[key]}
-                  onChange={() => update(`tokens.flags.${key}`, !data.tokens?.flags?.[key])}
-                  className="toggle my-3 toggle-success"
-                  checked={data.tokens?.flags?.[key]}
-                />
-                <label className="hover:cursor-pointer" htmlFor={key}>
-                  {flags[key]}
-                </label>
-                {data.tokens?.flags?.[key] ? <BoolYesIcon /> : <BoolNoIcon />}
-              </div>
-              <Markdown>{fdocs[key]}</Markdown>
-            </label>
-          ))}
+        <button
+          className={`btn ${isEnabled ? 'btn-error' : 'btn-success'} btn-sm`}
+          onClick={() => update(`tokens.flags.${flagKey}`, !data.tokens?.flags?.[flagKey])}
+        >
+          {isEnabled ? 'Disable' : 'Enable'}
+        </button>
       </div>
-    </>
+    </div>
+  )
+
+  return (
+    <div className="space-y-6">
+      {enabledFlags.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <BoolYesIcon className="text-success" />
+            Enabled Features ({enabledFlags.length})
+          </h3>
+          <div className="space-y-3">
+            {enabledFlags.map((key) => (
+              <FlagItem key={key} flagKey={key} isEnabled={true} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {disabledFlags.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <BoolNoIcon className="text-error" />
+            Disabled Features ({disabledFlags.length})
+          </h3>
+          <div className="space-y-3">
+            {disabledFlags.map((key) => (
+              <FlagItem key={key} flagKey={key} isEnabled={false} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {Object.keys(mergedFlags || {}).length === 0 && (
+        <div className="text-center py-8 text-base-content/50">No feature flags available</div>
+      )}
+    </div>
   )
 }
