@@ -8,15 +8,22 @@ module.exports = function (RED) {
      * Don't bother without a broker client
      */
     const broker = RED.nodes.getNode(n.broker)
-    if (!broker) return this.status({ fill: 'red', shape: 'ring', text: 'No broker client found' })
+    if (!broker) return this.status({ fill: 'red', shape: 'ring', text: 'No broker client provided' })
     else this.broker = broker
+
+    /*
+     * Don't bother without a topic
+     */
+    const topic = RED.nodes.getNode(n.topic)
+    if (!topic) return this.status({ fill: 'red', shape: 'ring', text: 'No topic provided' })
+    else this.topic = topic
 
     /*
      * Store settings and other things we need for use in prototype
      */
     this.settings = {
       consumer: { groupId: n.groupId || 'no_group_id' },
-      topic: n.topic
+      topic: topic.topic
     }
 
     /*
