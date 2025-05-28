@@ -82,7 +82,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       volumes: [
         `${DIRS.conf}/eda:/etc/morio/eda`,
         `${DIRS.data}/eda:/data`,
-        `${DIRS.conf}/eda/settings.js:/data/settings.js`,
+        `${DIRS.data}/eda/entrypoint.sh:/usr/src/node-red/entrypoint.sh`,
       ],
       // Run an init inside the container to forward signals and avoid PID 1
       //init: true,
@@ -106,108 +106,49 @@ export const resolveServiceConfiguration = ({ utils }) => {
     },
     /*
      * Node-Red settings
+     * The custom storage module will be added to this by core
      */
     eda: {
-      // File containing nodered flows
-      flowFile: 'flows.json',
-
-      // Key for encrypting credentials
-      credentialSecret: "a-secret-key",
-
-      // Pretty-print flow config
-      flowFilePretty: true,
-
-      // Keep data outside container
-      userDir: '/data/users/',
-
-      // (extra) dir to scan for nodes
-      nodesDir: '/data/nodes',
-
-      // Port to listen on
-      uiPort: utils.getFlag('MORIO_EDA_HTTP_PORT') || 1880,
-
-      // Listen on all interfaces
-      uiHost: "0.0.0.0",
-
-      // Limit API call body to 5mb
-      apiMaxLength: '5mb',
-
-      // Set prefix for UI access
+      /*
+       * Set prefix for UI access. Node-RED makes this easy.
+       */
       httpAdminRoot: '/eda',
-
-      // FIXME: Use this for auth?
-      // httpAdminMiddleware: function(req,res,next) {
-      //    // Set the X-Frame-Options header to limit where the editor
-      //    // can be embedded
-      //    //res.set('X-Frame-Options', 'sameorigin');
-      //    next();
-      // },
-
-      /**
-       * FIXME: Use this for webhooks?
-       * Some nodes, such as HTTP In, can be used to listen for incoming http requests.
-        * By default, these are served relative to '/'. The following property
-        * can be used to specify a different root path. If set to false, this is
-        * disabled.
-        */
-      //httpNodeRoot: '/red-nodes',
-
-      // Permissive CORS
+      /*
+       * Extra folder to scan for nodes, outside the container
+       */
+      nodesDir: '/data/nodes',
+      /*
+       * Listen on all interfaces
+       */
+      uiHost: "0.0.0.0",
+      /*
+       * Port to listen on
+       */
+      uiPort: utils.getFlag('MORIO_EDA_HTTP_PORT') || 1880,
+      /*
+       * Prefix for nodes that accept incoming HTTP
+       */
+      httpNodeRoot: '/eda/webhooks',
+      /*
+       * Permissive CORS
+       */
       httpNodeCors: {
-          origin: "*",
+          erigin: "*",
           methods: "GET,PUT,POST,DELETE"
       },
-
-      /**
-       * // FIXME: Use this for auth?
-       * The following property can be used to add a custom middleware function
-        * in front of all http in nodes. This allows custom authentication to be
-        * applied to all http in nodes, or any other sort of common request processing.
-        * It can be a single function or an array of middleware functions.
-        */
-      //httpNodeMiddleware: function(req,res,next) {
-      //    // Handle/reject the request, or pass it on to the http in node by calling next();
-      //    // Optionally skip our rawBodyParser by setting this to true;
-      //    //req.skipRawBodyParser = true;
-      //    next();
-      //},
-
-
-      // Language
-      lang: "en-US",
-
-      // Diagnostics
-      diagnostics: {
-        enabled: true,
-        ui: true,
-      },
-
-      // Runtime state allow start/stop
-      runtimeState: {
-          enabled: true,
-          ui: true,
-      },
-
-      // Logging
+      /*
+       * Logging configuration
+       */
       logging: {
         console: {
-          level: "debug",
+          level: "info",
           metrics: false,
           audit: true
         }
       },
-
-      // FIXME: This is not cluster-ready
-      contextStorage: {
-        default: {
-          module:"localfilesystem"
-        },
-      },
-
-      // FIXME: Is this safe?
-      exportGlobalContextKeys: true,
-
-      // Allow modules
+      /*
+       * Allow modules
+       */
       externalModules: {
         autoInstall: false,
         autoInstallRetry: 30,
@@ -226,23 +167,97 @@ export const resolveServiceConfiguration = ({ utils }) => {
           denyList: []
         }
       },
-
-
+      /*
+       * Key for encrypting credentials
+       * This needs to be a random string that is available on all cluster nodes
+       * So we use the salt from the Morio root token as that is on disk
+       */
+      credentialSecret: utils.getKeys().mrt.salt,
+      /*
+       * Pretty-print flow config
+       */
+      flowFilePretty: true,
+      /*
+       * Limit API call body to 5mb
+       */
+      apiMaxLength: '5mb',
+      /*
+       * Language
+       */
+      lang: "en-US",
+      /*
+       * Diagnostics
+       */
+      diagnostics: {
+        enabled: true,
+        ui: true,
+      },
+      /*
+       * Runtime state allow start/stop
+       */
+      runtimeState: {
+        enabled: true,
+        ui: true,
+      },
+      /*
+       * FIXME: This is not cluster-ready and should be hooked into rqlite
+       */
+      contextStorage: {
+        default: {
+          module:"localfilesystem"
+        },
+      },
+      /*
+       * Show global context in the sidebar
+       */
+      exportGlobalContextKeys: true,
+      /*
+       * Allow the Function node to load additional npm modules directly
+       */
+      functionExternalModules: true,
+      /*
+       * Allow colors in the debug output
+       */
+      debugUseColors: true,
+      /*
+       * Maximum debug length
+       */
+      debugMaxLength: 1000,
+      /*
+       * Maximum buffer size for the exec node (25MB)
+       */
+      execMaxBufferSize: 25000000,
+      /*
+       * Timeout in milliseconds for HTTP request connections (12s)
+       */
+      httpRequestTimeout: 12000,
+      /*
+       * Theme settings
+       */
       editorTheme: {
-        // FIXME: Custom theme?
-        theme: "",
-
-        // Disable welcome tour
+        page: {
+          title: "Morio EdA",
+          favicon: "/favicon.svg",
+          css: "",
+          scripts: [],
+        },
+        header: {
+          title: "Morio EdA",
+          image: null,
+          url: "/eda/",
+        },
+        deployButton: {
+          type: "simple",
+          label: "Save",
+          icon: null,
+        },
         tours: false,
-
         palette: {
           categories: ['common', 'function', 'morio', 'network', 'parser', 'sequence', 'storage', 'subflows'],
         },
-
         projects: {
           enabled: false,
         },
-
         codeEditor: {
           lib: "monaco",
           options: {
@@ -252,37 +267,35 @@ export const resolveServiceConfiguration = ({ utils }) => {
             fontLigatures: true,
           }
         },
-
         markdownEditor: {
           mermaid: {
             enabled: true
           }
         },
       },
+    },
+    entrypoint : `#!/bin/bash
 
-      // Allow the Function node to load additional npm modules directly
-      functionExternalModules: true,
+trap stop SIGINT SIGTERM
 
-      // Default timeout, in seconds, for the Function node. 0 means no timeout is applied
-      functionTimeout: 1800,
+function stop() {
+        kill $CHILD_PID
+        wait $CHILD_PID
+}
 
-      // Global context
-      functionGlobalContext: { },
+# Custom entrypoint change for Morio
+npm install /data/node-red-storage-rqlite
+cd /data
+npm install /data/node-red-morio
+cd -
 
-      // Max buffer size for nodes operating on messages
-      nodeMessageBufferMaxLength: 1000,
+/usr/local/bin/node $NODE_OPTIONS node_modules/node-red/red.js --userDir /data $FLOWS "\${@}" &
 
-      // Allow colors in the debug output
-      debugUseColors: true,
+CHILD_PID="$!"
 
-      // Maximum debug length
-      debugMaxLength: 1000,
-
-      // Maximum buffer size for the exec node (25MB)
-      execMaxBufferSize: 25000000,
-
-      // Timeout in milliseconds for HTTP request connections (12s)
-      httpRequestTimeout: 12000,
-    }
+wait "\${CHILD_PID}"
+  }
+}
+`
   }
 }
