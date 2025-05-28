@@ -1,6 +1,7 @@
 // Dependencies
-import { slugify } from 'lib/utils.mjs'
+import { varify, inlineHelp } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
+import { runModsTableApiCall } from './mod.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -12,7 +13,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { CogIcon, AddVarIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { StringInput, TextInput } from 'components/inputs.mjs'
+import { StringInput, TextInput, SelectInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 
@@ -78,7 +79,7 @@ export const ModvarsTable = () => {
         </button>
         <NewModvarButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -89,7 +90,7 @@ export const ModvarsTable = () => {
                 checked={modvars.length === count}
               />
             </th>
-            {['val', 'info', 'mod'].map((field) => (
+            {['id', 'val', 'info', 'mod'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -117,8 +118,9 @@ export const ModvarsTable = () => {
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/modvars/${modvar.val}`}>{modvar.val}</PageLink>
+                <PageLink href={`/inventory/modvars/${modvar.id}`}>{modvar.id}</PageLink>
               </td>
+              <td className="">{modvar.val}</td>
               <td className="">{modvar.info}</td>
               <td className="">
                 <PageLink href={`/inventory/mods/${modvar.mod}`}>{modvar.mod}</PageLink>
@@ -164,27 +166,35 @@ export const NewModvar = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
+  const [id, setId] = useState('')
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
+  const [mod, setMod] = useState('')
+  const [mods, setMods] = useState([])
   const [isAvailable, setIsAvailable] = useState(false)
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
+  useEffect(() => {
+    if (mods.length < 1)
+      runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+  }, [api, val])
+
   // Effects
   useEffect(() => {
     const checkModvarAvailability = async () => {
-      const result = await api.isModvarAvailable(val)
+      const result = await api.isModvarAvailable(id)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (val) checkModvarAvailability()
-  }, [val, api])
+    if (id) checkModvarAvailability()
+  }, [id, api])
 
   // Handler method to create a new modvar
   const createModvar = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createModvar(val, info)
+    const result = await api.createModvar(id, val, info, mod)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Modvar created', true, true])
@@ -196,32 +206,41 @@ export const NewModvar = ({ refresh, setRefresh }) => {
     <div>
       <h3>Create a new modvar</h3>
       <p>
-        Give your new modvar a val, and an optional info. The modvar val will become its unique ID.
+        Give your new modvar a id, val, and an optional info and mod. The modvar id will become its
+        unique ID.
       </p>
+      <SelectInput
+        label="Inventory Module"
+        labelDflt="Choose a module to assign this var to"
+        help={inlineHelp('inventory/modvars#mod')}
+        update={setMod}
+        list={mods.map((mod) => ({ val: mod, label: mod }))}
+      />
       <StringInput
-        label="Module var"
-        update={(val) => setVal(slugify(val))}
-        current={val}
-        placeholder="variable"
+        label="Id"
+        update={(val) => setId(val)}
+        current={id}
+        placeholder="id_val"
         valid={(val) =>
           val && isAvailable
             ? true
             : val === ''
-              ? { error: { details: [{ message: 'Module variable cannot be empty' }] } }
-              : { error: { details: [{ message: 'This module variable is taken' }] } }
+              ? { error: { details: [{ message: 'Module var id cannot be empty' }] } }
+              : { error: { details: [{ message: 'This module var id is taken' }] } }
         }
       />
 
+      <StringInput label="val" update={setVal} current={val} placeholder="val" />
       <TextInput
         label="Module var info"
-        update={setInfo}
+        update={(val) => setInfo(varify(val))}
         current={info}
         placeholder="Module variable info"
       />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(val && isAvailable)}
+          disabled={!(id && isAvailable)}
           onClick={createModvar}
         >
           Create Module Variable
@@ -239,11 +258,25 @@ export const NewModvar = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const ModvarDetail = ({ data }) => {
+export const ModvarDetail = ({ data, refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
   if (!data) return null
 
   return (
     <>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkModvarUpdate modvars={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Modvar
+      </button>
       {data.val ? (
         <>
           <h2>Val</h2>
@@ -261,20 +294,52 @@ export const ModvarDetail = ({ data }) => {
 }
 
 export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
+  // Normalize modvars to always be an array
+  const normalizedModvars = Array.isArray(modvars) ? modvars : [modvars.id]
+
   // State
+  const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
+  const [mod, setMod] = useState('')
+  const [mods, setMods] = useState([])
+
   // Hooks
   const { api } = useApi()
+
+  useEffect(() => {
+    if (mods.length < 1)
+      runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+  }, [api, val])
+
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
-  // Helper method to bulk-update versions
-  const updateInfos = async () => {
-    let i = 0
-    const count = modvars.length
-    for (const id in modvars) {
-      i++
-      await api.updateInventoryModvarInfo(modvars[id], info)
+  // Prefill values if modvars is a single object
+  useEffect(() => {
+    if (!Array.isArray(modvars)) {
+      if (modvars) {
+        setVal(modvars.val || '')
+        setInfo(modvars.info || '')
+        setMod(modvars.mod || '')
+      }
+    } else if (modvars.length === 1) {
+      const loadModvar = async () => {
+        const result = await runModvarApiCall(api, modvars[0])
+        if (result) {
+          setVal(result.val || '')
+          setInfo(result.info || '')
+          setMod(result.mod || '')
+        }
+      }
+      loadModvar()
+    }
+  }, [modvars])
+
+  const count = normalizedModvars.length
+  const updateInfo = async () => {
+    for (let i = 0; i < count; i++) {
+      const modvar = normalizedModvars[i]
+      await api.updateInventoryModvarInfo(modvar, val, info, mod)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating modvar info" key="linter" />,
@@ -287,13 +352,29 @@ export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
   return (
     <div className="">
       <h2>Update info</h2>
-      <p>This will set the same info for all the selected modvars.</p>
+      {normalizedModvars.length > 1 && (
+        <p>This will set the same info for all the selected modvars.</p>
+      )}
+      <SelectInput
+        label="Inventory Module"
+        labelDflt="Choose a module to assign this var to"
+        help={inlineHelp('inventory/modvars#mod')}
+        update={setMod}
+        list={mods.map((mod) => ({ val: mod, label: mod }))}
+      />
+      <StringInput current={val} update={setVal} label="Value" />
       <StringInput current={info} update={setInfo} label="Infomation" />
-      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateInfos}>
-        Update modvar infos
+      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateInfo}>
+        Update modvar info
       </button>
     </div>
   )
+}
+
+export async function runModvarApiCall(api, id) {
+  const result = await api.getInventoryModvar(id)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
 }
 
 /**
@@ -311,7 +392,7 @@ export const ModvarsDisplayTable = ({ modvars }) => {
     <table>
       <thead>
         <tr>
-          {['val', 'info', 'mod'].map((field) => (
+          {['id', 'val', 'info', 'mod'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -331,7 +412,10 @@ export const ModvarsDisplayTable = ({ modvars }) => {
         {sorted.map((modvar) => (
           <tr key={modvar.mod}>
             <td className="">
-              <PageLink href={`/inventory/modvars/${modvar.id}`}>{modvar.val}</PageLink>
+              <PageLink href={`/inventory/modvars/${modvar.id}`}>{modvar.id}</PageLink>
+            </td>
+            <td className="">
+              <Markdown>{modvar.val}</Markdown>
             </td>
             <td className="">
               <Markdown>{modvar.info}</Markdown>

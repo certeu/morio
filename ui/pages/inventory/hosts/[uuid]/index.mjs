@@ -9,12 +9,23 @@ export default function InventoryHostPage({ uuid = false }) {
   const { api } = useApi()
   const [data, setData] = useState([])
   const [title, setTitle] = useState('Loading host data...')
+  const [refresh, setRefresh] = useState(0)
 
   const meta = {
     title,
     page: ['inventory', 'hosts', uuid ? uuid : 'unknown'],
     Icon: ServersIcon,
   }
+
+  useEffect(() => {
+    if (refresh > 0) {
+      runApiCall(api, uuid).then((result) => {
+        setData(result)
+        setTitle(result.fqdn)
+        setRefresh(0)
+      })
+    }
+  }, [refresh])
 
   useEffect(() => {
     if (uuid)
@@ -29,8 +40,7 @@ export default function InventoryHostPage({ uuid = false }) {
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
-          <HostDetail data={data} />
-          <pre>{JSON.stringify(data, null, 2)}</pre>
+          <HostDetail data={data} refresh={refresh} setRefresh={setRefresh} />
         </div>
       </ContentWrapper>
     </PageWrapper>

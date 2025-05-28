@@ -15,7 +15,6 @@ import { CogIcon, AddPuzzleIcon, RightIcon, TrashIcon } from 'components/icons.m
 import { StringInput, TextInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { InventoryHostname } from './host.mjs'
 
 /**
  * This component renders a table with all Morio modules and allows removal
@@ -79,7 +78,7 @@ export const ModsTable = () => {
         </button>
         <NewModButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -90,7 +89,7 @@ export const ModsTable = () => {
                 checked={mods.length === count}
               />
             </th>
-            {['mod', 'host', 'data'].map((field) => (
+            {['mod', 'data'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -121,11 +120,6 @@ export const ModsTable = () => {
                 <PageLink href={`/inventory/mods/${mod.mod}`}>{mod.mod}</PageLink>
               </td>
               <td className="">
-                <PageLink href={`/inventory/hosts/${mod.host}`}>
-                  <InventoryHostname uuid={mod.host} />
-                </PageLink>
-              </td>
-              <td className="">
                 <Markdown>{mod.data}</Markdown>
               </td>
             </tr>
@@ -137,7 +131,7 @@ export const ModsTable = () => {
   )
 }
 
-async function runModsTableApiCall(api) {
+export async function runModsTableApiCall(api) {
   const result = await api.getInventoryMods()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
@@ -245,11 +239,25 @@ export const NewMod = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const ModDetail = ({ data }) => {
+export const ModDetail = ({ data, refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
   if (!data) return null
 
   return (
     <>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkModUpdate mods={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Module
+      </button>
       {data.mod ? (
         <>
           <h2>Module</h2>
@@ -267,6 +275,9 @@ export const ModDetail = ({ data }) => {
 }
 
 export const BulkModUpdate = ({ mods, refresh, setRefresh }) => {
+  // Normalize mods to always be an array
+  const normalizedMods = Array.isArray(mods) ? mods : [mods.mod]
+
   // State
   const [data, setData] = useState('')
   // Hooks
@@ -274,13 +285,28 @@ export const BulkModUpdate = ({ mods, refresh, setRefresh }) => {
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
-  // Helper method to bulk-update datas
+  // Prefill values if mods is a single object
+  useEffect(() => {
+    if (!Array.isArray(mods)) {
+      if (mods) {
+        setData(mods.data || '')
+      }
+    } else if (mods.length === 1) {
+      const loadMod = async () => {
+        const result = await runModApiCall(api, mods[0])
+        if (result) {
+          setData(result.data || '')
+        }
+      }
+      loadMod()
+    }
+  }, [mods])
+
+  const count = normalizedMods.length
   const updateDatas = async () => {
-    let i = 0
-    const count = mods.length
-    for (const mod in mods) {
-      i++
-      await api.updateInventoryModData(mods[mod], data)
+    for (let i = 0; i < count; i++) {
+      const mod = normalizedMods[i]
+      await api.updateInventoryModData(mod, data)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating mod datas" key="linter" />,
@@ -293,7 +319,9 @@ export const BulkModUpdate = ({ mods, refresh, setRefresh }) => {
   return (
     <div className="">
       <h2>Update data</h2>
-      <p>This will set the same data for all the selected modules.</p>
+      {normalizedMods.length > 1 && (
+        <p>This will set the same data for all the selected modules.</p>
+      )}
       <StringInput current={data} update={setData} label="Data" />
       <button className="btn btn-primary mt-4 mx-auto block" onClick={updateDatas}>
         Update module datas
@@ -302,12 +330,18 @@ export const BulkModUpdate = ({ mods, refresh, setRefresh }) => {
   )
 }
 
+export async function runModApiCall(api, mod) {
+  const result = await api.getInventoryMod(mod)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
 /**
  * This component renders a table with Morio Modules
  */
 export const ModsDisplayTable = ({ mods }) => {
   // State
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('mod')
   const [desc, setDesc] = useState(false)
 
   // Hooks
@@ -317,7 +351,7 @@ export const ModsDisplayTable = ({ mods }) => {
     <table>
       <thead>
         <tr>
-          {['mod', 'host', 'data'].map((field) => (
+          {['mod', 'data'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -338,11 +372,6 @@ export const ModsDisplayTable = ({ mods }) => {
           <tr key={mod.mod}>
             <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/mods/${mod.mod}`}>{mod.mod}</PageLink>
-            </td>
-            <td className="py-0.5 pr-4 font-mono text-sm">
-              <PageLink href={`/inventory/hosts/${mod.host}`}>
-                <InventoryHostname uuid={mod.host} />
-              </PageLink>
             </td>
             <td className="">
               <Markdown>{mod.data}</Markdown>

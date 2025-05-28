@@ -9,12 +9,23 @@ export default function InventoryModvarPage({ id = false }) {
   const { api } = useApi()
   const [data, setData] = useState([])
   const [title, setTitle] = useState('Loading module variable data...')
+  const [refresh, setRefresh] = useState(0)
 
   const meta = {
     title: title ? id : 'Loading module variable data',
     page: ['inventory', 'modvars', id ? id : 'unknown'],
     Icon: VariableIcon,
   }
+
+  useEffect(() => {
+    if (refresh > 0) {
+      runModvarApiCall(api, id).then((result) => {
+        setData(result)
+        setTitle(result.val)
+        setRefresh(0)
+      })
+    }
+  }, [refresh])
 
   useEffect(() => {
     if (id)
@@ -29,7 +40,7 @@ export default function InventoryModvarPage({ id = false }) {
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
-          <ModvarDetail data={data} />
+          <ModvarDetail data={data} refresh={refresh} setRefresh={setRefresh} />
         </div>
       </ContentWrapper>
     </PageWrapper>

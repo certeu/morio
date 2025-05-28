@@ -486,3 +486,29 @@ Group.prototype.delete = async function (id = false) {
 
   return result
 }
+
+/**
+ * Helper method to delete a group connection with group_id
+ *
+ * @param {string} group_id - The group_id of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+Group.prototype.deleteGroups = async function (group_id = false) {
+  await utils.db.write(`DELETE FROM inventory_group_group WHERE group_id = :group_id`, { group_id })
+
+  return true
+}
+
+/**
+ * Helper method to delete a group connection with member_id
+ *
+ * @param {string} member_id - The member_id of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+Group.prototype.deleteMembers = async function (member_id = false) {
+  await utils.db.write(`DELETE FROM inventory_group_group WHERE member_id = :member_id`, {
+    member_id,
+  })
+
+  return true
+}

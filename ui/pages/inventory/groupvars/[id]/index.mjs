@@ -9,12 +9,23 @@ export default function InventoryGroupvarPage({ id = false }) {
   const { api } = useApi()
   const [data, setData] = useState([])
   const [title, setTitle] = useState('Loading groupvar data...')
+  const [refresh, setRefresh] = useState(0)
 
   const meta = {
     title: title ? data.key : 'Loading groupvar data',
     page: ['inventory', 'groupvars', id ? id : 'unknown'],
     Icon: GroupIcon,
   }
+
+  useEffect(() => {
+    if (refresh > 0) {
+      runGroupvarApiCall(api, id).then((result) => {
+        setData(result)
+        setTitle(`Groupvar ${result.key}`)
+        setRefresh(0)
+      })
+    }
+  }, [refresh])
 
   useEffect(() => {
     if (id)
@@ -29,7 +40,7 @@ export default function InventoryGroupvarPage({ id = false }) {
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
-          <GroupvarDetail data={data} />
+          <GroupvarDetail data={data} refresh={refresh} setRefresh={setRefresh} />
         </div>
       </ContentWrapper>
     </PageWrapper>

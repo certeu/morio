@@ -1,6 +1,7 @@
 // Dependencies
-import { slugify } from 'lib/utils.mjs'
+import { inlineHelp } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
+import { runModsTableApiCall } from './mod.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -12,9 +13,10 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { CogIcon, AddHardwareIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { StringInput, TextInput } from 'components/inputs.mjs'
+import { StringInput, TextInput, SelectInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
+import { generateId } from './utils.mjs'
 
 /**
  * This component renders a table with all Module files and allows removal
@@ -78,7 +80,7 @@ export const ModfilesTable = () => {
         </button>
         <NewModfileButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -119,18 +121,12 @@ export const ModfilesTable = () => {
               <td className="">
                 <PageLink href={`/inventory/mods/${modfile.mod}`}>{modfile.mod}</PageLink>
               </td>
-              <td className="">
-                <Markdown>{modfile.folder}</Markdown>
-              </td>
+              <td className="">{modfile.folder}</td>
               <td className="">
                 <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.file}</PageLink>
               </td>
-              <td className="">
-                <Markdown>{modfile.content}</Markdown>
-              </td>
-              <td className="">
-                <Markdown>{modfile.source}</Markdown>
-              </td>
+              <td className="">{modfile.content}</td>
+              <td className="">{modfile.source}</td>
             </tr>
           ))}
         </tbody>
@@ -172,6 +168,9 @@ export const NewModfile = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
+  const [id, setId] = useState('')
+  const [mod, setMod] = useState('')
+  const [mods, setMods] = useState([])
   const [folder, setFolder] = useState('')
   const [file, setFile] = useState('')
   const [content, setContent] = useState('')
@@ -181,20 +180,26 @@ export const NewModfile = ({ refresh, setRefresh }) => {
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
+  useEffect(() => {
+    if (mods.length < 1)
+      runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+  }, [api, folder])
+
   // Effects
   useEffect(() => {
+    setId(generateId())
     const checkModfileAvailability = async () => {
-      const result = await api.isModfileAvailable(file)
+      const result = await api.isModfileAvailable(id)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (file) checkModfileAvailability()
-  }, [file, api])
+    if (id) checkModfileAvailability()
+  }, [id, api])
 
   // Handler method to create a new ip
   const createModfile = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createModfile(folder, file, content, source)
+    const result = await api.createModfile(id, mod, folder, file, content, source)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Modfile created', true, true])
@@ -206,28 +211,23 @@ export const NewModfile = ({ refresh, setRefresh }) => {
     <div>
       <h3>Create a new module file</h3>
       <p>
-        Give your new module file a name, folder, content and source. The ip address will become its
-        unique ID.
+        Give your new module file a id, mod, name, folder, content and source. The id will become
+        its unique ID.
       </p>
+      <SelectInput
+        label="Inventory Module"
+        labelDflt="Choose a module to assign this file to"
+        help={inlineHelp('inventory/modfiles#mod')}
+        update={setMod}
+        list={mods.map((mod) => ({ val: mod, label: mod }))}
+      />
       <StringInput
         label="Folder name"
         update={setFolder}
         current={folder}
         placeholder="New Folder"
       />
-      <StringInput
-        label="File name"
-        update={(val) => setFile(slugify(val))}
-        current={file}
-        placeholder="New File"
-        valid={(val) =>
-          val && isAvailable
-            ? true
-            : val === ''
-              ? { error: { details: [{ message: 'File name cannot be empty' }] } }
-              : { error: { details: [{ message: 'This file name is taken' }] } }
-        }
-      />
+      <StringInput label="File name" update={setFile} current={file} placeholder="New File" />
       <TextInput
         label="Content"
         update={setContent}
@@ -239,7 +239,7 @@ export const NewModfile = ({ refresh, setRefresh }) => {
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(file && isAvailable)}
+          disabled={!(id && isAvailable)}
           onClick={createModfile}
         >
           Create Module File
@@ -257,11 +257,25 @@ export const NewModfile = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const ModfileDetail = ({ data }) => {
+export const ModfileDetail = ({ data, refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
   if (!data) return null
 
   return (
     <>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkModfileUpdate modfiles={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Module file
+      </button>
       {data.folder ? (
         <>
           <h2>Folder</h2>
@@ -291,22 +305,57 @@ export const ModfileDetail = ({ data }) => {
 }
 
 export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
+  // Normalize modfiles to always be an array
+  const normalizedModfiles = Array.isArray(modfiles) ? modfiles : [modfiles.id]
+
   // State
+  const [mod, setMod] = useState('')
+  const [mods, setMods] = useState([])
   const [folder, setFolder] = useState('')
+  const [file, setFile] = useState('')
   const [content, setContent] = useState('')
   const [source, setSource] = useState('')
   // Hooks
   const { api } = useApi()
+
+  useEffect(() => {
+    if (mods.length < 1)
+      runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+  }, [api, folder])
+
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
-  // Helper method to bulk-update folder, content, source
+  // Prefill values if modfiles is a single object
+  useEffect(() => {
+    if (!Array.isArray(modfiles)) {
+      if (modfiles) {
+        setMod(modfiles.mod || '')
+        setFolder(modfiles.folder || '')
+        setFile(modfiles.file || '')
+        setContent(modfiles.content || '')
+        setSource(modfiles.source || '')
+      }
+    } else if (modfiles.length === 1) {
+      const loadModfile = async () => {
+        const result = await runModfileApiCall(api, modfiles[0])
+        if (result) {
+          setMod(result.mod || '')
+          setFolder(result.folder || '')
+          setFile(result.file || '')
+          setContent(result.content || '')
+          setSource(result.source || '')
+        }
+      }
+      loadModfile()
+    }
+  }, [modfiles])
+
+  const count = normalizedModfiles.length
   const updateFileInfo = async () => {
-    let i = 0
-    const count = modfiles.length
-    for (const id in modfiles) {
-      i++
-      await api.updateInventoryModfile(modfiles[id], folder, content, source)
+    for (let i = 0; i < count; i++) {
+      const modfile = normalizedModfiles[i]
+      await api.updateInventoryModfile(modfile, mod, folder, file, content, source)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating modfile infos" key="linter" />,
@@ -318,16 +367,32 @@ export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
 
   return (
     <div className="">
-      <h2>Update modfile infos</h2>
-      <p>This will set the same infos for all the selected modfiles.</p>
+      <h2>Update modfile info</h2>
+      {normalizedModfiles.length > 1 && (
+        <p>This will set the same info for all the selected modfiles.</p>
+      )}
+      <SelectInput
+        label="Inventory Module"
+        labelDflt="Choose a module to assign this var to"
+        help={inlineHelp('inventory/modvars#mod')}
+        update={setMod}
+        list={mods.map((mod) => ({ val: mod, label: mod }))}
+      />
       <StringInput current={folder} update={setFolder} label="Folder" />
-      <StringInput current={content} update={setContent} label="content" />
+      <StringInput current={file} update={setFile} label="File" />
+      <TextInput label="Content" update={setContent} current={content} />
       <StringInput current={source} update={setSource} label="source" />
       <button className="btn btn-primary mt-4 mx-auto block" onClick={updateFileInfo}>
-        Update Module File Infos
+        Update Module File Info
       </button>
     </div>
   )
+}
+
+export async function runModfileApiCall(api, id) {
+  const result = await api.getInventoryModfile(id)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
 }
 
 /**

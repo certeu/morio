@@ -46,9 +46,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         NODE_ID: utils.getNodeSerial(),
       },
       // Aliases to use on the docker network (used for cross-cluster db access)
-      aliases: [
-        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}ccdb`,
-      ],
+      aliases: [`${utils.getPreset('MORIO_CONTAINER_PREFIX')}ccdb`],
       // Volumes
       volumes: PROD
         ? [
@@ -102,8 +100,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         priority: 666,
         entrypoint: 'ccdb',
         router: 'ccdb',
-      })
-        .set('http.routers.ccdb.middlewares', ['ccdb-auth@file'])
+      }).set('http.routers.ccdb.middlewares', ['ccdb-auth@file']),
     },
     /**
      * This is the schema, or more accurately, the SQL commands to create the
@@ -284,9 +281,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
       )`,
     },
     //data: [
-      // FIXME: This is in the ansibleinv branch
-      //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_TICK', '30s') ON CONFLICT DO UPDATE SET val='30s'`,
-      //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_DEBUG', 'false') ON CONFLICT DO UPDATE SET val='false'`,
+    // FIXME: This is in the ansibleinv branch
+    //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_TICK', '30s') ON CONFLICT DO UPDATE SET val='30s'`,
+    //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_DEBUG', 'false') ON CONFLICT DO UPDATE SET val='false'`,
     //],
   }
 }

@@ -250,6 +250,7 @@ export const StringInput = ({
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
   disabled = false, // Allows rendering a disabled view
+  readOnly = false, // Allows rendering a readonly view
   help = false, // Optional link to help / docs
 }) => {
   const isValid = typeof valid === 'function' ? valid(current) : valid
@@ -262,6 +263,7 @@ export const StringInput = ({
         type="text"
         placeholder={placeholder}
         value={current}
+        readOnly={readOnly}
         onChange={(evt) => update(evt.target.value)}
         className={`input w-full bg-base-100 input-bordered ${
           isValid?.error

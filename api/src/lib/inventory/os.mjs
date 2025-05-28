@@ -1,7 +1,7 @@
 // Utils
-import { utils } from '../utils.mjs'
+import { log, utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
+import { addNonEnumProp, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Os instance
@@ -29,34 +29,59 @@ export function Os(id = false) {
  * @param {string} version - The Os version
  * @return {Os} this - The Os instance
  */
-Os.prototype.create = async function ({ id, name, version }) {
-  /*
-   * Do not bother without an id
-   */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
-
-  /*
-   * Insert into the database
-   */
-  let result = false
-  try {
-    result = await utils.db.write(
-      `INSERT INTO inventory_oss(id, name, version) VALUES(:id, :name, :version)`,
-      { id, name, version }
-    )
-  } catch (err) {
-    return this.setError(err)
+Os.prototype.create = async function (id, name, version) {
+  if (!id) {
+    return false
   }
 
-  /*
-   * If it worked, store the internal id
-   */
-  return result &&
-    Array.isArray(result) &&
-    result[0] === 200 &&
-    result[1]?.results?.[0]?.last_insert_id
-    ? this.setId(id).setSaved(true).setError(false)
-    : this.setError('Failed to create record')
+  const sql = `
+    INSERT INTO inventory_oss(
+      id, name, version
+    ) VALUES (
+      :id, :name, :version
+    )
+  `
+
+  const params = {
+    id,
+    name,
+    version,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to update an inventory (host) os
+ *
+ * @return {object} updated - true if it the os is updated, false if not
+ */
+Os.prototype.update = async function (id, name = '', version = '') {
+  if (!id) return false
+
+  // Run query
+  const updateResult = await utils.db.write(
+    `UPDATE inventory_oss SET name=:name, version=:version WHERE id=:id`,
+    {
+      name,
+      version,
+      id,
+    }
+  )
+
+  if (updateResult.rowCount === 0) {
+    return false
+  }
+
+  return await this.read(id)
 }
 
 /*
@@ -164,60 +189,39 @@ Os.prototype.delete = async function () {
  *
  * @param {string} id - The Os id
  */
-Os.prototype.read = async function (id = false) {
-  /*
-   * Do not bother without an id
-   */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
+Os.prototype.read = async function (id) {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_oss WHERE id=:id`, {
+    id,
+  })
 
-  /*
-   * Read from database
-   */
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_oss WHERE id = :id`, {
-      id: id || this.getId(),
-    })
-    const data = resultAsRecord(result[1])
-    if (data.id) this.setId(data.id)
-    if (data.name) this.setRecordField('name', data.name)
-    if (data.version) this.setRecordField('version', data.version)
-    this.setSaved(true)
-  } catch (err) {
-    return this.setError(err)
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one os in loadOs. This is unexpected.`)
+    return false
   }
-
-  return result && Array.isArray(result) && result[0] === 200
-    ? this
-    : this.setError('Failed to create record')
 }
 
 /**
  * List all OS records
  */
 Os.prototype.list = async function () {
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_oss ORDER BY name`)
-  } catch (err) {
-    return this.setError(err)
-  }
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_oss ORDER BY id`)
 
-  return result && Array.isArray(result) && result[0] === 200
-    ? result[1].results
-    : this.setError('Failed to fetch OS list')
+  return status === 200 ? resultsAsList(result) : false
 }
 
 /**
  * Helper method to see if a OS is available
  *
- * @param {string} name - The os name
+ * @param {string} id - The os id
  * @return {object} available - true if it is available, false if not
  */
-Os.prototype.isAvailable = async function (name) {
-  const [status, result] = await utils.db.read(`SELECT name FROM inventory_oss where name=:name`, {
-    name,
-  })
+Os.prototype.isAvailable = async function (id) {
+  const [status, result] = await utils.db.read(`SELECT id FROM inventory_oss where id=:id`, { id })
   if (status === 200) {
     const hits = resultsAsList(result)
     return hits.length === 0

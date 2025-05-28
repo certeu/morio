@@ -1,6 +1,7 @@
 // Dependencies
-import { slugify } from 'lib/utils.mjs'
+import { varify, inlineHelp } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
+import { runHostsTableApiCall } from './host.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -12,10 +13,11 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { CogIcon, AddVarIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { StringInput, TextInput } from 'components/inputs.mjs'
+import { StringInput, TextInput, SelectInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { InventoryHostname } from './host.mjs'
+import { generateId } from './utils.mjs'
 
 /**
  * This component renders a table with all Host vars and allows removal
@@ -79,7 +81,7 @@ export const HostvarsTable = () => {
         </button>
         <NewHostvarButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -90,7 +92,7 @@ export const HostvarsTable = () => {
                 checked={hostvars.length === count}
               />
             </th>
-            {['id', 'key', 'val', 'info', 'host'].map((field) => (
+            {['key', 'val', 'info', 'host'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -118,10 +120,7 @@ export const HostvarsTable = () => {
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/hostvars/${hostvar.id}`}>{hostvar.id}</PageLink>
-              </td>
-              <td className="">
-                <Markdown>{hostvar.key}</Markdown>
+                <PageLink href={`/inventory/hostvars/${hostvar.id}`}>{hostvar.key}</PageLink>
               </td>
               <td className="">
                 <Markdown>{hostvar.val}</Markdown>
@@ -175,28 +174,37 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
+  const [id, setId] = useState(0)
   const [key, setKey] = useState('')
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
+  const [host, setHost] = useState('')
+  const [hosts, setHosts] = useState([])
   const [isAvailable, setIsAvailable] = useState(false)
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
+  useEffect(() => {
+    if (hosts.length < 1)
+      runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => entry.id)))
+  }, [api, key])
+
   // Effects
   useEffect(() => {
+    setId(generateId())
     const checkHostvarAvailability = async () => {
-      const result = await api.isHostvarAvailable(key)
+      const result = await api.isHostvarAvailable(id)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (key) checkHostvarAvailability()
-  }, [key, api])
+    if (id) checkHostvarAvailability()
+  }, [id, api])
 
   // Handler method to create a new hostvar
   const createHostvar = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createHostvar(key, val, info)
+    const result = await api.createHostvar(id, key, val, info, host)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Hostvar created', true, true])
@@ -208,23 +216,22 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
     <div>
       <h3>Create a new hostvar</h3>
       <p>
-        Give your new hostvar a key, val, and an optional info. The hostvar key will become its
-        unique ID.
+        Give your new hostvar a id, key, val, an optional info and host. The hostvar id will become
+        its unique ID.
       </p>
+      <SelectInput
+        label="Inventory Host"
+        labelDflt="Choose a host to assign this var to"
+        help={inlineHelp('inventory/hostvars#host')}
+        update={setHost}
+        list={hosts.map((host) => ({ val: host, label: host }))}
+      />
       <StringInput
         label="Hostvar key"
-        update={(val) => setKey(slugify(val))}
+        update={(val) => setKey(varify(val))}
         current={key}
-        placeholder="127.0.0.1"
-        valid={(val) =>
-          val && isAvailable
-            ? true
-            : val === ''
-              ? { error: { details: [{ message: 'Hostvar key cannot be empty' }] } }
-              : { error: { details: [{ message: 'This hostvar key is taken' }] } }
-        }
+        placeholder="Hostvar key"
       />
-
       <StringInput label="Hostvar val" update={setVal} current={val} placeholder="Hostvar val" />
       <TextInput
         label="Hostvar info"
@@ -235,7 +242,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(key && isAvailable)}
+          disabled={!(id && isAvailable)}
           onClick={createHostvar}
         >
           Create Host Variable
@@ -253,11 +260,25 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const HostvarDetail = ({ data }) => {
+export const HostvarDetail = ({ data, refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
   if (!data) return null
 
   return (
     <>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkHostvarUpdate hostvars={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Hostvar
+      </button>
       {data.key ? (
         <>
           <h2>Key</h2>
@@ -281,24 +302,63 @@ export const HostvarDetail = ({ data }) => {
 }
 
 export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
+  // Normalize hostvars to always be an array
+  const normalizedHostvars = Array.isArray(hostvars) ? hostvars : [hostvars.id]
+
   // State
+  const [key, setKey] = useState('')
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
+  const [host, setHost] = useState('')
+  const [hosts, setHosts] = useState([])
+
   // Hooks
   const { api } = useApi()
+
+  useEffect(() => {
+    if (hosts.length < 1)
+      runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => entry.id)))
+  }, [api, key])
+
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
-  // Helper method to bulk-update versions
-  const updateValInfos = async () => {
-    let i = 0
-    const count = hostvars.length
-    for (const id in hostvars) {
-      i++
-      await api.updateInventoryHostvarInfos(hostvars[id], val, info)
+  // Prefill values if hostvars is a single object
+  useEffect(() => {
+    if (!Array.isArray(hostvars)) {
+      if (hostvars) {
+        setKey(hostvars.key || '')
+        setVal(hostvars.val || '')
+        setInfo(hostvars.info || '')
+        setHost(hostvars.host || '')
+      }
+    } else if (hostvars.length === 1) {
+      const loadHostvar = async () => {
+        const result = await runHostvarApiCall(api, hostvars[0])
+        if (result) {
+          setKey(result.key || '')
+          setVal(result.val || '')
+          setInfo(result.info || '')
+          setHost(result.host || '')
+        }
+      }
+      loadHostvar()
+    }
+  }, [hostvars])
+
+  const count = normalizedHostvars.length
+  const updateInfo = async () => {
+    for (let i = 0; i < count; i++) {
+      const hostvar = normalizedHostvars[i]
+      await api.updateInventoryHostvarInfo(hostvar, key, val, info, host)
       setLoadingStatus([
         true,
-        <LoadingProgress val={i} max={count} msg="Updating hostvar val, info" key="linter" />,
+        <LoadingProgress
+          val={i}
+          max={count}
+          msg="Updating hostvar key, val, info, host"
+          key="linter"
+        />,
       ])
     }
     if (setRefresh) setRefresh(refresh + 1)
@@ -307,15 +367,32 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
 
   return (
     <div className="">
-      <h2>Update value, infos</h2>
-      <p>This will set the same value, infos for all the selected hostvars.</p>
+      <h2>Update key, value, info, host</h2>
+      {normalizedHostvars.length > 1 && (
+        <p>This will set the same key, value, info, host for all the selected hostvars.</p>
+      )}
+      <SelectInput
+        label="Inventory Host"
+        labelDflt="Choose a host to assign this var to"
+        help={inlineHelp('inventory/hostvars#host')}
+        current={host}
+        update={setHost}
+        list={hosts.map((host) => ({ val: host, label: host }))}
+      />
+      <StringInput current={key} update={setKey} label="Key" />
       <StringInput current={val} update={setVal} label="Value" />
-      <StringInput current={info} update={setInfo} label="Infomation" />
-      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateValInfos}>
-        Update hostvar value, infos
+      <TextInput label="Info" update={setInfo} current={info} />
+      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateInfo}>
+        Update hostvar key, value, info, host
       </button>
     </div>
   )
+}
+
+export async function runHostvarApiCall(api, id) {
+  const result = await api.getInventoryHostvar(id)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
 }
 
 /**
@@ -362,7 +439,7 @@ export const HostvarsDisplayTable = ({ hostvars }) => {
               <Markdown>{hostvar.info}</Markdown>
             </td>
             <td className="py-0.5 pr-4 font-mono text-sm">
-              <PageLink href={`/inventory/hostvars/${hostvar.host}`}>
+              <PageLink href={`/inventory/hosts/${hostvar.host}`}>
                 <InventoryHostname uuid={hostvar.host} />
               </PageLink>
             </td>

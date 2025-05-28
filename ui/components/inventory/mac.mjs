@@ -15,7 +15,6 @@ import { AddHardwareIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { InventoryHostname } from './host.mjs'
 
 /**
  * This component renders a table with all MAC addresses and allows removal
@@ -65,7 +64,7 @@ export const MacsTable = () => {
         </button>
         <NewMacButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -76,7 +75,7 @@ export const MacsTable = () => {
                 checked={macs.length === count}
               />
             </th>
-            {['mac', 'host'].map((field) => (
+            {['mac'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -106,11 +105,6 @@ export const MacsTable = () => {
               <td className="">
                 <PageLink href={`/inventory/macs/${mac.mac}`}>{mac.mac}</PageLink>
               </td>
-              <td className="">
-                <PageLink href={`/inventory/hosts/${mac.host}`}>
-                  <InventoryHostname uuid={mac.host} />
-                </PageLink>
-              </td>
             </tr>
           ))}
         </tbody>
@@ -120,7 +114,7 @@ export const MacsTable = () => {
   )
 }
 
-async function runMacsTableApiCall(api) {
+export async function runMacsTableApiCall(api) {
   const result = await api.getInventoryMacs()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
@@ -248,7 +242,7 @@ export const MacsDisplayTable = ({ macs }) => {
     <table>
       <thead>
         <tr>
-          {['mac', 'host'].map((field) => (
+          {['mac'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -269,11 +263,6 @@ export const MacsDisplayTable = ({ macs }) => {
           <tr key={mac.mac}>
             <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/macs/${mac.mac}`}>{mac.mac}</PageLink>
-            </td>
-            <td className="py-0.5 pr-4 font-mono text-sm">
-              <PageLink href={`/inventory/hosts/${mac.host}`}>
-                <InventoryHostname uuid={mac.host} />
-              </PageLink>
             </td>
           </tr>
         ))}

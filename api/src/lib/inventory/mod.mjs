@@ -1,7 +1,7 @@
 // Utils
-import { utils } from '../utils.mjs'
+import { log, utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
+import { addNonEnumProp, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Mod instance
@@ -28,34 +28,54 @@ export function Mod(mod = false) {
  * @param {string} data - The mod data
  * @return {Mod} this - The Mod instance
  */
-Mod.prototype.create = async function ({ mod, data }) {
-  /*
-   * Do not bother without a mod
-   */
-  if (!mod && !this.getId()) return this.setError('You must provide a mod')
-
-  /*
-   * Insert into the database
-   */
-  let result = false
-  try {
-    result = await utils.db.write(`INSERT INTO inventory_mods(mod, data) VALUES(:mod, :data)`, {
-      mod,
-      data,
-    })
-  } catch (err) {
-    return this.setError(err)
+Mod.prototype.create = async function (mod, data) {
+  if (!mod) {
+    return false
   }
 
-  /*
-   * If it worked, store the internal id
-   */
-  return result &&
-    Array.isArray(result) &&
-    result[0] === 200 &&
-    result[1]?.results?.[0]?.last_insert_id
-    ? this.setId(mod).setSaved(true).setError(false)
-    : this.setError('Failed to create record')
+  const sql = `
+    INSERT INTO inventory_mods(
+      mod, data
+    ) VALUES (
+      :mod, :data
+    )
+  `
+
+  const params = {
+    mod,
+    data,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to update an inventory (host) mod
+ *
+ * @return {object} updated - true if it the mod is updated, false if not
+ */
+Mod.prototype.update = async function (mod, data = '') {
+  if (!mod) return false
+
+  // Run query
+  const updateResult = await utils.db.write(`UPDATE inventory_mods SET data=:data WHERE mod=:mod`, {
+    data,
+    mod,
+  })
+
+  if (updateResult.rowCount === 0) {
+    return false
+  }
+
+  return await this.read(mod)
 }
 
 /*
@@ -142,7 +162,7 @@ Mod.prototype.delete = async function () {
   /*
    * Do not bother without a mod
    */
-  if (!this.getId()) return this.setError('You must provide an mod')
+  if (!this.getId()) return this.setError('You must provide a mod')
 
   /*
    * Remove from database
@@ -150,7 +170,7 @@ Mod.prototype.delete = async function () {
   let result = false
   try {
     result = await utils.db.write(`DELETE FROM inventory_mods WHERE mod = :mod`, {
-      mod: this.getMod(),
+      mod: this.getId(),
     })
   } catch (err) {
     return this.setError(err)
@@ -164,47 +184,29 @@ Mod.prototype.delete = async function () {
  *
  * @param {string} mod - The Mod data
  */
-Mod.prototype.read = async function (mod = false) {
-  /*
-   * Do not bother without a mod
-   */
-  if (!mod && !this.getId()) return this.setError('You must provide a mod')
+Mod.prototype.read = async function (mod) {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_mods WHERE mod=:mod`, {
+    mod,
+  })
 
-  /*
-   * Read from database
-   */
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_mods WHERE mod = :mod`, {
-      mod: mod || this.getId(),
-    })
-    const data = resultAsRecord(result[1])
-    if (data.mod) this.setId(data.mod)
-    if (data.data) this.setRecordField('data', data.data)
-    this.setSaved(true)
-  } catch (err) {
-    return this.setError(err)
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one mod in loadMod. This is unexpected.`)
+    return false
   }
-
-  return result && Array.isArray(result) && result[0] === 200
-    ? this
-    : this.setError('Failed to create record')
 }
 
 /**
  * List all Mod records
  */
 Mod.prototype.list = async function () {
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_mods ORDER BY mod`)
-  } catch (err) {
-    return this.setError(err)
-  }
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_mods ORDER BY mod`)
 
-  return result && Array.isArray(result) && result[0] === 200
-    ? result[1].results
-    : this.setError('Failed to fetch Mod list')
+  return status === 200 ? resultsAsList(result) : false
 }
 
 /**

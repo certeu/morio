@@ -11,6 +11,7 @@ export default function InventoryGroupPage({ id = false }) {
   const [members, setMembers] = useState([])
   const [memberOf, setMemberOf] = useState([])
   const [title, setTitle] = useState('Loading group data...')
+  const [refresh, setRefresh] = useState(0)
 
   const meta = {
     title: title ? id : 'Loading group data',
@@ -19,10 +20,20 @@ export default function InventoryGroupPage({ id = false }) {
   }
 
   useEffect(() => {
+    if (refresh > 0) {
+      runGroupApiCall(api, id).then((result) => {
+        setData(result)
+        setTitle(result.id)
+        setRefresh(0)
+      })
+    }
+  }, [refresh])
+
+  useEffect(() => {
     if (id)
       runGroupApiCall(api, id).then((result) => {
         setData(result)
-        setTitle(result.fqdn)
+        setTitle(result.id)
       })
     runGroupMembersApiCall(api, id).then((result) => setMembers(result))
     runGroupMemberOfApiCall(api, id).then((result) => setMemberOf(result))
@@ -33,7 +44,13 @@ export default function InventoryGroupPage({ id = false }) {
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
-          <GroupDetail data={data} members={members} memberOf={memberOf} />
+          <GroupDetail
+            data={data}
+            refresh={refresh}
+            setRefresh={setRefresh}
+            members={members}
+            memberOf={memberOf}
+          />
         </div>
       </ContentWrapper>
     </PageWrapper>

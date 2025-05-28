@@ -25,6 +25,31 @@ export function routes(app) {
   app.get(`/inventory/hosts`, rbac.user, inventory.listHosts)
 
   /*
+   * Read all host-ips (returns an array)
+   */
+  app.get(`/inventory/hosts/ips`, rbac.user, inventory.listHostIps)
+
+  /*
+   * Read all host-macs (returns an array)
+   */
+  app.get(`/inventory/hosts/macs`, rbac.user, inventory.listHostMacs)
+
+  /*
+   * Read all host-oss (returns an array)
+   */
+  app.get(`/inventory/hosts/oss`, rbac.user, inventory.listHostOss)
+
+  /*
+   * Read all host-pkgs (returns an array)
+   */
+  app.get(`/inventory/hosts/pkgs`, rbac.user, inventory.listHostPkgs)
+
+  /*
+   * Read all host-mods (returns an array)
+   */
+  app.get(`/inventory/hosts/mods`, rbac.user, inventory.listHostMods)
+
+  /*
    * Read all hosts (returns an object)
    */
   app.get(`/inventory/hosts.obj`, rbac.user, (req, res) => inventory.listHosts(req, res, 'object'))
@@ -44,6 +69,56 @@ export function routes(app) {
    */
   app.delete(`/inventory/hosts/:id`, rbac.operator, inventory.deleteHost)
 
+  /*
+   * Link ip to host
+   */
+  app.post(`/inventory/link/host/:host/ip/:ip`, rbac.operator, inventory.linkHostIp)
+
+  /*
+   * Unlink ip from host
+   */
+  app.delete(`/inventory/link/host/:host/ip/:ip`, rbac.operator, inventory.unlinkHostIp)
+
+  /*
+   * Link mac to host
+   */
+  app.post(`/inventory/link/host/:host/mac/:mac`, rbac.operator, inventory.linkHostMac)
+
+  /*
+   * Unlink mac from host
+   */
+  app.delete(`/inventory/link/host/:host/mac/:mac`, rbac.operator, inventory.unlinkHostMac)
+
+  /*
+   * Link os to host
+   */
+  app.post(`/inventory/link/host/:host/os/:id`, rbac.operator, inventory.linkHostOs)
+
+  /*
+   * Unlink os from host
+   */
+  app.delete(`/inventory/link/host/:host/os/:id`, rbac.operator, inventory.unlinkHostOs)
+
+  /*
+   * Link pkg to host
+   */
+  app.post(`/inventory/link/host/:host/pkg/:id`, rbac.operator, inventory.linkHostPkg)
+
+  /*
+   * Unlink pkg from host
+   */
+  app.delete(`/inventory/link/host/:host/pkg/:id`, rbac.operator, inventory.unlinkHostPkg)
+
+  /*
+   * Link mod to host
+   */
+  app.post(`/inventory/link/host/:host/mod/:mod`, rbac.operator, inventory.linkHostMod)
+
+  /*
+   * Unlink mod from host
+   */
+  app.delete(`/inventory/link/host/:host/mod/:mod`, rbac.operator, inventory.unlinkHostMod)
+
   // Pkgs ///////////////////////
 
   /*
@@ -59,7 +134,7 @@ export function routes(app) {
   /*
    * Update a Software Package
    */
-  app.put(`/inventory/pkgs/:id`, rbac.user, inventory.updatePkg)
+  app.patch(`/inventory/pkgs/:id`, rbac.operator, inventory.updatePkg)
 
   /*
    * Delete an Software Package
@@ -84,9 +159,9 @@ export function routes(app) {
   app.get(`/inventory/oss/:id`, rbac.user, inventory.readOs)
 
   /*
-   * Update a Operating System
+   * Update a OS
    */
-  app.put(`/inventory/oss/:id`, rbac.user, inventory.updateOs)
+  app.patch(`/inventory/oss/:id`, rbac.operator, inventory.updateOs)
 
   /*
    * Delete an Operating System
@@ -109,11 +184,6 @@ export function routes(app) {
    * Read an IP
    */
   app.get(`/inventory/ips/:ip`, rbac.user, inventory.readIp)
-
-  /*
-   * Update a IP
-   */
-  app.put(`/inventory/ips/:ip`, rbac.user, inventory.updateIp)
 
   /*
    * Delete an Operating System
@@ -167,7 +237,7 @@ export function routes(app) {
   /*
    * Update a Mod
    */
-  app.put(`/inventory/mods/:mod`, rbac.user, inventory.updateMod)
+  app.patch(`/inventory/mods/:mod`, rbac.operator, inventory.updateMod)
 
   /*
    * Delete a Mod
@@ -194,7 +264,12 @@ export function routes(app) {
   /*
    * Update a Module variable
    */
-  app.put(`/inventory/modvars/:id`, rbac.user, inventory.updateModvar)
+  app.patch(`/inventory/modvars/:id`, rbac.operator, inventory.updateModvar)
+
+  /*
+   * Update a Group variable
+   */
+  app.patch(`/inventory/groupvars/:id`, rbac.operator, inventory.updateGroupvar)
 
   /*
    * Delete an Module Variable
@@ -221,7 +296,7 @@ export function routes(app) {
   /*
    * Update a Host variable
    */
-  app.put(`/inventory/hostvars/:id`, rbac.user, inventory.updateHostvar)
+  app.patch(`/inventory/hostvars/:id`, rbac.operator, inventory.updateHostvar)
 
   /*
    * Delete an Host variable
@@ -246,7 +321,7 @@ export function routes(app) {
   /*
    * Update a Module file
    */
-  app.put(`/inventory/modfiles/:id`, rbac.user, inventory.updateModfile)
+  app.patch(`/inventory/modfiles/:id`, rbac.operator, inventory.updateModfile)
 
   /*
    * Delete an Module file
@@ -269,6 +344,16 @@ export function routes(app) {
   app.patch(`/inventory/groups/:id/:action`, rbac.operator, inventory.updateGroup)
 
   /*
+   * Update a host
+   */
+  app.patch(`/inventory/hosts/:id`, rbac.operator, inventory.updateHost)
+
+  /*
+   * Update a IP
+   */
+  app.patch(`/inventory/ips/:ip`, rbac.operator, inventory.updateIp)
+
+  /*
    * Read all groups (returns an array)
    */
   app.get(`/inventory/groups`, rbac.user, inventory.listGroups)
@@ -284,6 +369,11 @@ export function routes(app) {
   app.get(`/inventory/is-group-available/:group`, rbac.user, inventory.isGroupAvailable)
 
   /*
+   * Checks whether a host id is available
+   */
+  app.get(`/inventory/is-host-available/:id`, rbac.user, inventory.isHostAvailable)
+
+  /*
    * Checks whether a ip address is available
    */
   app.get(`/inventory/is-ip-available/:ip`, rbac.user, inventory.isIpAvailable)
@@ -296,12 +386,12 @@ export function routes(app) {
   /*
    * Checks whether a os is available
    */
-  app.get(`/inventory/is-os-available/:name`, rbac.user, inventory.isOsAvailable)
+  app.get(`/inventory/is-os-available/:id`, rbac.user, inventory.isOsAvailable)
 
   /*
    * Checks whether a pkg is available
    */
-  app.get(`/inventory/is-pkg-available/:name`, rbac.user, inventory.isPkgAvailable)
+  app.get(`/inventory/is-pkg-available/:id`, rbac.user, inventory.isPkgAvailable)
 
   /*
    * Checks whether a mod is available
@@ -311,17 +401,17 @@ export function routes(app) {
   /*
    * Checks whether a modvar is available
    */
-  app.get(`/inventory/is-modvar-available/:val`, rbac.user, inventory.isModvarAvailable)
+  app.get(`/inventory/is-modvar-available/:id`, rbac.user, inventory.isModvarAvailable)
 
   /*
    * Checks whether a hostvar is available
    */
-  app.get(`/inventory/is-hostvar-available/:key`, rbac.user, inventory.isHostvarAvailable)
+  app.get(`/inventory/is-hostvar-available/:id`, rbac.user, inventory.isHostvarAvailable)
 
   /*
    * Checks whether a modfile is available
    */
-  app.get(`/inventory/is-modfile-available/:file`, rbac.user, inventory.isModfileAvailable)
+  app.get(`/inventory/is-modfile-available/:id`, rbac.user, inventory.isModfileAvailable)
 
   /*
    * Read a group
@@ -362,6 +452,22 @@ export function routes(app) {
    * Delete a groupvar
    */
   app.delete(`/inventory/groupvars/:id`, rbac.operator, inventory.deleteGroupvar)
+
+  /*
+   * Delete a groupvar with group_id
+   */
+  app.delete(`/inventory/groupvars/group/:group_id`, rbac.operator, inventory.deleteGroupvars)
+
+  /*
+   * Delete a group connection with group_id
+   */
+  app.delete(`/inventory/groups/group/:group_id`, rbac.operator, inventory.deleteGroups)
+
+  /*
+   * Delete a group connection with member_id
+   */
+  app.delete(`/inventory/groups/member/:member_id`, rbac.operator, inventory.deleteMembers)
+
   /*
    * Search the inventory
    */

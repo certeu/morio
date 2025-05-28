@@ -9,12 +9,23 @@ export default function InventoryHostvarPage({ id = false }) {
   const { api } = useApi()
   const [data, setData] = useState([])
   const [title, setTitle] = useState('Loading host variable data...')
+  const [refresh, setRefresh] = useState(0)
 
   const meta = {
-    title: title ? id : 'Loading host variable data',
+    title: title ? title : 'Loading host variable data',
     page: ['inventory', 'hostvars', id ? id : 'unknown'],
     Icon: VariableIcon,
   }
+
+  useEffect(() => {
+    if (refresh > 0) {
+      runHostvarApiCall(api, id).then((result) => {
+        setData(result)
+        setTitle(result.key)
+        setRefresh(0)
+      })
+    }
+  }, [refresh])
 
   useEffect(() => {
     if (id)
@@ -29,7 +40,7 @@ export default function InventoryHostvarPage({ id = false }) {
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
-          <HostvarDetail data={data} />
+          <HostvarDetail data={data} refresh={refresh} setRefresh={setRefresh} />
         </div>
       </ContentWrapper>
     </PageWrapper>
