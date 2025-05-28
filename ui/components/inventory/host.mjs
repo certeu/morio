@@ -1182,8 +1182,7 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
   return (
     <div>
       <h2>Update multiple hosts</h2>
-      <p>This will set the same info for all the selected hosts.</p>
-
+      {normalizedHosts.length > 1 && <p>This will set the same info for all the selected hosts.</p>}
       <StringInput label="Arch" update={setArch} current={arch} placeholder="linux_22.04" />
       <StringInput label="Cores" update={setCores} current={cores} placeholder="8" />
       <StringInput

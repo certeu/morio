@@ -64,7 +64,7 @@ export const MacsTable = () => {
         </button>
         <NewMacButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">

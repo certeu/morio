@@ -63,7 +63,7 @@ export const PkgsTable = () => {
         </button>
         <NewPkgButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -213,7 +213,7 @@ export const NewPkg = ({ refresh, setRefresh }) => {
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(name && isAvailable)}
+          disabled={!(name && version && isAvailable)}
           onClick={createPkg}
         >
           Create Pkg

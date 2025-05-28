@@ -430,28 +430,37 @@ export const BulkGroupUpdate = ({ groups, refresh, setRefresh }) => {
 
   return (
     <div className="">
-      <h2>Update multiple groups</h2>
-      <Tabs tabs="Add to group, Update description">
-        <Tab tabId="Add to group">
-          <p>Click any group name to instantly add these groups to an existing group.</p>
-          {allGroups.map((group) => (
-            <button
-              key={group}
-              className="badge badge-neutral hover:badge-primary"
-              onClick={() => addToGroup(group)}
-            >
-              {group}
+      <h2>{normalizedGroups.length == 1 ? 'Update group' : 'Update multiple groups'}</h2>
+      {normalizedGroups.length > 1 ? (
+        <Tabs tabs="Add to group, Update description">
+          <Tab tabId="Add to group">
+            <p>Click any group name to instantly add these groups to an existing group.</p>
+            {allGroups.map((group) => (
+              <button
+                key={group}
+                className="badge badge-neutral hover:badge-primary"
+                onClick={() => addToGroup(group)}
+              >
+                {group}
+              </button>
+            ))}
+          </Tab>
+          <Tab tabId="Update description">
+            <p>This will set the same description for all the selected groups.</p>
+            <TextInput current={description} update={setDescription} label="Description" />
+            <button className="btn btn-primary mt-4 mx-auto block" onClick={updateDescriptions}>
+              Update group descriptions
             </button>
-          ))}
-        </Tab>
-        <Tab tabId="Update description">
-          <p>This will set the same description for all the selected groups.</p>
+          </Tab>
+        </Tabs>
+      ) : (
+        <>
           <TextInput current={description} update={setDescription} label="Description" />
           <button className="btn btn-primary mt-4 mx-auto block" onClick={updateDescriptions}>
-            Update group descriptions
+            Update group description
           </button>
-        </Tab>
-      </Tabs>
+        </>
+      )}
     </div>
   )
 }

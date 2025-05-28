@@ -64,7 +64,7 @@ export const IpsTable = () => {
         </button>
         <NewIpButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -105,9 +105,7 @@ export const IpsTable = () => {
               <td className="">
                 <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
               </td>
-              <td className="">
-                <Markdown>{ip.version}</Markdown>
-              </td>
+              <td className="">{ip.version}</td>
             </tr>
           ))}
         </tbody>

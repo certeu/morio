@@ -81,7 +81,7 @@ export const HostvarsTable = () => {
         </button>
         <NewHostvarButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -368,7 +368,9 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
   return (
     <div className="">
       <h2>Update key, value, info, host</h2>
-      <p>This will set the same key, value, info, host for all the selected hostvars.</p>
+      {normalizedHostvars.length > 1 && (
+        <p>This will set the same key, value, info, host for all the selected hostvars.</p>
+      )}
       <SelectInput
         label="Inventory Host"
         labelDflt="Choose a host to assign this var to"

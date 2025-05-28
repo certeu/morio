@@ -80,7 +80,7 @@ export const ModfilesTable = () => {
         </button>
         <NewModfileButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -121,18 +121,12 @@ export const ModfilesTable = () => {
               <td className="">
                 <PageLink href={`/inventory/mods/${modfile.mod}`}>{modfile.mod}</PageLink>
               </td>
-              <td className="">
-                <Markdown>{modfile.folder}</Markdown>
-              </td>
+              <td className="">{modfile.folder}</td>
               <td className="">
                 <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.file}</PageLink>
               </td>
-              <td className="">
-                <Markdown>{modfile.content}</Markdown>
-              </td>
-              <td className="">
-                <Markdown>{modfile.source}</Markdown>
-              </td>
+              <td className="">{modfile.content}</td>
+              <td className="">{modfile.source}</td>
             </tr>
           ))}
         </tbody>
@@ -374,7 +368,9 @@ export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
   return (
     <div className="">
       <h2>Update modfile info</h2>
-      <p>This will set the same info for all the selected modfiles.</p>
+      {normalizedModfiles.length > 1 && (
+        <p>This will set the same info for all the selected modfiles.</p>
+      )}
       <SelectInput
         label="Inventory Module"
         labelDflt="Choose a module to assign this var to"

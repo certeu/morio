@@ -292,14 +292,14 @@ export const schema = {
   // Inventory - Mods
   'req.inventory.createMod': Joi.object({
     mod: Joi.string().required(),
-    data: Joi.string(),
+    data: Joi.string().allow(''),
   }),
   'req.inventory.readMod': Joi.object({
     mod: Joi.string().required(),
   }),
   'req.inventory.updateMod': Joi.object({
     mod: Joi.string().required(),
-    data: Joi.string(),
+    data: Joi.string().allow(''),
   }),
   // Inventory - Modvars
   'req.inventory.createModvar': Joi.object({
@@ -362,8 +362,8 @@ export const schema = {
     fqdn: Joi.string(),
     memory: Joi.number(),
     name: Joi.string(),
-    notes: Joi.string(),
-    tags: Joi.string(),
+    notes: Joi.string().allow(''),
+    tags: Joi.string().allow(''),
     last_update: Joi.string().isoDate(),
   }),
   'req.inventory.createGroup': Joi.object({
@@ -422,8 +422,8 @@ export const schema = {
     fqdn: Joi.string(),
     memory: Joi.number(),
     name: Joi.string(),
-    notes: Joi.string(),
-    tags: Joi.string(),
+    notes: Joi.string().allow(''),
+    tags: Joi.string().allow(''),
   }),
   'req.inventory.readHost': Joi.object({
     id: Joi.string().required(),

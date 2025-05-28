@@ -79,7 +79,7 @@ export const ModvarsTable = () => {
         </button>
         <NewModvarButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -352,7 +352,9 @@ export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
   return (
     <div className="">
       <h2>Update info</h2>
-      <p>This will set the same info for all the selected modvars.</p>
+      {normalizedModvars.length > 1 && (
+        <p>This will set the same info for all the selected modvars.</p>
+      )}
       <SelectInput
         label="Inventory Module"
         labelDflt="Choose a module to assign this var to"

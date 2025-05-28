@@ -199,7 +199,9 @@ export const BulkGroupvarUpdate = ({ groupvars, refresh, setRefresh }) => {
   return (
     <div className="">
       <h2>Update multiple groupvars</h2>
-      <p>This will set the same info for all the selected groupvars.</p>
+      {normalizedGroupvars.length > 1 && (
+        <p>This will set the same info for all the selected groupvars.</p>
+      )}
       <SelectInput
         label="Inventory Group"
         labelDflt="Choose a group to assign this var to"

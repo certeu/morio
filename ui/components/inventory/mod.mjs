@@ -78,7 +78,7 @@ export const ModsTable = () => {
         </button>
         <NewModButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -319,7 +319,9 @@ export const BulkModUpdate = ({ mods, refresh, setRefresh }) => {
   return (
     <div className="">
       <h2>Update data</h2>
-      <p>This will set the same data for all the selected modules.</p>
+      {normalizedMods.length > 1 && (
+        <p>This will set the same data for all the selected modules.</p>
+      )}
       <StringInput current={data} update={setData} label="Data" />
       <button className="btn btn-primary mt-4 mx-auto block" onClick={updateDatas}>
         Update module datas

@@ -64,7 +64,7 @@ export const OssTable = () => {
         </button>
         <NewOsButton {...{ refresh, setRefresh }} />
       </div>
-      <table>
+      <table className="table table-auto">
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -105,12 +105,8 @@ export const OssTable = () => {
               <td className="">
                 <PageLink href={`/inventory/oss/${os.id}`}>{os.id}</PageLink>
               </td>
-              <td className="">
-                <Markdown>{os.name}</Markdown>
-              </td>
-              <td className="">
-                <Markdown>{os.version}</Markdown>
-              </td>
+              <td className="">{os.name}</td>
+              <td className="">{os.version}</td>
             </tr>
           ))}
         </tbody>
@@ -216,7 +212,11 @@ export const NewOs = ({ refresh, setRefresh }) => {
         }
       />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
-        <button className="btn btn-primary grow" disabled={!(id && isAvailable)} onClick={createOs}>
+        <button
+          className="btn btn-primary grow"
+          disabled={!(name && version && isAvailable)}
+          onClick={createOs}
+        >
           Create Os
         </button>
         <button className="btn btn-primary btn-outline" onClick={clearModal}>
