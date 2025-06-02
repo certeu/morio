@@ -1,0 +1,83 @@
+<script type="text/javascript">
+  RED.nodes.registerType('morio-kvget', {
+    category: 'morio',
+    color: '#a6bbcf',
+    defaults: {
+      name: { value: "" },
+      fqdn: { value: "", required: true },
+      key: { value: "", required: true },
+      credentials: { value: "", type: 'morio-apikey', required: true }
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "white-globe.png",
+    label: function() {
+      return this.name || `KV Get: ${this.key}`;
+    },
+    labelStyle: function() {
+      return this.name ? "node_label_italic" : "";
+    }
+  });
+</script>
+
+<script type="text/html" data-template-name="morio-kvget">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-credentials"><i class="fa fa-key"></i> Credentials</label>
+    <input type="text" id="node-input-credentials">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-fqdn"><i class="fa fa-server"></i> FQDN</label>
+    <input type="text" id="node-input-fqdn" placeholder="api.example.com">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-key"><i class="fa fa-key"></i> Key</label>
+    <input type="text" id="node-input-key" placeholder="my-key">
+  </div>
+</script>
+
+<script type="text/html" data-help-name="morio-kvget">
+  <p>Retrieves a value from a key-value store via HTTPS GET request.</p>
+
+  <h3>Configuration</h3>
+  <dl class="message-properties">
+    <dt>Credentials <span class="property-type">kv-credentials</span></dt>
+    <dd>The API credentials configuration node to use for authentication</dd>
+
+    <dt>FQDN <span class="property-type">string</span></dt>
+    <dd>The fully qualified domain name of the API server</dd>
+
+    <dt>Key <span class="property-type">string</span></dt>
+    <dd>The key to retrieve from the store</dd>
+  </dl>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>key <span class="property-type">string</span></dt>
+    <dd>Optional. Override the configured key for this request</dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">object | string</span></dt>
+    <dd>The response body from the API (parsed as JSON if possible)</dd>
+
+    <dt>statusCode <span class="property-type">number</span></dt>
+    <dd>The HTTP status code of the response</dd>
+
+    <dt>headers <span class="property-type">object</span></dt>
+    <dd>The response headers</dd>
+  </dl>
+
+  <h3>Details</h3>
+  <p>Makes a GET request to <code>https://{fqdn}/kv/keys/{key}</code> using Basic authentication.</p>
+  <p>Supports self-signed certificates and includes proper error handling.</p>
+  <p>The key can be overridden per message by setting <code>msg.key</code>.</p>
+  <p>Uses a shared credentials configuration node for API key management across multiple flows.</p>
+</script>
