@@ -7,7 +7,7 @@ import { loadAllPresets } from '#config'
 import { validate as validateMethod } from '../schema.mjs'
 import { vaultGetSecret } from './vault.mjs'
 // Wanted helper from Tap
-import { isTapWanted } from './services/tap.mjs'
+import { isTapWanted } from './tap.mjs'
 
 /*
  * Export a log object for logging via the logger
