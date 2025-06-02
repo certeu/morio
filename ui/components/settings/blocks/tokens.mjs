@@ -269,6 +269,7 @@ export const Secrets = (props) => <Tokens {...props} secrets />
 
 export const Flags = ({ update, data }) => {
   const [flags, setFlags] = useState({})
+  const [searchInput, setSearchInput] = useState('')
   const { api } = useApi()
 
   useEffect(() => {
@@ -285,13 +286,26 @@ export const Flags = ({ update, data }) => {
     ...(data.tokens?.flags || {}),
   }
 
-  const enabledFlags = Object.keys(mergedFlags || {})
-    .filter((key) => data.tokens?.flags?.[key])
-    .sort()
+  const filterFlags = (flagKeys) => {
+    if (!searchInput.trim()) return flagKeys
+    return flagKeys.filter((key) => {
+      const title = key
+      const description = flags[key] || ''
+      return `${title} ${description}`.toLowerCase().includes(searchInput.toLowerCase())
+    })
+  }
 
-  const disabledFlags = Object.keys(mergedFlags || {})
-    .filter((key) => !data.tokens?.flags?.[key])
-    .sort()
+  const enabledFlags = filterFlags(
+    Object.keys(mergedFlags || {})
+      .filter((key) => data.tokens?.flags?.[key])
+      .sort()
+  )
+
+  const disabledFlags = filterFlags(
+    Object.keys(mergedFlags || {})
+      .filter((key) => !data.tokens?.flags?.[key])
+      .sort()
+  )
 
   const FlagItem = ({ flagKey, isEnabled }) => (
     <div
@@ -328,6 +342,16 @@ export const Flags = ({ update, data }) => {
 
   return (
     <div className="space-y-6">
+      <div className="mt-4">
+        <input
+          type="text"
+          placeholder="Search feature flags..."
+          className="input input-bordered w-full"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        />
+      </div>
+
       {enabledFlags.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -359,6 +383,15 @@ export const Flags = ({ update, data }) => {
       {Object.keys(mergedFlags || {}).length === 0 && (
         <div className="text-center py-8 text-base-content/50">No feature flags available</div>
       )}
+
+      {searchInput.trim() &&
+        enabledFlags.length === 0 &&
+        disabledFlags.length === 0 &&
+        Object.keys(mergedFlags || {}).length > 0 && (
+          <div className="text-center py-8 text-base-content/50">
+            No feature flags match your search
+          </div>
+        )}
     </div>
   )
 }
