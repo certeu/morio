@@ -15,7 +15,7 @@ module.exports = function (RED) {
      */
     const topic = RED.nodes.getNode(n.topic)
     if (!topic) return this.status({ fill: 'red', shape: 'ring', text: 'No topic provided' })
-    else this.topic = topic
+    else this.topic = topic.topic
 
     /*
      * Store settings and state
