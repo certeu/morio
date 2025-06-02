@@ -9,7 +9,7 @@ import {
   hashPassword,
   uuid,
 } from '#shared/crypto'
-import { reload } from '../index.mjs'
+import { reload } from '../reload.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'

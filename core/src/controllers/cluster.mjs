@@ -2,7 +2,7 @@ import { log, utils } from '../lib/utils.mjs'
 import { verifyHeartbeatRequest, pullClusterData } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeJsonFile } from '#shared/fs'
-import { reload } from '../index.mjs'
+import { reload } from '../reload.mjs'
 import { uuid } from '#shared/crypto'
 import { ensureCaConfig } from '../lib/services/ca.mjs'
 import {

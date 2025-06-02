@@ -11,12 +11,18 @@ module.exports = function (RED) {
     if (!broker) return this.status({ fill: 'red', shape: 'ring', text: 'Broker is missing.' })
 
     /*
+     * Don't bother without a topic
+     */
+    const topic = RED.nodes.getNode(n.topic)
+    if (!topic) return this.status({ fill: 'red', shape: 'ring', text: 'No topic provided' })
+    else this.topic = topic
+
+    /*
      * Store settings and state
      */
     this.broker = broker
     this.ready = false
     this.producer = null
-    this.topic = n.topic
 
     /*
      * Keep a handle on this for event handlers
@@ -104,7 +110,7 @@ module.exports = function (RED) {
           acks: 1,
           messages: [
             {
-              key: Date.now(),
+              key: `${Date.now()}`,
               value: utils.prepareKafkaData(msg.payload)
             },
           ],

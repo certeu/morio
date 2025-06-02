@@ -116,7 +116,7 @@ module.exports = function (RED) {
     return {
       eachMessage: async ({ topic, partition, message }) => {
         try {
-          self.send({ payload: { topic, partition, payload: utils.parseKafkaMessage(message) } })
+          self.send({ topic, partition, payload: utils.parseKafkaMessage(message) })
           self.status({ fill: 'green', shape: 'dot', text: 'Message received' })
         } catch (err) {
           self.onError('Morio consumer error during message processing', err)

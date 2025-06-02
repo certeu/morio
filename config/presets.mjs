@@ -377,6 +377,12 @@ predocs.MORIO_EDA_HTTP_PORT =
   'URL prefix for accessing the EDA service through the proxy service'
 presets.MORIO_EDA_HTTP_PORT = 1880
 
+predocs.MORIO_EDA_CORE_MODULES = 'A list of modules that Morio core should add to the base EdA setup'
+presets.MORIO_EDA_CORE_MODULES = [
+  'node-red-morio',
+  'node-red-storage-rqlite',
+]
+
 /*
  * Proxy presets
  */

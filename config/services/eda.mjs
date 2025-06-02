@@ -84,8 +84,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${DIRS.data}/eda:/data`,
         `${DIRS.data}/eda/entrypoint.sh:/usr/src/node-red/entrypoint.sh`,
       ],
-      // Run an init inside the container to forward signals and avoid PID 1
-      //init: true,
       // Environment
       environment: {
         MORIO_FQDN: process.env['MORIO_FQDN'],
@@ -283,10 +281,10 @@ function stop() {
         wait $CHILD_PID
 }
 
-# Custom entrypoint change for Morio
-npm install /data/node-red-storage-rqlite
+# Custom entrypoint changes for Morio
 cd /data
-npm install /data/node-red-morio
+npm install ./morio/node-red-storage-rqlite
+npm install ./morio/node-red-morio
 cd -
 
 /usr/local/bin/node $NODE_OPTIONS node_modules/node-red/red.js --userDir /data $FLOWS "\${@}" &
@@ -294,8 +292,6 @@ cd -
 CHILD_PID="$!"
 
 wait "\${CHILD_PID}"
-  }
-}
 `
   }
 }
