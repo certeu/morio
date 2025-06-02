@@ -13,7 +13,7 @@ import {
   loadClusterDataFromDisk,
 } from './services/core.mjs'
 import { validate } from '#lib/validation'
-import { reload } from '../index.mjs'
+import { reload } from '../reload.mjs'
 import { writeJsonFile } from '#shared/fs'
 
 /*
