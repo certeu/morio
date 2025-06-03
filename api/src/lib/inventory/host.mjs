@@ -8,6 +8,28 @@ import ipaddr from 'ipaddr.js'
 import { asScalarOrJson } from '#shared/utils'
 
 /**
+ * readMany fallback using read()
+ * @param {Store} store - The Store instance (passed by utils)
+ * @param {Array} queries - Array of single-item arrays like [[sql], [sql]]
+ * @returns {[number, { results: Array }]} - Mimics rqlite's /query structure
+ */
+export async function readMany(store, queries) {
+  const results = []
+
+  for (const [query] of queries) {
+    const [status, result] = await utils.db.read(query)
+    if (status !== 200 || !result || !result.results?.length) {
+      store.log.warn(`readMany fallback failed on query: ${query}`)
+      results.push({ values: [[0]] }) // fallback to zero if any fail
+    } else {
+      results.push(result.results[0])
+    }
+  }
+
+  return [200, { results }]
+}
+
+/**
  * Constructor for a Host instance
  *
  * @param {string} id - The Id to preset this for reading
@@ -377,8 +399,23 @@ Host.prototype.getAnsibleInventory = async function (withSecrets = false) {
  * @return {object} stats - The stats
  */
 Host.prototype.getStats = async function () {
-  // Count various inventory tables
-  const count = await utils.db.readMany([
+  // Local fallback readMany using utils.db.read
+  const readMany = async (queries) => {
+    const results = []
+
+    for (const [query] of queries) {
+      const [status, result] = await utils.db.read(query)
+      if (status !== 200 || !result?.results?.[0]) {
+        results.push({ values: [[0]] }) // fallback to zero if failed
+      } else {
+        results.push(result.results[0])
+      }
+    }
+
+    return [200, { results }]
+  }
+
+  const count = await readMany([
     [`SELECT COUNT(id) as hosts FROM inventory_hosts`],
     [`SELECT COUNT(ip) as ips FROM inventory_ips`],
     [`SELECT COUNT(mac) as macs FROM inventory_macs`],
@@ -391,21 +428,23 @@ Host.prototype.getStats = async function () {
     [`SELECT COUNT(id) as groups FROM inventory_groups`],
     [`SELECT COUNT(id) as modfiles FROM inventory_modfiles`],
   ])
+
   if (Array.isArray(count) && count[0] === 200) {
+    const values = count[1].results.map((r) => r.values?.[0]?.[0] ?? 0)
     return {
-      hosts: count[1].results[0].values[0][0],
-      ips: count[1].results[1].values[0][0],
-      macs: count[1].results[2].values[0][0],
-      oss: count[1].results[3].values[0][0],
-      pkgs: count[1].results[4].values[0][0],
-      mods: count[1].results[5].values[0][0],
-      modvars: count[1].results[6].values[0][0],
-      hostvars: count[1].results[7].values[0][0],
-      groupvars: count[1].results[8].values[0][0],
-      groups: count[1].results[9].values[0][0],
-      modfiles: count[1].results[10].values[0][0],
+      hosts: values[0],
+      ips: values[1],
+      macs: values[2],
+      oss: values[3],
+      pkgs: values[4],
+      mods: values[5],
+      modvars: values[6],
+      hostvars: values[7],
+      groupvars: values[8],
+      groups: values[9],
+      modfiles: values[10],
     }
-  } else
+  } else {
     return {
       hosts: 0,
       ips: 0,
@@ -419,6 +458,7 @@ Host.prototype.getStats = async function () {
       groups: 0,
       modfiles: 0,
     }
+  }
 }
 
 Host.prototype.delete = async function (id = false) {
