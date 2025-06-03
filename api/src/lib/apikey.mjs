@@ -108,6 +108,8 @@ export async function deleteApikey(id = false) {
  * @return {boolean} - True if successful, false otherwise
  */
 export async function createApikey(data, recreate = false) {
+  if (!recreate) data.id = data.key
+
   const columns = []
   const params = {}
 

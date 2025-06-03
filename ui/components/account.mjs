@@ -245,8 +245,7 @@ const ShowNewApiKey = ({ data }) => (
     <p>
       This API key holds the <Role role={data.role} /> role and expires{' '}
       <b>
-        <DateAndTime iso={data.expires_at} />
-        <TimeToGo iso={data.expires_at} />
+        <DateAndTime iso={data.expires_at} /> (<TimeToGo iso={data.expires_at} />)
       </b>{' '}
       from now.
     </p>
