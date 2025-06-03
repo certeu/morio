@@ -245,12 +245,11 @@ const ShowNewApiKey = ({ data }) => (
     <p>
       This API key holds the <Role role={data.role} /> role and expires{' '}
       <b>
-        <DateAndTime iso={data.expires_at} />
-        <TimeToGo iso={data.expires_at} />
+        <DateAndTime iso={data.expires_at} /> (<TimeToGo iso={data.expires_at} />)
       </b>{' '}
       from now.
     </p>
-    <Highlight title="Key">{data.key}</Highlight>
+    <Highlight title="Key">{data.id}</Highlight>
     <Highlight title="Secret">{data.secret}</Highlight>
     <p>
       Use the <b>key</b> as <b>username</b> and the <b>secret</b> as <b>password</b> to authenticate
