@@ -5,9 +5,8 @@
     color: '#00bba7',
     defaults: {
       name: { value: "" },
-      fqdn: { value: "", required: true },
       key: { value: "", required: true },
-      credentials: { value: "", type: 'morio-apikey', required: true }
+      apikey: { value: "", type: 'morio-apikey', required: true }
     },
     inputs: 0,
     outputs: 1,
@@ -26,13 +25,8 @@
   </div>
 
   <div class="form-row">
-    <label for="node-input-credentials"><i class="fa fa-key"></i> Credentials</label>
-    <input type="text" id="node-input-credentials">
-  </div>
-
-  <div class="form-row">
-    <label for="node-input-fqdn"><i class="fa fa-server"></i> FQDN</label>
-    <input type="text" id="node-input-fqdn" placeholder="api.example.com">
+    <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+    <input type="text" id="node-input-apikey">
   </div>
 
   <div class="form-row">
@@ -46,11 +40,8 @@
 
   <h3>Configuration</h3>
   <dl class="message-properties">
-    <dt>Credentials <span class="property-type">kv-credentials</span></dt>
-    <dd>The API credentials configuration node to use for authentication</dd>
-
-    <dt>FQDN <span class="property-type">string</span></dt>
-    <dd>The fully qualified domain name of the API server</dd>
+    <dt>API Key <span class="property-type">morio-apikey</span></dt>
+    <dd>The API Key configuration node to use for authentication</dd>
 
     <dt>Key <span class="property-type">string</span></dt>
     <dd>The key to retrieve from the store</dd>
@@ -59,7 +50,7 @@
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>key <span class="property-type">string</span></dt>
-    <dd>Optional. Override the configured key for this request</dd>
+    <dd>The key to read. You can override this by setting <code>msg.kvkey</code></dd>
   </dl>
 
   <h3>Outputs</h3>
@@ -75,8 +66,8 @@
   </dl>
 
   <h3>Details</h3>
-  <p>Makes a GET request to <code>https://{fqdn}/kv/keys/{key}</code> using Basic authentication.</p>
+  <p>Makes an API request to <code>/kv/keys/{key}</code> using Basic authentication.</p>
   <p>Supports self-signed certificates and includes proper error handling.</p>
-  <p>The key can be overridden per message by setting <code>msg.key</code>.</p>
-  <p>Uses a shared credentials configuration node for API key management across multiple flows.</p>
+  <p>The key can be overwritten by setting msg.kvkey</p>
+  <p>Uses a shared API Key configuration node for API key management across multiple flows.</p>
 </script>

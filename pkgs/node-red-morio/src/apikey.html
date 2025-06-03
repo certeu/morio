@@ -4,10 +4,8 @@
     defaults: {
       name: { value: "", required: true }
     },
-    credentials: {
-      apikey: { type: 'text', required: true },
-      apisecret: { type: 'password', required: true }
-    },
+    apikey: { type: 'text', required: true },
+    apisecret: { type: 'password', required: true }
     label: function() {
       return this.name || "Morio API Key"
     }

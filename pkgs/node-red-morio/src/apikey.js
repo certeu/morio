@@ -10,9 +10,7 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('morio-apikey', MorioApikeyNode, {
-    credentials: {
-      apikey: { type: 'text' },
-      apisecret: { type: 'password' }
-    }
+    apikey: { type: 'text' },
+    apisecret: { type: 'password' }
   })
 }

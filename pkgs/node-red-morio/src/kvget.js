@@ -10,7 +10,8 @@ module.exports = function (RED) {
      */
     this.key = n.key
     this.fqdn = n.fqdn
-    this.credentials = RED.nodes.getNode(n.credentials)
+    this.apikey = RED.nodes.getNode(n.apikey)
+    console.log({APIKEY: this.apikey})
 
     /*
      * Validate required fields
@@ -21,11 +22,11 @@ module.exports = function (RED) {
     if (!this.fqdn) {
       return this.status({ fill: 'red', shape: 'ring', text: 'FQDN is required' })
     }
-    if (!this.credentials) {
-      return this.status({ fill: 'red', shape: 'ring', text: 'API credentials missing' })
+    if (!this.apikey) {
+      return this.status({ fill: 'red', shape: 'ring', text: 'API Key missing' })
     }
-    if (!this.credentials.apikey || !this.credentials.apisecret) {
-      return this.status({ fill: 'red', shape: 'ring', text: 'Invalid API credentials' })
+    if (!this.apikey.apikey || !this.apikey.apisecret) {
+      return this.status({ fill: 'red', shape: 'ring', text: 'Invalid API Key' })
     }
 
     /*
@@ -55,8 +56,8 @@ module.exports = function (RED) {
     try {
       send = send || (() => this.send.apply(this, arguments))
 
-      // Allow key to be overridden by msg.key
-      const key = msg.key || this.key
+      // Allow key to be overridden by msg.kvkey
+      const key = msg.kvkey || this.key
       if (!key) {
         const error = new Error('No key provided in config or message')
         if (done) done(error)
@@ -68,7 +69,7 @@ module.exports = function (RED) {
       const url = new URL(`https://poc-morio-node1.cert.europa.eu/kv/keys/${key}`)
 
       // Prepare Basic Auth using credentials from config node
-      const auth = Buffer.from(`${this.credentials.apikey}:${this.credentials.apisecret}`).toString('base64')
+      const auth = Buffer.from(`${this.apikey.apikey}:${this.apikey.apisecret}`).toString('base64')
 
       // Request options
       const options = {
