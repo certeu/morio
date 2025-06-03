@@ -1,23 +1,22 @@
 <script type="text/javascript">
   RED.nodes.registerType('morio-kvget', {
+    align: 'left',
     category: 'morio',
-    color: '#a6bbcf',
+    color: '#00bba7',
     defaults: {
       name: { value: "" },
       fqdn: { value: "", required: true },
       key: { value: "", required: true },
       credentials: { value: "", type: 'morio-apikey', required: true }
     },
-    inputs: 1,
+    inputs: 0,
     outputs: 1,
-    icon: "white-globe.png",
+    icon: 'morio.svg',
     label: function() {
-      return this.name || `KV Get: ${this.key}`;
+      return this.name || `Morio KV Get: ${this.key}`;
     },
-    labelStyle: function() {
-      return this.name ? "node_label_italic" : "";
-    }
-  });
+    paletteLabel: 'KV Get',
+  })
 </script>
 
 <script type="text/html" data-template-name="morio-kvget">

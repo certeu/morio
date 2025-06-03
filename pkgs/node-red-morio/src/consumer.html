@@ -43,30 +43,42 @@
 
 <script type="text/html" data-help-name="morio-consumer">
   <p>A Kafka/RedPanda consumer to read data from a Morio topic.</p>
-  <details>
-    <summary><big><b>Details</b></big></summary>
-    <p><b>name</b></p>
-    <p>
+
+  <h3>Configuration</h3>
+
+  <dl class="message-properties">
+    <dt>Name <span class="property-type">string</span></dt>
+    <dd>
+      A descriptive name for this consumer.
       This is pure metadata used in the display of your flow.
       It has no impact on the functioning of this node.
-    </p>
-    <p><b>broker</b></p>
-    <p>This is an instance of a Morio broker client.</p>
-    <p>You typically can re-use the same broker client instance.</p>
+    </dd>
 
-    <p><b>groupId</b></p>
-    <p>
+    <dt>Broker <span class="property-type">string</span></dt>
+    <dd>
+      This is an instance of a Morio broker client.
+      You typically can re-use the same broker client instance.
+    </dd>
+
+    <dt>Group ID <span class="property-type">string</span></dt>
+    <dd>
       The <code>groupId</code> ties different consumers together in a
       high-level consumer group. This is the standard way to provide
       horizontal scaling to Kafka clients, so if you give multiple flows
       the same <code>groupId</code> they will work together to process
       messages flowing through Kafka/RedPanda.
-    </p>
-    <p>
-      As such, if you want to different flows to process the same
-      messages, you <b>must</b> give them a different <code>groupId</code>.
-    </p>
-    <p><b>topic</b></p>
-    <p>This is the broker topic to read from.</p>
-  </details>
+    </dd>
+
+    <dt>Topic <span class="property-type">string</span></dt>
+    <dd>
+      This is an instance of a Morio topic configuration node.
+      It holds the broker topic to read from.
+    </dd>
+  </dl>
+
+  <h3>Details</h3>
+  <p>
+    If you want to different flows to process the same
+    messages, you <b>must</b> give them a different <code>groupId</code>.
+  </p>
 </script>
