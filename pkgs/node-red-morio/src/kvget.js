@@ -9,9 +9,7 @@ module.exports = function (RED) {
      * Store configuration
      */
     this.key = n.key
-    this.fqdn = n.fqdn
-    this.apikey = RED.nodes.getNode(n.apikey)
-    console.log({APIKEY: this.apikey})
+    this.apikeyNode = RED.nodes.getNode(n.apikey)
 
     /*
      * Validate required fields
@@ -19,13 +17,10 @@ module.exports = function (RED) {
     if (!this.key) {
       return this.status({ fill: 'red', shape: 'ring', text: 'Key is required' })
     }
-    if (!this.fqdn) {
-      return this.status({ fill: 'red', shape: 'ring', text: 'FQDN is required' })
-    }
-    if (!this.apikey) {
+    if (!this.apikeyNode) {
       return this.status({ fill: 'red', shape: 'ring', text: 'API Key missing' })
     }
-    if (!this.apikey.apikey || !this.apikey.apisecret) {
+    if (!this.apikeyNode.credentials.apikey || !this.apikeyNode.credentials.apisecret) {
       return this.status({ fill: 'red', shape: 'ring', text: 'Invalid API Key' })
     }
 
@@ -66,10 +61,10 @@ module.exports = function (RED) {
       }
 
       // Build the URL
-      const url = new URL(`https://poc-morio-node1.cert.europa.eu/kv/keys/${key}`)
+      const url = new URL(`https://poc-morio-node1.cert.europa.eu/-/api/kv/keys/${key}`)
 
       // Prepare Basic Auth using credentials from config node
-      const auth = Buffer.from(`${this.apikey.apikey}:${this.apikey.apisecret}`).toString('base64')
+      const auth = Buffer.from(`${this.apikeyNode.credentials.apikey}:${this.apikeyNode.credentials.apisecret}`).toString('base64')
 
       // Request options
       const options = {

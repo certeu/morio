@@ -4,8 +4,10 @@
     defaults: {
       name: { value: "", required: true }
     },
-    apikey: { type: 'text', required: true },
-    apisecret: { type: 'password', required: true }
+    credentials: {
+      apikey: { type: "text", required: true },
+      apisecret: { type: "password", required: true }
+    },
     label: function() {
       return this.name || "Morio API Key"
     }
@@ -19,12 +21,12 @@
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-apikey"><i class="fa fa-user"></i> API Key</label>
+    <label for="node-config-input-apikey"><i class="fa fa-user"></i> API Key ID</label>
     <input type="text" id="node-config-input-apikey" placeholder="your-api-key-uuid">
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-apisecret"><i class="fa fa-lock"></i> API Secret</label>
+    <label for="node-config-input-apisecret"><i class="fa fa-lock"></i> API Key Secret</label>
     <input type="password" id="node-config-input-apisecret" placeholder="your-api-key-secret">
   </div>
 </script>
@@ -35,7 +37,7 @@
   <h3>Configuration</h3>
   <dl class="message-properties">
     <dt>Name <span class="property-type">string</span></dt>
-    <dd>A descriptive name for this set of credentials</dd>
+    <dd>A descriptive name for this Morio API Key</dd>
 
     <dt>API Key <span class="property-type">string</span></dt>
     <dd>The API key for authentication</dd>
