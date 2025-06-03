@@ -249,7 +249,7 @@ const ShowNewApiKey = ({ data }) => (
       </b>{' '}
       from now.
     </p>
-    <Highlight title="Key">{data.key}</Highlight>
+    <Highlight title="Key">{data.id}</Highlight>
     <Highlight title="Secret">{data.secret}</Highlight>
     <p>
       Use the <b>key</b> as <b>username</b> and the <b>secret</b> as <b>password</b> to authenticate
