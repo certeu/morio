@@ -12,11 +12,15 @@ export const DateAndTime = ({ iso }) => {
 
 export const TimeForHumans = ({ iso, future = false }) => {
   const suffix = future ? 'from now' : 'ago'
-  const dates = [DateTime.fromISO(iso), DateTime.now()]
-  if (future) dates.reverse()
+
+  const inputDate = DateTime.fromISO(iso)
+  const now = DateTime.now().setZone('local')
+
+  const dates = future ? [now, inputDate] : [inputDate, now]
   const i = Interval.fromDateTimes(...dates)
     .toDuration(['minutes', 'hours', 'days', 'months', 'years'])
     .toObject()
+
   const years = Math.floor(i.years)
   const months = Math.floor(i.months)
   const days = Math.floor(i.days)

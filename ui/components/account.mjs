@@ -194,6 +194,7 @@ export const AddApiKey = () => {
   const createApiKey = async () => {
     setLoadingStatus([true, 'Creating API Key'])
     const result = await api.createApikey({ role, expires: days, name })
+
     if (result[1] === 200) {
       setLoadingStatus([true, 'API Key Created', true, true])
       pushModal(
@@ -245,7 +246,7 @@ const ShowNewApiKey = ({ data }) => (
       This API key holds the <Role role={data.role} /> role and expires{' '}
       <b>
         <DateAndTime iso={data.expires_at} />
-        <TimeToGo time={data.expires_at / 1000} />
+        <TimeToGo iso={data.expires_at} />
       </b>{' '}
       from now.
     </p>
@@ -325,7 +326,7 @@ export const Apikey = ({ data }) => (
     <span>
       <b>
         <DateAndTime iso={data.expires_at} />
-        <TimeToGo time={data.expires_at / 1000} />
+        <TimeToGo iso={data.expires_at} />
       </b>{' '}
       from now
     </span>
