@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [cache] Enable ACL and authentication for cross-cluster access
 - [core] Add selective deployment of flanking services
 - [eda] Added the new EdA service for event-driven automation
+- [eda] Implemented custom storage plugin to use Morio's db service
+- [eda] Added custom nodes to consume/produce Morio topics
+- [eda] Added custom nodes to get/set Morio KV data
 - [proxy] Endpoint for cross-cluster cache access
 - [proxy] Endpoint for cross-cluster database access
 - [ui] Add UI to manage flanking nodes and services
