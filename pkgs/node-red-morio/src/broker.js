@@ -14,7 +14,7 @@ module.exports = function (RED) {
       node.server = new Kafka(node.options)
     }
     catch (error) {
-      console.error('BROKER CONSTRUCTOR: Error:', error)
+      console.error('Morio Broker Contrusture Error:', error)
       throw error
     }
   }

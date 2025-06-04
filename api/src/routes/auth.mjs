@@ -41,10 +41,10 @@ export function routes(app) {
   app.get(`/token/ccdbauth`, Auth.getCcdbToken)
 
   /*
-   * Request a token for vault
+   * Request a custom token (used by EdA)
    * (not accessible from outside the docker network)
    */
-  app.post(`/token/vault`, Auth.getVaultToken)
+  app.post(`/token/custom`, Auth.getCustomToken)
 
   /*
    * Whoami/ping check

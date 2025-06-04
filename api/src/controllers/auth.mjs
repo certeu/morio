@@ -475,9 +475,42 @@ Controller.prototype.getCcdbToken = async function (req, res) {
 
   return res.send({ jwt })
 }
-// FIXME
-Controller.prototype.getVaultToken = async function (req, res) {
-  return res.send({ fixme: 'todo' })
+
+/**
+ * Create a custom JWT (for EdA)
+ *
+ * This generates a JWT on-demand.
+ * This is useful for authenticating to systems that trust Morio.
+ * This was added so you can re-use the Morio integration with
+ * Hashicorp Vault (or OpenBao) from within the EdA service, but the
+ * same principle can be used to authenticate to other services.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getCustomToken = async function (req, res) {
+  const jwt = await generateJwt({
+    data: {
+      user: 'eda',
+      role: 'eda',
+      node: utils.getNodeUuid(),
+      cluster: utils.getClusterUuid(),
+      eda: req.body,
+    },
+    key: utils.getKeys().private,
+    passphrase: utils.getKeys().unseal,
+    options: {
+      /*
+       * If this token expires, EdA will break.
+       * It is renewed at each init() command, so in priciple this
+       * should not be a problem. But let's make it longer than the
+       * default 4h anyway
+       */
+      expiresIn: '24h',
+    },
+  })
+
+  return res.send({ jwt })
 }
 
 /**

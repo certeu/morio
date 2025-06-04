@@ -18,13 +18,15 @@ function loadSettings () {
   const file = process.env['MORIO_EDA_PLUGIN_SETTINGS'] || `/etc/morio/eda/morio-settings.js`
   const settings = require(file)
 
-  return settings?.db || {}
+  return {
+    ...settings.db,
+    api: settings.api
+  }
 }
 
 class RqliteStorage {
   constructor() {
     const settings = loadSettings()
-    console.log({ settings })
     this.settings = settings || {}
     this.tablePrefix = this.settings.tablePrefix || 'nodered_'
     this.connection = this.settings.connection
