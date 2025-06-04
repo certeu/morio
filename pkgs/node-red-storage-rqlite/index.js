@@ -83,9 +83,9 @@ class RqliteStorage {
     try {
       await this._execute(createTableQueries)
       this.initialized = true
-      console.log(`[rqlite-storage] Initialized with table prefix: ${this.tablePrefix}`)
+      console.log(`[morio-storage] Initialized with table prefix: ${this.tablePrefix}`)
     } catch (error) {
-      console.error('[rqlite-storage] Failed to initialize:', error)
+      console.error('[morio-storage] Failed to initialize:', error)
       throw error
     }
   }
@@ -95,7 +95,23 @@ class RqliteStorage {
    */
   async _execute(queries) {
     const url = new URL('/db/execute', this.baseUrl)
-    const data = JSON.stringify(queries)
+
+    // Handle both single queries and arrays of queries
+    let queryData
+    if (Array.isArray(queries)) {
+      if (Array.isArray(queries[0])) {
+        // Array of [query, param1, param2, ...] arrays
+        queryData = queries
+      } else {
+        // Single query with parameters: [query, param1, param2, ...]
+        queryData = [queries]
+      }
+    } else {
+      // Single query string
+      queryData = [queries]
+    }
+
+    const data = JSON.stringify(queryData)
 
     return new Promise((resolve, reject) => {
       const options = {
@@ -139,7 +155,10 @@ class RqliteStorage {
    */
   async _query(sql, params = []) {
     const url = new URL('/db/query', this.baseUrl)
-    const data = JSON.stringify([sql, ...params])
+
+    // Format as rqlite expects: [sql, param1, param2, ...]
+    const queryData = params.length > 0 ? [sql, ...params] : [sql]
+    const data = JSON.stringify([queryData])  // Wrap in array for rqlite
 
     return new Promise((resolve, reject) => {
       const options = {
@@ -437,7 +456,8 @@ class RqliteStorage {
  * Create and return the storage interface
  */
 function createRqliteStorage(settings) {
-  const storage = new RqliteStorage(settings.rqlite)
+  const rqliteConfig = settings.rqlite || settings
+  const storage = new RqliteStorage(rqliteConfig)
 
   return {
     init: () => storage.init(),
