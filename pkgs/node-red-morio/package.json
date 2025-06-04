@@ -12,7 +12,8 @@
       "morio-topic": "src/topic.js",
       "morio-consumer": "src/consumer.js",
       "morio-producer": "src/producer.js",
-      "morio-kvget": "src/kvget.js"
+      "morio-kvget": "src/kvget.js",
+      "morio-kvset": "src/kvset.js"
     }
   },
   "dependencies": {

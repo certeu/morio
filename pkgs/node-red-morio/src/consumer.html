@@ -2,7 +2,7 @@
   RED.nodes.registerType('morio-consumer', {
     align: 'left',
     category: 'morio',
-    color: '#00bba7',
+    color: '#95d3e2',
     defaults: {
       name: { value: 'Read Morio topic', required: false },
       broker: { value: '', required: true, type: 'morio-broker-client' },
@@ -14,28 +14,28 @@
     outputs: 1,
     outputLabels: 'New message',
     label: function () {
-      return this.name || 'Read topic'
+      return this.name || 'Topic Read'
     },
-    paletteLabel: 'Read topic',
+    paletteLabel: 'Topic Read',
   })
 </script>
 
 <script type="text/html" data-template-name="morio-consumer">
   <div>
     <div class="form-row">
-      <label for="node-input-name"><i class="fa fa-tag"></i>Name</label>
+      <label for="node-input-name"><i class="fa fa-vcard-o"></i> Name</label>
       <input type="text" id="node-input-name" placeholder="Name" />
     </div>
     <div class="form-row">
-      <label for="node-input-broker"><i class="fa fa-plug"></i>Broker</label>
+      <label for="node-input-broker"><i class="fa fa-database"></i> Broker</label>
       <input type="text" id="node-input-broker" />
     </div>
     <div class="form-row">
-      <label for="node-input-groupid"><i class="fa fa-tag"></i>Group ID</label>
+      <label for="node-input-groupid"><i class="fa fa-id-badge"></i> Group ID</label>
       <input type="text" id="node-input-groupid" placeholder="Group ID" />
     </div>
     <div class="form-row">
-      <label for="node-input-topic"><i class="fa fa-link"></i>Topic</label>
+      <label for="node-input-topic"><i class="fa fa-table"></i> Topic</label>
       <input type="text" id="node-input-topic" placeholder="Topic" />
     </div>
   </div>

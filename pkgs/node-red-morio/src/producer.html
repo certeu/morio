@@ -1,8 +1,8 @@
 <script type="text/javascript">
   RED.nodes.registerType('morio-producer', {
-    allign: 'right',
+    align: 'right',
     category: 'morio',
-    color: '#fe9a00',
+    color: '#ffc592',
     defaults: {
       name: { value: 'Write Morio topic', required: false },
       broker: { value: '', required: true, type: 'morio-broker-client' },
@@ -14,24 +14,24 @@
     outputs: 2,
     outputLabels: ['Done', 'Error'],
     label: function () {
-      return this.name || 'Write topic'
+      return this.name || 'Topic Write'
     },
-    paletteLabel: 'Write topic',
+    paletteLabel: 'Topic Write',
   })
 </script>
 
 <script type="text/html" data-template-name="morio-producer">
   <div>
     <div class="form-row">
-      <label for="node-input-name"><i class="fa fa-tag"></i>Name</label>
+      <label for="node-input-name"><i class="fa fa-vcard-o"></i> Name</label>
       <input type="text" id="node-input-name" placeholder="Name" />
     </div>
     <div class="form-row">
-      <label for="node-input-broker"><i class="fa fa-plug"></i>Broker</label>
+      <label for="node-input-broker"><i class="fa fa-database"></i> Broker</label>
       <input type="text" id="node-input-broker" />
     </div>
     <div class="form-row">
-      <label for="node-input-topic"><i class="fa fa-link"></i>Topic</label>
+      <label for="node-input-topic"><i class="fa fa-table"></i> Topic</label>
       <input type="text" id="node-input-topic" placeholder="Topic" />
     </div>
   </div>

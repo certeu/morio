@@ -2,7 +2,7 @@
   RED.nodes.registerType('morio-apikey', {
     category: 'config',
     defaults: {
-      name: { value: "", required: true }
+      name: { value: "" }
     },
     credentials: {
       apikey: { type: "text", required: true },
@@ -16,7 +16,7 @@
 
 <script type="text/html" data-template-name="morio-apikey">
   <div class="form-row">
-    <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+    <label for="node-config-input-name"><i class="fa fa-vcard-o"></i> Name</label>
     <input type="text" id="node-config-input-name" placeholder="My Morio API Key">
   </div>
 
