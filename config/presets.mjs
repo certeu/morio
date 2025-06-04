@@ -369,19 +369,23 @@ presets.MORIO_DB_PROXY_PORT = 6662
 /*
  * EDA presets
  */
-predocs.MORIO_EDA_PREFIX =
-  'URL prefix for accessing the EDA service through the proxy service'
-presets.MORIO_EDA_PREFIX = 'eda'
-
-predocs.MORIO_EDA_HTTP_PORT =
-  'URL prefix for accessing the EDA service through the proxy service'
-presets.MORIO_EDA_HTTP_PORT = 1880
-
 predocs.MORIO_EDA_CORE_MODULES = 'A list of modules that Morio core should add to the base EdA setup'
 presets.MORIO_EDA_CORE_MODULES = [
   'node-red-morio',
   'node-red-storage-rqlite',
 ]
+
+predocs.MORIO_EDA_HTTP_PORT =
+  'URL prefix for accessing the EDA service through the proxy service'
+presets.MORIO_EDA_HTTP_PORT = 1880
+
+predocs.MORIO_EDA_PREFIX =
+  'URL prefix for accessing the EDA service through the proxy service'
+presets.MORIO_EDA_PREFIX = 'eda'
+
+predocs.MORIO_EDA_TABLE_PREFIX =
+  'Prefix for tables added to the database for the EdA service'
+presets.MORIO_EDA_TABLE_PREFIX = 'nodered_'
 
 /*
  * Proxy presets

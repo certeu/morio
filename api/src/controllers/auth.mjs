@@ -440,6 +440,47 @@ Controller.prototype.authenticateCcdb = async function (req, res) {
 }
 
 /**
+ * Create JWT for CCDB connection
+ *
+ * This generates a JWT for cross-cluster database
+ * connections. These go through a dedicated entrypoint in
+ * Traefik because they are not accessible to regular users.
+ * These requests come with a JWT that we generate here.
+ *
+ * This endpoint is only accessible over the internal Docker network.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getCcdbToken = async function (req, res) {
+  const jwt = await generateJwt({
+    data: {
+      user: 'ccdb',
+      role: 'ccdb',
+      node: utils.getNodeUuid(),
+      cluster: utils.getClusterUuid(),
+    },
+    key: utils.getKeys().private,
+    passphrase: utils.getKeys().unseal,
+    options: {
+      /*
+       * If this token expires, EdA will break.
+       * It is renewed at each init() command, so in priciple this
+       * should not be a problem. But let's make it longer than the
+       * default 4h anyway
+       */
+      expiresIn: '24h',
+    },
+  })
+
+  return res.send({ jwt })
+}
+// FIXME
+Controller.prototype.getVaultToken = async function (req, res) {
+  return res.send({ fixme: 'todo' })
+}
+
+/**
  * Helper method to verify the token
  *
  * @param {object} token - The token to verify

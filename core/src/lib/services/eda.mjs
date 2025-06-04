@@ -91,10 +91,7 @@ async function ensureLocalPrerequisites() {
           },
           null,
           2
-        ).replace(
-          `"${token}"`,
-          `require("/data/morio/node-red-storage-rqlite/index.js")({ rqliteUrl: 'http://morio-db:4001' }),`
-        ),
+        ).replace(`"${token}"`, `require("/data/morio/node-red-storage-rqlite/index.js")(),`),
     ].join('\n')
     // Node-RED looks for `/data/settings.js`
     await writeFile('/morio/data/eda/settings.js', edaSettings, log, 0o640)
@@ -104,10 +101,19 @@ async function ensureLocalPrerequisites() {
     // Ensure service certificate exists
     await ensureServiceCertificate('eda', true)
 
-    // Construct Morio plugin settings
+    /*
+     * Construct Morio plugin settings
+     *
+     * If this is is a broker node, the database service is available locally.
+     * But if not, we need a cross-cluser connection, also fetch a JWT for access.
+     * Our custom storage plugin handles all of this. The only thing we need to do
+     * is tell it what kind of a node we are on, it's FQDN and the cluster FQDN.
+     */
     const settings = {
       broker: {
-        brokers: utils.getBrokerFqdns().map((broker) => `${broker}:9092`),
+        brokers: utils
+          .getBrokerFqdns()
+          .map((broker) => `${broker}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
         clientId: 'morio-eda',
         logLevel: 'info',
         ssl: {
@@ -118,6 +124,13 @@ async function ensureLocalPrerequisites() {
         },
       },
       consumer: {},
+      db: {
+        api: `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}`,
+        local: `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+        ccdb: `https://${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
+        connection: utils.isBrokerNode() ? 'local' : 'ccdb',
+        tablePrefix: utils.getPreset('MORIO_EDA_TABLE_PREFIX'),
+      },
       producer: {},
     }
 
