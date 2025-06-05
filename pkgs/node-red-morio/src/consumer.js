@@ -76,27 +76,38 @@ module.exports = function (RED) {
   }
 
   /*
-   * These prototype methods are shared across all Morio consumer instances
+   * Connection handler
    */
-  // Connection handler
   MorioConsumerNode.prototype.onConnect = function () {
     this.status({ fill: 'green', shape: 'ring', text: 'Connected' })
   }
-  // Disconnection handler
+
+  /*
+   * Disconnection handler
+   */
   MorioConsumerNode.prototype.onDisconnect = function () {
     this.status({ fill: 'red', shape: 'ring', text: 'Disconnected' })
   }
-  // Request timeout handler
+
+  /*
+   * Request timeout handler
+   */
   MorioConsumerNode.prototype.onRequestTimeout = function () {
     this.error('Kafka Consumer Timeout')
     this.status({ fill: 'red', shape: 'ring', text: 'Request timed out' })
   }
-  // Error handler
+
+  /*
+   * Error handler
+   */
   MorioConsumerNode.prototype.onError = function (message, ex) {
     this.error(message || 'Kafka Consumer Error', ex)
     this.status({ fill: 'red', shape: 'ring', text: 'Consumer error' })
   }
-  // Initializer
+
+  /*
+   * Initializer
+   */
   MorioConsumerNode.prototype.init = async function () {
     this.consumer = this.broker.server.consumer(this.settings.consumer)
     this.status({ fill: 'yellow', shape: 'ring', text: 'Starting consumer...' })
@@ -114,7 +125,10 @@ module.exports = function (RED) {
     await this.consumer.subscribe({ topic: this.settings.topic })
     await this.consumer.run(this.createRunHandler())
   }
-  // Factory method for the incoming message handler
+
+  /*
+   * Factory method for the incoming message handler
+   */
   MorioConsumerNode.prototype.createRunHandler = function () {
     const self = this
     return {
@@ -129,6 +143,7 @@ module.exports = function (RED) {
       },
     }
   }
+
   /*
    * Last but not least, register the node type
    */
