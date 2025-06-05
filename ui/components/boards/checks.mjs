@@ -260,7 +260,6 @@ const HealthCheckRow = ({ check, data }) => {
   }
 
   const statusColor = getStatusColor(uptimePercentage)
-  const isUp = latestCheck.up
 
   // Take last 30 checks for the timeline (or all if less than 30)
   const timelineChecks = sortedChecks.slice(0, 30).reverse() // Reverse to show oldest to newest
