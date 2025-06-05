@@ -45,6 +45,12 @@ export const ChecksTable = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
 
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const timer = window.setTimeout(() => setRefresh(refresh + 1), 30000)
+    return () => clearTimeout(timer)
+  }, [refresh])
+
   // Tell people we are still loading
   if (cache === false)
     return (
@@ -72,7 +78,7 @@ export const ChecksTable = () => {
       {/* Search field */}
       <div className="mb-4">
         <div className="relative">
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" />
           <input
             type="text"
             placeholder="Search health checks by name or ID..."
@@ -171,7 +177,7 @@ const HealthChecksList = ({ checks, searchTerm, showFailingFirst }) => {
             return !latest.up
           }) && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-red-600 mb-3">Failing Health Checks</h3>
+              <h3 className="text-lg font-semibold text-error mb-3">Failing Health Checks</h3>
               {sortedChecks
                 .filter((check) => {
                   const data = healthCheckData[check.key]
@@ -190,7 +196,7 @@ const HealthChecksList = ({ checks, searchTerm, showFailingFirst }) => {
       {/* All health checks or remaining checks */}
       <div>
         {showFailingFirst && (
-          <h3 className="text-lg font-semibold text-green-600 mb-3">Operational Health Checks</h3>
+          <h3 className="text-lg font-semibold text-success mb-3">Succeeding Health Checks</h3>
         )}
         {sortedChecks
           .filter((check) => {
@@ -214,23 +220,23 @@ const HealthChecksList = ({ checks, searchTerm, showFailingFirst }) => {
 const HealthCheckRow = ({ check, data }) => {
   if (!data || !Array.isArray(data) || data.length === 0) {
     return (
-      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-2">
+      <div className="flex items-center justify-between p-4 bg-base-200 rounded-lg mb-2">
         <div className="flex items-center space-x-4">
-          <div className="bg-gray-400 text-white px-3 py-1 rounded-full text-sm font-medium">
+          <div className="bg-base-300 text-base-content px-3 py-1 rounded-full text-sm font-medium">
             ---%
           </div>
           <div>
-            <div className="font-medium">{check.id}</div>
-            <div className="text-sm text-gray-500">Loading...</div>
+            <div className="font-medium text-base-content">{check.id}</div>
+            <div className="text-sm text-base-content/70">Loading...</div>
           </div>
         </div>
         <div className="flex flex-col items-end">
           <div className="flex space-x-1 mb-1">
             {Array.from({ length: 30 }, (_, i) => (
-              <div key={i} className="w-1 h-8 bg-gray-300 rounded-sm"></div>
+              <div key={i} className="w-1 h-8 bg-base-300 rounded-sm"></div>
             ))}
           </div>
-          <div className="flex justify-between w-full text-xs text-gray-500">
+          <div className="flex justify-between w-full text-xs text-base-content/70">
             <div>--</div>
             <div>--</div>
           </div>
@@ -249,17 +255,14 @@ const HealthCheckRow = ({ check, data }) => {
   const latestCheck = sortedChecks[0]
   const oldestCheck = sortedChecks[sortedChecks.length - 1]
 
-  // Calculate uptime percentage
-  const uptimePercentage = Math.round(latestCheck.uptime * 100 * 10) / 10
+  // Calculate uptime percentage from historical data
+  const upChecks = healthChecks.filter((check) => check.up).length
+  const totalChecks = healthChecks.length
+  const calculatedUptime = totalChecks > 0 ? upChecks / totalChecks : 0
+  const uptimePercentage = Math.round(calculatedUptime * 100 * 10) / 10
 
-  // Determine status color based on uptime percentage
-  const getStatusColor = (uptime) => {
-    if (uptime >= 99) return 'bg-green-500'
-    if (uptime >= 95) return 'bg-yellow-500'
-    return 'bg-red-500'
-  }
-
-  const statusColor = getStatusColor(uptimePercentage)
+  // Determine status color: green for 100%, red for anything less
+  const statusColor = uptimePercentage === 100 ? 'bg-success' : 'bg-error'
 
   // Take last 30 checks for the timeline (or all if less than 30)
   const timelineChecks = sortedChecks.slice(0, 30).reverse() // Reverse to show oldest to newest
@@ -267,21 +270,23 @@ const HealthCheckRow = ({ check, data }) => {
   return (
     <Link
       href={`/boards/checks/${latestCheck.id}`}
-      className="block hover:bg-gray-50 transition-colors duration-150"
+      className="block hover:bg-base-200 transition-colors duration-150"
     >
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 last:border-b-0">
+      <div className="flex items-center justify-between p-4 border-b border-base-300 last:border-b-0">
         <div className="flex items-center space-x-4">
           {/* Uptime percentage badge */}
           <div
-            className={`${statusColor} text-white px-3 py-1 rounded-full text-sm font-medium min-w-16 text-center`}
+            className={`${statusColor} text-success-content px-3 py-1 rounded-full text-sm font-medium min-w-16 text-center`}
           >
             {uptimePercentage}%
           </div>
 
           {/* Service name and ID */}
           <div>
-            <div className="font-medium text-gray-900 hover:text-blue-600">{latestCheck.name}</div>
-            <div className="text-sm text-gray-500">{latestCheck.id}</div>
+            <div className="font-medium text-base-content hover:text-primary">
+              {latestCheck.name}
+            </div>
+            <div className="text-sm text-base-content/70">{latestCheck.id}</div>
           </div>
         </div>
 
@@ -291,19 +296,19 @@ const HealthCheckRow = ({ check, data }) => {
             {timelineChecks.map((healthCheck, index) => (
               <div
                 key={`${healthCheck.timestamp}-${index}`}
-                className={`w-1 h-8 rounded-sm ${healthCheck.up ? 'bg-green-500' : 'bg-red-500'}`}
+                className={`w-1 h-8 rounded-sm ${healthCheck.up ? 'bg-success' : 'bg-error'}`}
                 title={`${healthCheck.up ? 'Up' : 'Down'} - ${new Date(healthCheck.timestamp).toLocaleString()} - ${healthCheck.ms}ms`}
               ></div>
             ))}
             {/* Fill remaining slots if less than 30 checks */}
             {timelineChecks.length < 30 &&
               Array.from({ length: 30 - timelineChecks.length }, (_, i) => (
-                <div key={`empty-${i}`} className="w-1 h-8 bg-gray-200 rounded-sm"></div>
+                <div key={`empty-${i}`} className="w-1 h-8 bg-base-300 rounded-sm"></div>
               ))}
           </div>
 
           {/* Time indicators positioned under the timeline */}
-          <div className="flex justify-between w-full text-xs text-gray-500">
+          <div className="flex justify-between w-full text-xs text-base-content/70">
             <div>{timeAgo(oldestCheck.timestamp)}</div>
             <div>{timeAgo(latestCheck.timestamp)}</div>
           </div>
