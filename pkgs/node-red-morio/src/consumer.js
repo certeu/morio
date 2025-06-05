@@ -8,7 +8,8 @@ module.exports = function (RED) {
      * Don't bother without a broker client
      */
     const broker = RED.nodes.getNode(n.broker)
-    if (!broker) return this.status({ fill: 'red', shape: 'ring', text: 'No broker client provided' })
+    if (!broker)
+      return this.status({ fill: 'red', shape: 'ring', text: 'No broker client provided' })
     else this.broker = broker
 
     /*
@@ -23,7 +24,7 @@ module.exports = function (RED) {
      */
     this.settings = {
       consumer: { groupId: n.groupId || 'no_group_id' },
-      topic: topic.topic
+      topic: topic.topic,
     }
 
     /*
@@ -36,7 +37,7 @@ module.exports = function (RED) {
           const data = {
             topic,
             partition,
-            data: utils.parseKafkaMessage(message)
+            data: utils.parseKafkaMessage(message),
           }
 
           node.send({ topic, partition, data })
@@ -51,11 +52,10 @@ module.exports = function (RED) {
     /*
      * Initialize the Morio consumer
      */
-    this.init()
-      .catch((e) => {
-        node.status({ fill: 'red', shape: 'ring', text: 'Consumer startup error' })
-        node.error('Morio consumer startup error', e)
-      })
+    this.init().catch((e) => {
+      node.status({ fill: 'red', shape: 'ring', text: 'Consumer startup error' })
+      node.error('Morio consumer startup error', e)
+    })
 
     /*
      * Shut down Kafka connection gracefully on close
@@ -67,7 +67,7 @@ module.exports = function (RED) {
           node.status({ fill: 'grey', shape: 'ring', text: 'Disconnected' })
           if (done) done()
         })
-        .catch(err => done ? done(err) : node.onError(err))
+        .catch((err) => (done ? done(err) : node.onError(err)))
     })
   }
 
@@ -111,7 +111,7 @@ module.exports = function (RED) {
     await this.consumer.run(this.createRunHandler())
   }
   // Factory method for the incoming message handler
-  MorioConsumerNode.prototype.createRunHandler = function() {
+  MorioConsumerNode.prototype.createRunHandler = function () {
     const self = this
     return {
       eachMessage: async ({ topic, partition, message }) => {
@@ -122,7 +122,7 @@ module.exports = function (RED) {
           self.onError('Morio consumer error during message processing', err)
           self.status({ fill: 'red', shape: 'ring', text: 'Message processing error' })
         }
-      }
+      },
     }
   }
   /*

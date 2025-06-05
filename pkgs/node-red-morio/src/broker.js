@@ -12,8 +12,7 @@ module.exports = function (RED) {
         clientId: n.clientId,
       }
       node.server = new Kafka(node.options)
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Morio Broker Contrusture Error:', error)
       throw error
     }

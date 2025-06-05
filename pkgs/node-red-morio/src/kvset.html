@@ -4,16 +4,16 @@
     category: 'morio',
     color: '#ffc592',
     defaults: {
-      name: { value: "" },
-      key: { value: "" },
-      val: { value: "" },
-      apikey: { value: "", type: 'morio-apikey', required: true }
+      name: { value: '' },
+      key: { value: '' },
+      val: { value: '' },
+      apikey: { value: '', type: 'morio-apikey', required: true },
     },
     inputs: 1,
     outputs: 1,
     icon: 'morio.svg',
-    label: function() {
-      return this.name || `Morio KV Set: ${this.key}`;
+    label: function () {
+      return this.name || `Morio KV Set: ${this.key}`
     },
     paletteLabel: 'KV Set',
   })
@@ -22,22 +22,22 @@
 <script type="text/html" data-template-name="morio-kvset">
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-vcard-o"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name">
+    <input type="text" id="node-input-name" placeholder="Name" />
   </div>
 
   <div class="form-row">
     <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
-    <input type="text" id="node-input-apikey">
+    <input type="text" id="node-input-apikey" />
   </div>
 
   <div class="form-row">
     <label for="node-input-key"><i class="fa fa-map-marker"></i> KV Key</label>
-    <input type="text" id="node-input-key" placeholder="morio/ui/markdown/home">
+    <input type="text" id="node-input-key" placeholder="morio/ui/markdown/home" />
   </div>
 
   <div class="form-row">
     <label for="node-input-val"><i class="fa fa-file-text-o"></i> KV Value</label>
-    <input type="text" id="node-input-val" placeholder="hello_world">
+    <input type="text" id="node-input-val" placeholder="hello_world" />
   </div>
 </script>
 

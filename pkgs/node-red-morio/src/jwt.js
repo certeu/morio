@@ -31,8 +31,7 @@ module.exports = function (RED) {
       this.on('input', function (msg, send, done) {
         self.handleInput(msg, send, done)
       })
-    }
-    catch (error) {
+    } catch (error) {
       console.error('JWT Node Constructor Error:', error)
       throw error
     }
@@ -47,48 +46,46 @@ module.exports = function (RED) {
     /*
      * Request a JWT token from the Morio API
      */
-    fetch(
-      `${self.settings?.api || 'http://morio-api:3000'}/token/custom`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+    fetch(`${self.settings?.api || 'http://morio-api:3000'}/token/custom`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        node: {
+          id: self.id,
+          type: self.type,
+          z: self.z,
+          name: self.name,
         },
-        body: JSON.stringify({
-          node: {
-            id: self.id,
-            type: self.type,
-            z: self.z,
-            name: self.name
-          },
-          msg
-        })
-      }
-    )
-    .then(response => {
-      response.json()
-      .then(data => {
-        if (data.jwt) {
-          self.status({ fill: 'green', shape: 'dot', text: `JWT Loaded` })
-          send({
-            ...msg,
-            payload: {
-              jwt: data.jwt,
-              bearer: `Bearer ${data.jwt}`,
-              headers: {
-                Authorization: `Bearer ${data.jwt}`
-              }
-            }
-          })
-        } else {
-          self.status({ fill: 'red', shape: 'dot', text: `Failed` })
-        }
-
-        if (done) done()
-      })
-      .catch(err => console.log(err))
+        msg,
+      }),
     })
-    .catch(err => console.log(err))
+      .then((response) => {
+        response
+          .json()
+          .then((data) => {
+            if (data.jwt) {
+              self.status({ fill: 'green', shape: 'dot', text: `JWT Loaded` })
+              send({
+                ...msg,
+                payload: {
+                  jwt: data.jwt,
+                  bearer: `Bearer ${data.jwt}`,
+                  headers: {
+                    Authorization: `Bearer ${data.jwt}`,
+                  },
+                },
+              })
+            } else {
+              self.status({ fill: 'red', shape: 'dot', text: `Failed` })
+            }
+
+            if (done) done()
+          })
+          .catch((err) => console.log(err))
+      })
+      .catch((err) => console.log(err))
   }
 
   RED.nodes.registerType('morio-jwt', JwtNode)

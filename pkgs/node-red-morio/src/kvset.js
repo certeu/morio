@@ -67,11 +67,13 @@ module.exports = function (RED) {
       const url = new URL(`https://poc-morio-node1.cert.europa.eu/-/api/kv/keys/${key}`)
 
       // Prepare Basic Auth using credentials from config node
-      const auth = Buffer.from(`${this.apikeyNode.credentials.apikey}:${this.apikeyNode.credentials.apisecret}`).toString('base64')
+      const auth = Buffer.from(
+        `${this.apikeyNode.credentials.apikey}:${this.apikeyNode.credentials.apisecret}`
+      ).toString('base64')
 
       // Request body
       const body = JSON.stringify({ value: val })
-      console.log({body})
+      console.log({ body })
 
       // Request options
       const options = {
@@ -80,13 +82,13 @@ module.exports = function (RED) {
         path: url.pathname,
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${auth}`,
+          Authorization: `Basic ${auth}`,
           'User-Agent': 'Node-RED KV Client',
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(body),
         },
         // Support self-signed certificates
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
       }
 
       this.status({ fill: 'blue', shape: 'ring', text: 'Sending...' })
@@ -114,7 +116,7 @@ module.exports = function (RED) {
                 ...msg,
                 payload: responseBody,
                 statusCode: res.statusCode,
-                headers: res.headers
+                headers: res.headers,
               }
 
               node.status({ fill: 'green', shape: 'dot', text: `Success (${res.statusCode})` })
@@ -159,7 +161,6 @@ module.exports = function (RED) {
       // Write the body and end the request
       req.write(body)
       req.end()
-
     } catch (ex) {
       this.status({ fill: 'red', shape: 'ring', text: 'Request error' })
       if (done) done(ex)

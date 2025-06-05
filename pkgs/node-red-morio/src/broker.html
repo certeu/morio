@@ -2,7 +2,7 @@
   RED.nodes.registerType('morio-broker-client', {
     category: 'config',
     defaults: {
-      clientId: { value: "morio.eda", required: true },
+      clientId: { value: 'morio.eda', required: true },
     },
     label: function () {
       return this.clientId || 'Morio Broker'
@@ -18,19 +18,16 @@
 </script>
 
 <script type="text/html" data-help-name="morio-broker-client">
-  <p>
-    A Kafka/RedPanda client that is pre-configured
-    to connect to the local Morio broker.
-  </p>
+  <p>A Kafka/RedPanda client that is pre-configured to connect to the local Morio broker.</p>
 
   <h3>Configuration</h3>
   <dl class="message-properties">
     <dt>clientId <span class="property-type">string</span></dt>
-    <dd>The client ID, a logical name for an application interacting with a Kafka/RedPanda broker</dd>
+    <dd>
+      The client ID, a logical name for an application interacting with a Kafka/RedPanda broker
+    </dd>
   </dl>
 
   <h3>Details</h3>
-  <p>
-    This will work out of the box, you only need to set the <b>client ID</b>.
-  </p>
+  <p>This will work out of the box, you only need to set the <b>client ID</b>.</p>
 </script>

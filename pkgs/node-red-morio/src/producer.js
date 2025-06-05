@@ -32,11 +32,10 @@ module.exports = function (RED) {
     /*
      * Initialize the Morio producer
      */
-    this.init()
-      .catch(e => {
-        node.status({ fill: 'red', shape: 'ring', text: 'Producer startup error' })
-        node.error('Morio producer startup error', e)
-      })
+    this.init().catch((e) => {
+      node.status({ fill: 'red', shape: 'ring', text: 'Producer startup error' })
+      node.error('Morio producer startup error', e)
+    })
 
     /*
      * Handle incoming messages
@@ -111,7 +110,7 @@ module.exports = function (RED) {
           messages: [
             {
               key: `${Date.now()}`,
-              value: utils.prepareKafkaData(msg.payload)
+              value: utils.prepareKafkaData(msg.payload),
             },
           ],
         })
@@ -125,20 +124,15 @@ module.exports = function (RED) {
           this.status({ fill: 'red', shape: 'ring', text: 'Producer sending error' })
           send([null, { ...msg, error: err }])
 
-          done
-            ? done(err)
-            : this.error(err, 'Morio producer error')
+          done ? done(err) : this.error(err, 'Morio producer error')
         })
 
       this.status({ fill: 'blue', shape: 'ring', text: 'Sending message' })
-    }
-    catch (ex) {
+    } catch (ex) {
       this.status({ fill: 'red', shape: 'ring', text: 'Message sending error' })
       send([null, { ...msg, error: ex }])
 
-      done
-        ? done(ex)
-        : this.error(ex, 'Morio producer error')
+      done ? done(ex) : this.error(ex, 'Morio producer error')
     }
   }
 
@@ -147,13 +141,13 @@ module.exports = function (RED) {
     done = typeof done === 'function' ? done : typeof removed === 'function' ? removed : null
 
     this.producer &&
-    this.producer
-      .disconnect()
-      .then(() => {
-        this.status({ fill: 'grey', shape: 'ring', text: 'Disconnected' })
-        if (done) done()
-      })
-      .catch(err => done ? done(err) : this.onError('Broker disconnect error', err))
+      this.producer
+        .disconnect()
+        .then(() => {
+          this.status({ fill: 'grey', shape: 'ring', text: 'Disconnected' })
+          if (done) done()
+        })
+        .catch((err) => (done ? done(err) : this.onError('Broker disconnect error', err)))
   }
 
   /*

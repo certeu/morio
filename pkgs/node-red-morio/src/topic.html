@@ -2,25 +2,27 @@
   RED.nodes.registerType('morio-topic', {
     category: 'config',
     defaults: {
-      topic: { value: "events", required: true }
+      topic: { value: 'events', required: true },
     },
     label: function () {
       return this.topic || 'topic_name'
-    }
+    },
   })
 </script>
 
 <script type="text/html" data-template-name="morio-topic">
   <div class="form-row">
     <label for="node-config-input-topic"><i class="fa fa-id-card-o"></i> Topic</label>
-    <input type="text" id="node-config-input-topic" placeholder="events">
+    <input type="text" id="node-config-input-topic" placeholder="events" />
   </div>
 </script>
 
 <script type="text/html" data-help-name="morio-topic">
   <p>A Kafka/RedPanda topic on the local Morio broker.</p>
   <details>
-    <summary><big><b>Details</b></big></summary>
+    <summary>
+      <big><b>Details</b></big>
+    </summary>
     <p><b>topic</b></p>
     <p>This is the broker topic to read from.</p>
   </details>
