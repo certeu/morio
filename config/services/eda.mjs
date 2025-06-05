@@ -1,4 +1,4 @@
-import { generateTraefikConfig, getContainerTagSuffix } from './index.mjs'
+import { generateTraefikConfig } from './index.mjs'
 import process from 'process'
 
 /*
@@ -16,11 +16,6 @@ export const pullConfig = {
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
-  /*
-   * Make it easy to test production containers in a dev environment
-   */
-  const PROD = utils.isProduction()
-
   /*
    * Grab directories here to keep this DRY
    */
