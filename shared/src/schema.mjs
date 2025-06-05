@@ -247,6 +247,7 @@ const settings = Joi.object({
       DISABLE_IDP_MRT: Joi.boolean(),
       DISABLE_IDP_OIDC: Joi.boolean(),
       DISABLE_SERVICE_UI: Joi.boolean(),
+      ENABLE_SERVICE_EDA: Joi.boolean(),
       ENFORCE_HTTP_MTLS: Joi.boolean(),
       ENFORCE_SERVICE_CACHE: Joi.boolean(),
       REQUIRE_CLIENT_INVITES: Joi.boolean(),

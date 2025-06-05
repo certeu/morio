@@ -1,0 +1,57 @@
+<script type="text/javascript">
+  RED.nodes.registerType('morio-producer', {
+    align: 'right',
+    category: 'morio',
+    color: '#ffc592',
+    defaults: {
+      name: { value: 'Write Morio topic', required: false },
+      broker: { value: '', required: true, type: 'morio-broker-client' },
+      topic: { value: '', required: true, type: 'morio-topic' },
+    },
+    icon: 'morio.svg',
+    inputs: 1,
+    inputLabels: '',
+    outputs: 2,
+    outputLabels: ['Done', 'Error'],
+    label: function () {
+      return this.name || 'Topic Write'
+    },
+    paletteLabel: 'Topic Write',
+  })
+</script>
+
+<script type="text/html" data-template-name="morio-producer">
+  <div>
+    <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-vcard-o"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row">
+      <label for="node-input-broker"><i class="fa fa-database"></i> Broker</label>
+      <input type="text" id="node-input-broker" />
+    </div>
+    <div class="form-row">
+      <label for="node-input-topic"><i class="fa fa-table"></i> Topic</label>
+      <input type="text" id="node-input-topic" placeholder="Topic" />
+    </div>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="morio-producer">
+  <p>A Kafka/RedPanda producer to write data to a Morio topic.</p>
+  <details>
+    <summary>
+      <big><b>Details</b></big>
+    </summary>
+    <p><b>name</b></p>
+    <p>
+      This is pure metadata used in the display of your flow. It has no impact on the functioning of
+      this node.
+    </p>
+    <p><b>broker</b></p>
+    <p>This is an instance of a Morio broker client.</p>
+    <p>You typically can re-use the same broker client instance.</p>
+    <p><b>topic</b></p>
+    <p>This is the broker topic to write to.</p>
+  </details>
+</script>

@@ -157,6 +157,14 @@ Controller.prototype.authenticate = async function (req, res) {
     if (service === 'console') {
       if (isRoleAvailable(payload.role, 'operator')) allow = true
       else return res.redirect(redirectPath(req, '/http-errors/rbac/'))
+    }
+    /*
+     * Node-Red needs to be shielded from all but operator and up roles
+     * Since this is not an API, rather than return JSON, we redirect to an error page
+     */
+    if (service === 'eda') {
+      if (isRoleAvailable(payload.role, 'operator')) allow = true
+      else return res.redirect(redirectPath(req, '/http-errors/rbac/'))
     } else if (service === 'api') allow = true
 
     /*
@@ -429,6 +437,80 @@ Controller.prototype.authenticateCcdb = async function (req, res) {
    * Whatever this is, we do not allow it
    */
   return utils.sendErrorResponse(res, 'morio.ccdb.authentication.required', req.url)
+}
+
+/**
+ * Create JWT for CCDB connection
+ *
+ * This generates a JWT for cross-cluster database
+ * connections. These go through a dedicated entrypoint in
+ * Traefik because they are not accessible to regular users.
+ * These requests come with a JWT that we generate here.
+ *
+ * This endpoint is only accessible over the internal Docker network.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getCcdbToken = async function (req, res) {
+  const jwt = await generateJwt({
+    data: {
+      user: 'ccdb',
+      role: 'ccdb',
+      node: utils.getNodeUuid(),
+      cluster: utils.getClusterUuid(),
+    },
+    key: utils.getKeys().private,
+    passphrase: utils.getKeys().unseal,
+    options: {
+      /*
+       * If this token expires, EdA will break.
+       * It is renewed at each init() command, so in priciple this
+       * should not be a problem. But let's make it longer than the
+       * default 4h anyway
+       */
+      expiresIn: '24h',
+    },
+  })
+
+  return res.send({ jwt })
+}
+
+/**
+ * Create a custom JWT (for EdA)
+ *
+ * This generates a JWT on-demand.
+ * This is useful for authenticating to systems that trust Morio.
+ * This was added so you can re-use the Morio integration with
+ * Hashicorp Vault (or OpenBao) from within the EdA service, but the
+ * same principle can be used to authenticate to other services.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getCustomToken = async function (req, res) {
+  const jwt = await generateJwt({
+    data: {
+      user: 'eda',
+      role: 'eda',
+      node: utils.getNodeUuid(),
+      cluster: utils.getClusterUuid(),
+      eda: req.body,
+    },
+    key: utils.getKeys().private,
+    passphrase: utils.getKeys().unseal,
+    options: {
+      /*
+       * If this token expires, EdA will break.
+       * It is renewed at each init() command, so in priciple this
+       * should not be a problem. But let's make it longer than the
+       * default 4h anyway
+       */
+      expiresIn: '24h',
+    },
+  })
+
+  return res.send({ jwt })
 }
 
 /**

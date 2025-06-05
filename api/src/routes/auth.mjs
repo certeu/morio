@@ -35,6 +35,18 @@ export function routes(app) {
   app.get(`/token`, rbac.user, Auth.renewToken)
 
   /*
+   * Request a token for ccdbauth
+   * (not accessible from outside the docker network)
+   */
+  app.get(`/token/ccdbauth`, Auth.getCcdbToken)
+
+  /*
+   * Request a custom token (used by EdA)
+   * (not accessible from outside the docker network)
+   */
+  app.post(`/token/custom`, Auth.getCustomToken)
+
+  /*
    * Whoami/ping check
    */
   app.get(`/whoami`, rbac.user, Auth.whoami)

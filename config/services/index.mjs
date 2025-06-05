@@ -7,6 +7,7 @@ import { resolveServiceConfiguration as console } from './console.mjs'
 import { resolveServiceConfiguration as connector } from './connector.mjs'
 import { resolveServiceConfiguration as core } from './core.mjs'
 import { resolveServiceConfiguration as db } from './db.mjs'
+import { resolveServiceConfiguration as eda } from './eda.mjs'
 import { resolveServiceConfiguration as proxy } from './proxy.mjs'
 import { resolveServiceConfiguration as tap } from './tap.mjs'
 import { resolveServiceConfiguration as ui } from './ui.mjs'
@@ -21,6 +22,7 @@ const resolvers = {
   connector,
   core,
   db,
+  eda,
   proxy,
   tap,
   ui,
@@ -45,6 +47,7 @@ export const serviceOrder = [
   'connector',
   'watcher',
   'tap',
+  'eda',
 ]
 
 /*
@@ -55,7 +58,7 @@ export const ephemeralServiceOrder = ['proxy', 'api', 'ui']
 /*
  * List of services that we should not take for granted
  */
-export const optionalServices = ['db', 'cache', 'ui', 'connector', 'tap', 'watcher']
+export const optionalServices = ['db', 'cache', 'ui', 'connector', 'tap', 'watcher', 'eda']
 
 /**
  * Helper method to generate the Traefik configuration
@@ -135,6 +138,7 @@ const getServicePort = (service, utils) => {
   if (service === 'ui') return utils.getPreset('MORIO_UI_PORT')
   if (service === 'ca') return utils.getPreset('MORIO_CA_PORT')
   if (service === 'db' || service === 'ccdb') return utils.getPreset('MORIO_DB_HTTP_PORT')
+  if (service === 'eda') return utils.getPreset('MORIO_EDA_HTTP_PORT')
   if (service === 'console') return utils.getPreset('MORIO_CONSOLE_PORT')
   if (service === 'rpadmin') return utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')
   if (service === 'rpproxy') return utils.getPreset('MORIO_BROKER_REST_API_PORT')

@@ -254,6 +254,7 @@ export async function ensureServiceCertificate(service, internal = false, chain 
     ),
   })
 
+  // FIXME this is the incorrect return value
   return {
     cert: certAndKey.certificate.crt,
     key: certAndKey.key,
