@@ -8,12 +8,10 @@ import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
 import Link from 'next/link'
-import { RightIcon, NoIcon, OkIcon } from 'components/icons.mjs'
-import { PageLink } from 'components/link.mjs'
+import { NoIcon, OkIcon, SearchIcon } from 'components/icons.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { Loading, Spinner } from 'components/animations.mjs'
 import { KeyVal } from 'components/keyval.mjs'
-import { ListInput } from 'components/inputs.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { ToggleGraphButton, ToggleLiveButton } from 'components/boards/shared.mjs'
 import { SingleEchart } from './metrics.mjs'
@@ -21,15 +19,13 @@ import { chartGradient } from 'components/echarts.mjs'
 import { Popout } from 'components/popout.mjs'
 
 /**
- * This component renders a table with the host for which we have cached logs
+ * This component renders a status page view of health checks
  */
 export const ChecksTable = () => {
   // State
   const [cache, setCache] = useState(false)
   const [refresh, setRefresh] = useState(0)
-  const [order, setOrder] = useState('name')
-  const [desc, setDesc] = useState(false)
-  const [show, setShow] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Hooks
   const { api } = useApi()
@@ -49,7 +45,7 @@ export const ChecksTable = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
 
-  // Tell people  we are still lading
+  // Tell people we are still loading
   if (cache === false)
     return (
       <>
@@ -71,79 +67,250 @@ export const ChecksTable = () => {
       </Popout>
     )
 
-  const btn = (
-    <ListInput
-      label="Display:"
-      current={show}
-      list={[
-        {
-          label: 'All health checks',
-          val: 'all',
-        },
-        {
-          label: 'Failing health checks',
-          val: 'failing',
-        },
-        {
-          label: 'List of health check IDs',
-          val: 'list',
-        },
-      ]}
-      dense={true}
-      dir="row"
-      update={(val) => setShow(val)}
-    />
-  )
-
-  if (show !== 'list')
-    return (
-      <>
-        {btn}
-        <div className="flex flex-row flex-wrap items-center gap-2">
-          {cache.map((check) => (
-            <UpOrNot key={check.key} cacheKey={check.key} hideOnUp={show === 'failing'} />
-          ))}
+  return (
+    <>
+      {/* Search field */}
+      <div className="mb-4">
+        <div className="relative">
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search health checks by name or ID..."
+            className="input input-bordered w-full pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      </>
-    )
+      </div>
 
-  // Only keep what is in the cache, but use the inventory data
-  const sorted = orderBy(cache, [order], [desc ? 'desc' : 'asc'])
+      {/* Health checks status display */}
+      <div className="space-y-1">
+        <HealthChecksList checks={cache} searchTerm={searchTerm} showFailingFirst={true} />
+      </div>
+
+      <div className="mt-4">
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+      </div>
+    </>
+  )
+}
+
+/**
+ * Component to display the list of health checks with status
+ */
+const HealthChecksList = ({ checks, searchTerm, showFailingFirst }) => {
+  const [healthCheckData, setHealthCheckData] = useState({})
+  const { api } = useApi()
+
+  // Fetch data for all health checks
+  useEffect(() => {
+    const fetchAllData = async () => {
+      const data = {}
+      for (const check of checks) {
+        try {
+          const result = await runCheckApiCall(api, check.key)
+          if (result) {
+            data[check.key] = result
+          }
+        } catch (error) {
+          console.error(`Failed to fetch data for ${check.key}:`, error)
+        }
+      }
+      setHealthCheckData(data)
+    }
+
+    if (checks.length > 0) {
+      fetchAllData()
+    }
+  }, [checks, api])
+
+  // Filter checks based on search term
+  const filteredChecks = checks.filter((check) => {
+    if (!searchTerm) return true
+    const data = healthCheckData[check.key]
+    if (!data || !Array.isArray(data) || data.length === 0) return false
+
+    const latestCheck = JSON.parse(data[0])
+    const searchLower = searchTerm.toLowerCase()
+    return (
+      latestCheck.name?.toLowerCase().includes(searchLower) ||
+      latestCheck.id?.toLowerCase().includes(searchLower)
+    )
+  })
+
+  // Sort checks - failing first if requested
+  const sortedChecks = [...filteredChecks].sort((a, b) => {
+    const dataA = healthCheckData[a.key]
+    const dataB = healthCheckData[b.key]
+
+    if (!dataA || !dataB || !Array.isArray(dataA) || !Array.isArray(dataB)) return 0
+    if (dataA.length === 0 || dataB.length === 0) return 0
+
+    const latestA = JSON.parse(dataA[0])
+    const latestB = JSON.parse(dataB[0])
+
+    if (showFailingFirst) {
+      // Sort by status first (failing checks first), then by name
+      if (latestA.up !== latestB.up) {
+        return latestA.up - latestB.up // 0 (down) comes before 1 (up)
+      }
+    }
+
+    return latestA.name?.localeCompare(latestB.name) || 0
+  })
 
   return (
     <>
-      {btn}
-      <table className="table table-auto">
-        <thead>
-          <tr>
-            {['id'].map((field) => (
-              <th key={field}>
-                <button
-                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
-                  onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
-                >
-                  {field}{' '}
-                  <RightIcon
-                    stroke={3}
-                    className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
-                  />
-                </button>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((check) => (
-            <tr key={check.id}>
-              <td className="">
-                <PageLink href={`/boards/checks/${check.id}`}>{check.id}</PageLink>
-              </td>
-            </tr>
+      {/* Failing health checks section */}
+      {showFailingFirst && (
+        <>
+          {sortedChecks.some((check) => {
+            const data = healthCheckData[check.key]
+            if (!data || !Array.isArray(data) || data.length === 0) return false
+            const latest = JSON.parse(data[0])
+            return !latest.up
+          }) && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-red-600 mb-3">Failing Health Checks</h3>
+              {sortedChecks
+                .filter((check) => {
+                  const data = healthCheckData[check.key]
+                  if (!data || !Array.isArray(data) || data.length === 0) return false
+                  const latest = JSON.parse(data[0])
+                  return !latest.up
+                })
+                .map((check) => (
+                  <HealthCheckRow key={check.key} check={check} data={healthCheckData[check.key]} />
+                ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* All health checks or remaining checks */}
+      <div>
+        {showFailingFirst && (
+          <h3 className="text-lg font-semibold text-green-600 mb-3">Operational Health Checks</h3>
+        )}
+        {sortedChecks
+          .filter((check) => {
+            if (!showFailingFirst) return true
+            const data = healthCheckData[check.key]
+            if (!data || !Array.isArray(data) || data.length === 0) return true
+            const latest = JSON.parse(data[0])
+            return latest.up
+          })
+          .map((check) => (
+            <HealthCheckRow key={check.key} check={check} data={healthCheckData[check.key]} />
           ))}
-        </tbody>
-      </table>
-      <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+      </div>
     </>
+  )
+}
+
+/**
+ * Component to display a single health check row in status page format
+ */
+const HealthCheckRow = ({ check, data }) => {
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-2">
+        <div className="flex items-center space-x-4">
+          <div className="bg-gray-400 text-white px-3 py-1 rounded-full text-sm font-medium">
+            ---%
+          </div>
+          <div>
+            <div className="font-medium">{check.id}</div>
+            <div className="text-sm text-gray-500">Loading...</div>
+          </div>
+        </div>
+        <div className="flex flex-col items-end">
+          <div className="flex space-x-1 mb-1">
+            {Array.from({ length: 30 }, (_, i) => (
+              <div key={i} className="w-1 h-8 bg-gray-300 rounded-sm"></div>
+            ))}
+          </div>
+          <div className="flex justify-between w-full text-xs text-gray-500">
+            <div>--</div>
+            <div>--</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Parse all health check entries
+  const healthChecks = data.map((entry) => JSON.parse(entry))
+
+  // Sort by timestamp (most recent first)
+  const sortedChecks = orderBy(healthChecks, 'timestamp', 'desc')
+
+  // Get latest check for main info
+  const latestCheck = sortedChecks[0]
+  const oldestCheck = sortedChecks[sortedChecks.length - 1]
+
+  // Calculate uptime percentage
+  const uptimePercentage = Math.round(latestCheck.uptime * 100 * 10) / 10
+
+  // Determine status color based on uptime percentage
+  const getStatusColor = (uptime) => {
+    if (uptime >= 99) return 'bg-green-500'
+    if (uptime >= 95) return 'bg-yellow-500'
+    return 'bg-red-500'
+  }
+
+  const statusColor = getStatusColor(uptimePercentage)
+  const isUp = latestCheck.up
+
+  // Take last 30 checks for the timeline (or all if less than 30)
+  const timelineChecks = sortedChecks.slice(0, 30).reverse() // Reverse to show oldest to newest
+
+  return (
+    <Link
+      href={`/boards/checks/${latestCheck.id}`}
+      className="block hover:bg-gray-50 transition-colors duration-150"
+    >
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 last:border-b-0">
+        <div className="flex items-center space-x-4">
+          {/* Uptime percentage badge */}
+          <div
+            className={`${statusColor} text-white px-3 py-1 rounded-full text-sm font-medium min-w-16 text-center`}
+          >
+            {uptimePercentage}%
+          </div>
+
+          {/* Service name and ID */}
+          <div>
+            <div className="font-medium text-gray-900 hover:text-blue-600">{latestCheck.name}</div>
+            <div className="text-sm text-gray-500">{latestCheck.id}</div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end">
+          {/* Timeline bars */}
+          <div className="flex space-x-1 mb-1">
+            {timelineChecks.map((healthCheck, index) => (
+              <div
+                key={`${healthCheck.timestamp}-${index}`}
+                className={`w-1 h-8 rounded-sm ${healthCheck.up ? 'bg-green-500' : 'bg-red-500'}`}
+                title={`${healthCheck.up ? 'Up' : 'Down'} - ${new Date(healthCheck.timestamp).toLocaleString()} - ${healthCheck.ms}ms`}
+              ></div>
+            ))}
+            {/* Fill remaining slots if less than 30 checks */}
+            {timelineChecks.length < 30 &&
+              Array.from({ length: 30 - timelineChecks.length }, (_, i) => (
+                <div key={`empty-${i}`} className="w-1 h-8 bg-gray-200 rounded-sm"></div>
+              ))}
+          </div>
+
+          {/* Time indicators positioned under the timeline */}
+          <div className="flex justify-between w-full text-xs text-gray-500">
+            <div>{timeAgo(oldestCheck.timestamp)}</div>
+            <div>{timeAgo(latestCheck.timestamp)}</div>
+          </div>
+        </div>
+      </div>
+    </Link>
   )
 }
 
