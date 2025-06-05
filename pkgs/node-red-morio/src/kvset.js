@@ -1,3 +1,7 @@
+/*
+ * This adds a Node-RED node that will write a
+ * key to the Morio KV store (via the Morio API).
+ */
 module.exports = function (RED) {
   const https = require('https')
   const { URL } = require('url')

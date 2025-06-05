@@ -1,3 +1,7 @@
+/*
+ * This adds a Node-RED node that will fetch a
+ * custom JWT token from the Morio API.
+ */
 module.exports = function (RED) {
   const utils = require('./utils.js')
 

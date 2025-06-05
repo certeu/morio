@@ -1,3 +1,7 @@
+/*
+ * This adds a Node-RED node that consumes messages
+ * from a broker (Kafka/RedPanda) topic.
+ */
 module.exports = function (RED) {
   const utils = require('./utils.js')
 

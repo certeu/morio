@@ -1,3 +1,8 @@
+/*
+ * This adds a Node-RED config node that holds
+ * a broker client. Essentially a pre-configured
+ * KafkaJS instance.
+ */
 module.exports = function (RED) {
   const utils = require('./utils.js')
   const { Kafka } = require('kafkajs')
