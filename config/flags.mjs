@@ -54,6 +54,12 @@ fdocs.DISABLE_SERVICE_UI = `Enable this flag to disable the UI service and run M
 flags.DISABLE_SERVICE_UI = false
 
 /*
+ * Enables the UI service
+ */
+fdocs.ENABLE_SERVICE_EDA = `Enable this flag to enable the EDA service for event-driven automation.`
+flags.ENABLE_SERVICE_EDA = false
+
+/*
  * Enforces mTLS on all HTTP endpoints
  */
 fdocs.ENFORCE_HTTP_MTLS = `Enable this feature flag to enforce \`mTLS\` on all

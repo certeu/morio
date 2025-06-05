@@ -241,7 +241,7 @@ export const prebuildDocs = async () => {
   /*
    * OpenAPI specs
    */
-  await writeOpenAPISpecs()
+  //await writeOpenAPISpecs()
 
   /*
    * Jargon imports

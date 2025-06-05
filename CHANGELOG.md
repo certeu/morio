@@ -10,12 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [api] Endpoint for cross-cluster database authentication
+- [api] Added endpoints for the management of inventory assets
 - [cache] Cache service is now available at the cluster level
 - [cache] Enable ACL and authentication for cross-cluster access
 - [core] Add selective deployment of flanking services
+- [eda] Added the new EdA service for event-driven automation
+- [eda] Implemented custom storage plugin to use Morio's db service
+- [eda] Added custom nodes to consume/produce Morio topics
+- [eda] Added custom nodes to get/set Morio KV data
 - [proxy] Endpoint for cross-cluster cache access
 - [proxy] Endpoint for cross-cluster database access
 - [ui] Add UI to manage flanking nodes and services
+- [ui] Added management of inventory assets to the UI
 
 ### Changed
 
@@ -28,8 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Run in PM2 and restart when memory exceeds 250MB
 - [core] Cluster join/heartbeat changes for flanking nodes
 - [db] Upgraded Rqlite from 8.36.12 to 8.36.16
+- [docs] Upgraded Docusaurus from 3.7.0 to 3.8.0
 - [proxy] Upgraded Traefik from v3.3.4 to v3.3.5
 - [shared] Improved error handling for REST client
+- [ui] Improved flags UI in the settings wizard
 - [watcher] Upgraded Elastic Heartbeat from 8.16.5 to 8.17.4
 
 ### Fixed
