@@ -403,9 +403,32 @@ export const Check = ({ id = false, cacheKey = false }) => {
   const data = parseCachedHealthchecks(cache)
   const templates = cloneAsPojo(chartTemplates)
 
+  // Calculate uptime from historical data
+  const upChecks = data.filter((check) => check.up).length
+  const totalChecks = data.length
+  const calculatedUptime = totalChecks > 0 ? upChecks / totalChecks : 0
+  const uptimePercentage = Math.round(calculatedUptime * 100 * 10) / 10
+
   const option = templates.charts.line
   option.title.text = 'Health check response time'
   option.yAxis.name = 'Response time in ms'
+
+  // Configure X-axis for time series
+  option.xAxis = {
+    type: 'time',
+    name: 'Time',
+    axisLabel: {
+      formatter: function (value) {
+        const date = new Date(value)
+        return date.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
+      },
+    },
+  }
+
   /*
    * Split series by agent
    */
@@ -418,7 +441,10 @@ export const Check = ({ id = false, cacheKey = false }) => {
         name: `Response time from ${check.from}`,
       }
     }
-    option.series[check.from].data.push(check.ms)
+    // Push [timestamp, response_time] pairs for proper time series
+    // Ensure timestamp is in milliseconds for ECharts
+    const timestamp = check.timestamp < 1e12 ? check.timestamp * 1000 : check.timestamp
+    option.series[check.from].data.push([timestamp, check.ms])
   }
   option.series = Object.values(option.series)
   if (option.series.length === 1) {
@@ -427,7 +453,7 @@ export const Check = ({ id = false, cacheKey = false }) => {
       color: chartGradient('#1b88a2'),
     }
   }
-  const check = data.shift()
+  const check = data[data.length - 1] // Get the latest check instead of shifting
 
   return (
     <div className="">
@@ -435,7 +461,7 @@ export const Check = ({ id = false, cacheKey = false }) => {
       <div className="flex flex-row items-center justify-center gap-2 mb-1">
         <ToggleLiveButton {...{ paused, setPaused }} />
         <KeyVal k="status" val={check.up ? 'up' : 'down'} color={check.up ? 'success' : 'error'} />
-        <KeyVal k="uptime" val={`${Math.round(check.uptime * 1000) / 10}%`} />
+        <KeyVal k="uptime" val={`${uptimePercentage}%`} />
         <KeyVal k="since" val={timeAgo(check.uptime_since)} />
         <ToggleGraphButton {...{ graph, setGraph }} />
       </div>
