@@ -1,7 +1,15 @@
 import { isRoleAvailable, currentUser } from '../rbac.mjs'
 import { randomString, hash, hashPassword } from '#shared/crypto'
 import { log, utils } from '../lib/utils.mjs'
-import { clean, listAccounts, loadAccount, saveAccount } from '../lib/account.mjs'
+import {
+  clean,
+  listAccounts,
+  loadAccount,
+  saveAccount,
+  deleteAccount,
+  updateAccount,
+  enableAccount,
+} from '../lib/account.mjs'
 import { mfa } from '../lib/mfa.mjs'
 
 /**
@@ -96,6 +104,95 @@ Controller.prototype.create = async function (req, res) {
     invite,
     inviteUrl: `https://${utils.getClusterFqdn()}/morio/invite/${valid.username}-${invite}`,
   })
+}
+
+/**
+ * Deletes a account
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.delete = async function (req, res) {
+  if (req.params.id.toLowerCase() === 'mrt.root')
+    return utils.sendErrorResponse(res, 'morio.api.mrt.violation', req.url)
+
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.account.delete`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const result = await deleteAccount(valid.id)
+
+  /*
+   * Return
+   */
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Update an account
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.update = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.account.update`, {
+    ...req.params,
+    ...req.body,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Take appropriate action
+   */
+  const result = await updateAccount(valid.id, valid.about)
+
+  return res.status(200).send(result[1])
+}
+
+/**
+ * Enable/Disable an account
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.enable = async function (req, res) {
+  if (req.params.id.toLowerCase() === 'mrt.root')
+    return utils.sendErrorResponse(res, 'morio.api.mrt.violation', req.url)
+
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.account.enable`, {
+    ...req.params,
+    ...req.body,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Take appropriate action
+   */
+  const result = await enableAccount(valid.id, valid.status)
+
+  return res.status(200).send(result[1])
 }
 
 /**

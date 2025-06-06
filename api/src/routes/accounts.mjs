@@ -20,6 +20,21 @@ export function routes(app) {
   app.post(`/account`, rbac.manager, Accounts.create)
 
   /*
+   * Delete account
+   */
+  app.delete(`/accounts/:id`, rbac.manager, Accounts.delete)
+
+  /*
+   * Update account
+   */
+  app.patch(`/accounts/:id`, rbac.manager, Accounts.update)
+
+  /*
+   * Enable/Disable account
+   */
+  app.patch(`/accounts/enable/:id`, rbac.manager, Accounts.enable)
+
+  /*
    * Activate account
    */
   app.post(`/activate-account`, Accounts.activate)

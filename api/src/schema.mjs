@@ -100,6 +100,17 @@ export const schema = {
     username: username.required(),
     overwrite: overwrite.optional(),
   }),
+  'req.account.delete': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.account.update': Joi.object({
+    id: Joi.string().required(),
+    about: Joi.string().allow(''),
+  }),
+  'req.account.enable': Joi.object({
+    id: Joi.string().required(),
+    status: Joi.string().valid('active', 'disabled'),
+  }),
   'req.account.activate': Joi.object({
     invite: invite.required(),
     provider: provider.required(),

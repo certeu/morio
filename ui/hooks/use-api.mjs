@@ -222,6 +222,49 @@ MorioClient.prototype.createAccount = async function (data) {
 }
 
 /**
+ * Delete (local) morio account
+ *
+ * @param {object} id - The account id
+ * @return {object} - The result
+ */
+MorioClient.prototype.deleteAccount = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/accounts/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Update the about of an account
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateAccount = async function (id, about) {
+  return await this.call(`${morioConfig.api}/accounts/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ about }),
+  })
+}
+
+/**
+ * Update the status of an account (enable/disable)
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.enableAccount = async function (id, status) {
+  return await this.call(`${morioConfig.api}/accounts/enable/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  })
+}
+
+/**
  * Create an API key
  *
  * @param {object} data - The data to submit
