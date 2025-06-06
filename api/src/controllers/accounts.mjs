@@ -160,7 +160,7 @@ Controller.prototype.update = async function (req, res) {
   /*
    * Take appropriate action
    */
-  const result = await updateAccount(valid.id, valid.about)
+  const result = await updateAccount(valid.id, valid.about, currentUser(req), Date.now())
 
   return res.status(200).send(result[1])
 }
@@ -190,7 +190,7 @@ Controller.prototype.enable = async function (req, res) {
   /*
    * Take appropriate action
    */
-  const result = await enableAccount(valid.id, valid.status)
+  const result = await enableAccount(valid.id, valid.status, currentUser(req), Date.now())
 
   return res.status(200).send(result[1])
 }
