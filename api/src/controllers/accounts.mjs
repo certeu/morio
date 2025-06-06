@@ -113,7 +113,10 @@ Controller.prototype.create = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.delete = async function (req, res) {
-  if (req.params.id === 'mrt.root') return
+  if (req.params.id.toLowerCase() === 'mrt.root')
+    return utils.sendErrorResponse(res, 'morio.api.mrt.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Validate input
@@ -171,7 +174,10 @@ Controller.prototype.update = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.enable = async function (req, res) {
-  if (req.params.id === 'mrt.root') return
+  if (req.params.id.toLowerCase() === 'mrt.root')
+    return utils.sendErrorResponse(res, 'morio.api.mrt.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Validate input
