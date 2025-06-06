@@ -201,24 +201,34 @@ export async function deleteAccount(id = false) {
   return true
 }
 
-export async function updateAccount(id, about = '') {
+export async function updateAccount(id, about = '', updated_by, updated_at) {
   if (!id) return false
   // Run query
-  const result = await utils.db.write(`UPDATE accounts SET about=:about WHERE id=:id`, {
-    id,
-    about,
-  })
+  const result = await utils.db.write(
+    `UPDATE accounts SET about=:about, updated_by=:updated_by, updated_at=:updated_at WHERE id=:id`,
+    {
+      id,
+      about,
+      updated_by,
+      updated_at,
+    }
+  )
 
   return result
 }
 
-export async function enableAccount(id, status = '') {
+export async function enableAccount(id, status = '', updated_by, updated_at) {
   if (!id) return false
   // Run query
-  const result = await utils.db.write(`UPDATE accounts SET status=:status WHERE id=:id`, {
-    id,
-    status,
-  })
+  const result = await utils.db.write(
+    `UPDATE accounts SET status=:status, updated_by=:updated_by, updated_at=:updated_at WHERE id=:id`,
+    {
+      id,
+      status,
+      updated_by,
+      updated_at,
+    }
+  )
 
   return result
 }
