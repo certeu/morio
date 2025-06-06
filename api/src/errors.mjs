@@ -222,6 +222,15 @@ export const errors = {
       'The request data failed validation against the Morio data schema. This means the request is invalid.',
   },
   /*
+   * Specific error for mrt api violations
+   */
+  'morio.api.mrt.violation': {
+    status: 400,
+    title: 'This request is not allowed due to restrictions on the mrt.root account.',
+    detail:
+      'The mrt.root account cannot be disabled via the API; however, this behavior can be controlled using the disable_idp_mrt feature flag.',
+  },
+  /*
    * Error for invalid settings
    */
   'morio.api.settings.invalid': {

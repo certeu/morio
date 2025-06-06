@@ -1,7 +1,6 @@
 import { roles, hiddenRoles } from '#config/roles'
 import { statuses } from '#config/account-statuses'
 import { utils, log } from './utils.mjs'
-
 /**
  * Helper method to return null.
  * @return null
@@ -194,6 +193,34 @@ export async function listAccounts() {
   const [status, result] = await utils.db.read(query)
 
   return status === 200 ? accountsAsList(result) : false
+}
+
+export async function deleteAccount(id = false) {
+  await utils.db.write(`DELETE FROM accounts WHERE id = :id`, { id })
+
+  return true
+}
+
+export async function updateAccount(id, about = '') {
+  if (!id) return false
+  // Run query
+  const result = await utils.db.write(`UPDATE accounts SET about=:about WHERE id=:id`, {
+    id,
+    about,
+  })
+
+  return result
+}
+
+export async function enableAccount(id, status = '') {
+  if (!id) return false
+  // Run query
+  const result = await utils.db.write(`UPDATE accounts SET status=:status WHERE id=:id`, {
+    id,
+    status,
+  })
+
+  return result
 }
 
 /**
