@@ -229,7 +229,7 @@ const AccountDetail = ({ account, refreshAccounts }) => {
             <button className="btn btn-sm btn-primary" onClick={editAbout}>
               Edit About
             </button>
-            {account.status !== 'pending' && (
+            {account.id !== 'mrt.root' && account.status !== 'pending' && (
               <button
                 className={`btn btn-sm ${account.status === 'active' ? 'btn-warning' : 'btn-success'}`}
                 onClick={handleStatusToggle}
@@ -237,9 +237,11 @@ const AccountDetail = ({ account, refreshAccounts }) => {
                 {account.status === 'active' ? 'Disable Account' : 'Enable Account'}
               </button>
             )}
-            <button className="btn btn-sm btn-error" onClick={confirmDelete}>
-              Delete Account
-            </button>
+            {account.id !== 'mrt.root' && (
+              <button className="btn btn-sm btn-error" onClick={confirmDelete}>
+                Delete Account
+              </button>
+            )}
           </div>
         )}
       </div>
