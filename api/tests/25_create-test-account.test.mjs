@@ -130,4 +130,102 @@ describe('Create Test Account', async () => {
     for (const code of d.scratch_codes) assert.equal(typeof code, 'string')
     store.set('accounts.user.scratch_codes', d.scratch_codes)
   })
+
+  // patch /accounts
+  it(`Should patch /accounts/:id`, async () => {
+    const result = await api.patch(
+      `/accounts/${accounts.user.provider}.${accounts.user.username}`,
+      {
+        about: 'updated account info',
+      }
+    )
+
+    assert.equal(result[0], 200)
+    assert.equal(typeof result[1], 'object')
+  })
+
+  // patch /accounts/enable
+  it(`Should patch /accounts/enable/:id`, async () => {
+    const result = await api.patch(
+      `/accounts/enable/${accounts.user.provider}.${accounts.user.username}`,
+      {
+        status: 'active',
+      }
+    )
+
+    assert.equal(result[0], 200)
+    assert.equal(typeof result[1], 'object')
+  })
+
+  // patch /accounts/enable
+  it(`Should patch /accounts/enable/:id`, async () => {
+    const result = await api.patch(
+      `/accounts/enable/${accounts.user.provider}.${accounts.user.username}`,
+      {
+        status: 'disabled',
+      }
+    )
+
+    assert.equal(result[0], 200)
+    assert.equal(typeof result[1], 'object')
+  })
+
+  // delete /accounts
+  it(`Should delete /accounts/:id`, async () => {
+    const result = await api.delete(`/accounts/${accounts.user.provider}.${accounts.user.username}`)
+
+    assert.equal(result[0], 204)
+  })
+
+  // patch /accounts/enable
+  it(`Should not patch /accounts/enable/:id`, async () => {
+    const result = await api.patch(`/accounts/enable/mrt.root`, {
+      status: 'disabled',
+    })
+
+    assert.equal(result[0], 400)
+    const d = result[1]
+    assert.equal(
+      d.title,
+      'This request is not allowed due to restrictions on the mrt.root account.'
+    )
+    assert.equal(
+      d.detail,
+      'The mrt.root account cannot be disabled via the API; however, this behavior can be controlled using the disable_idp_mrt feature flag.'
+    )
+  })
+
+  // patch /accounts/enable
+  it(`Should not patch /accounts/enable/:id`, async () => {
+    const result = await api.patch(`/accounts/enable/mrt.root`, {
+      status: 'active',
+    })
+
+    assert.equal(result[0], 400)
+    const d = result[1]
+    assert.equal(
+      d.title,
+      'This request is not allowed due to restrictions on the mrt.root account.'
+    )
+    assert.equal(
+      d.detail,
+      'The mrt.root account cannot be disabled via the API; however, this behavior can be controlled using the disable_idp_mrt feature flag.'
+    )
+  })
+
+  // delete /accounts
+  it(`Should not delete /accounts/:id`, async () => {
+    const result = await api.delete(`/accounts/mrt.root`)
+
+    assert.equal(result[0], 400)
+    const d = result[1]
+    assert.equal(
+      d.title,
+      'This request is not allowed due to restrictions on the mrt.root account.'
+    )
+    assert.equal(
+      d.detail,
+      'The mrt.root account cannot be disabled via the API; however, this behavior can be controlled using the disable_idp_mrt feature flag.'
+    )
+  })
 })
