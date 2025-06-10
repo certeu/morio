@@ -1,4 +1,5 @@
 import j2s from 'joi-to-swagger'
+import { Joi } from '#shared/schema'
 import { schema } from '../src/schema.mjs'
 import { response, errorResponse, errorResponses, security } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
@@ -6,6 +7,19 @@ import { examples } from './examples/json-loader.mjs'
 export default function (api) {
   const shared = { tags: ['accounts'] }
   api.tag('accounts', 'Endpoints for the local accounts identity provider')
+
+  /*
+   * Let's re-use the parameters config for the remaining endpoints
+   */
+  const parameters = [
+    {
+      in: 'path',
+      name: `id`,
+      schema: j2s(Joi.string().required().description('The ID of the Account')).swagger,
+      required: true,
+      description: 'The Account ID (provider + username)',
+    },
+  ]
 
   api.get('/accounts', {
     ...shared,
@@ -56,6 +70,51 @@ export default function (api) {
         `morio.api.account.state.invalid`,
         `morio.api.ratelimit.exceeded`,
         `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.patch(`/account/{id}`, {
+    ...shared,
+    operationId: `updateAccount`,
+    summary: 'Update Account',
+    description: `Updates an about of Account.`,
+    parameters,
+    responses: {
+      200: response({
+        desc: 'Account details',
+        example: examples.res.updateAccount,
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        'morio.api.account.role.insufficient',
+        `morio.api.internal.error`,
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  api.patch(`/account/enable/{id}`, {
+    ...shared,
+    operationId: `enableAccount`,
+    summary: 'Enable/Disable Account',
+    description: `Disable/Activate account.`,
+    parameters,
+    responses: {
+      200: response({
+        desc: 'Account details',
+        example: examples.res.enableAccount,
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.mrt.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        'morio.api.account.role.insufficient',
+        `morio.api.internal.error`,
+        `morio.api.ratelimit.exceeded`,
       ]),
     },
   })
@@ -127,6 +186,26 @@ Three scratch codes will be provided that can each be used once as a fallback fo
         `morio.api.account.state.invalid`,
         `morio.api.ratelimit.exceeded`,
         `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.delete('/account/{id}', {
+    ...shared,
+    operationId: `deleteAccount`,
+    summary: `Delete Account`,
+    description: `Removes a Morio Account.`,
+    parameters,
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.mrt.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        'morio.api.account.role.insufficient',
+        `morio.api.internal.error`,
+        `morio.api.ratelimit.exceeded`,
       ]),
     },
   })

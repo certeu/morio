@@ -19,6 +19,8 @@ import ratelimits from './ratelimits.json' with { type: 'json' }
 // Accounts
 import listAccounts from './list-accounts.json' with { type: 'json' }
 import createAccount from './create-account.json' with { type: 'json' }
+import updateAccount from './update-account.json' with { type: 'json' }
+import enableAccount from './enable-account.json' with { type: 'json' }
 import activateAccount from './activate-account.json' with { type: 'json' }
 import activateMfa from './activate-mfa.json' with { type: 'json' }
 // API keys
@@ -83,6 +85,8 @@ export const examples = {
     clientsJoin: clientsJoin.req,
     clientsPush: clientsPush.req,
     createAccount: createAccount.req,
+    updateAccount: updateAccount.req,
+    enableAccount: enableAccount.req,
     createCertificate: createCertificate.req,
     decrypt: encrypt.res,
     encrypt: encrypt.req,
@@ -95,6 +99,8 @@ export const examples = {
     clientsJoin: clientsJoin.res,
     clientsPull,
     createAccount: createAccount.res,
+    updateAccount: updateAccount.res,
+    enableAccount: enableAccount.res,
     createApikey: createApikey.res,
     createCertificate: createCertificate.res,
     downloads,

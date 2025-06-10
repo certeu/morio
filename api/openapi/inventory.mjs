@@ -85,7 +85,7 @@ const parameters_modfiles = [
 
 export default function (api) {
   const shared = { tags: ['inventory'] }
-  api.tag('inventory', "Endpoints to manage Morio's inventory (FIXME: document these)")
+  api.tag('inventory', "Endpoints to manage Morio's inventory")
 
   api.get('/inventory/stats', {
     ...shared,
@@ -118,12 +118,15 @@ export default function (api) {
       content: {
         'application/json': {
           schema: j2s(schema['req.inventory.createPkg']).swagger,
-          example: { id: 'openssh|2.13.2', name: 'openssh', version: '2.13.2' },
+          example: { id: 'openssh_2.13.2', name: 'openssh', version: '2.13.2' },
         },
       },
     },
     responses: {
-      204: { description: 'No response body' },
+      201: {
+        desc: 'The Package data',
+        example: { id: 'openssh_2.13.2', name: 'openssh', version: '2.13.2' },
+      },
       ...errorResponses([
         `morio.api.schema.violation`,
         `morio.api.authentication.required`,
@@ -145,7 +148,7 @@ export default function (api) {
       200: response({
         desc: 'The package data',
         example: {
-          id: 'openssh|2.13.2',
+          id: 'openssh_2.13.2',
           name: 'openssh',
           version: '2.13.2',
         },
@@ -154,43 +157,6 @@ export default function (api) {
         `morio.api.authentication.required`,
         `morio.api.ratelimit.exceeded`,
         `morio.api.internal.error`,
-      ]),
-    },
-  })
-
-  api.put('/inventory/pkgs/{id}', {
-    ...shared,
-    parameters: parameters_pkgs,
-    security,
-    operationId: 'pkg.update',
-    summary: `Update Software Package`,
-    description: `Updates a software package in the inventory.
-
-Note that you probably should not use this, and instead create a new entry.`,
-    requestBody: {
-      description: 'The package data',
-      required: true,
-      content: {
-        'application/json': {
-          schema: j2s(Joi.object({ name: Joi.string(), version: Joi.string() })).swagger,
-          example: { name: 'openssh', version: '2.13.2' },
-        },
-      },
-    },
-    responses: {
-      200: response({
-        desc: 'The package data',
-        example: {
-          id: 'openssh|2.13.2',
-          name: 'openssh',
-          version: '2.13.2',
-        },
-      }),
-      ...errorResponses([
-        `morio.api.schema.violation`,
-        `morio.api.authentication.required`,
-        'morio.api.db.failure',
-        `morio.api.ratelimit.exceeded`,
       ]),
     },
   })
@@ -226,12 +192,15 @@ Note that you probably should not use this, and instead create a new entry.`,
       content: {
         'application/json': {
           schema: j2s(schema['req.inventory.createOs']).swagger,
-          example: { id: 'debian|15.1.4', name: 'debian', version: '15.1.4' },
+          example: { id: 'debian_15.1.4', name: 'debian', version: '15.1.4' },
         },
       },
     },
     responses: {
-      204: { description: 'No response body' },
+      201: {
+        desc: 'The OS data',
+        example: { id: 'debian_15.1.4', name: 'debian', version: '15.1.4' },
+      },
       ...errorResponses([
         `morio.api.schema.violation`,
         `morio.api.authentication.required`,
@@ -251,9 +220,9 @@ Note that you probably should not use this, and instead create a new entry.`,
     description: `Reads a Operating System from the inventory.`,
     responses: {
       200: response({
-        desc: 'The os data',
+        desc: 'The OS data',
         example: {
-          id: 'debian|15.1.4',
+          id: 'debian_15.1.4',
           name: 'debian',
           version: '15.1.4',
         },
@@ -262,43 +231,6 @@ Note that you probably should not use this, and instead create a new entry.`,
         `morio.api.authentication.required`,
         `morio.api.ratelimit.exceeded`,
         `morio.api.internal.error`,
-      ]),
-    },
-  })
-
-  api.put('/inventory/oss/{id}', {
-    ...shared,
-    parameters: parameters_oss,
-    security,
-    operationId: 'os.update',
-    summary: `Update Operating System`,
-    description: `Updates a operating system in the inventory.
-
-    Note that you probably should not use this, and instead create a new entry.`,
-    requestBody: {
-      description: 'The os data',
-      required: true,
-      content: {
-        'application/json': {
-          schema: j2s(Joi.object({ name: Joi.string(), version: Joi.string() })).swagger,
-          example: { name: 'debian', version: '15.1.4' },
-        },
-      },
-    },
-    responses: {
-      200: response({
-        desc: 'The os data',
-        example: {
-          id: 'debian|15.1.4',
-          name: 'debian',
-          version: '15.1.4',
-        },
-      }),
-      ...errorResponses([
-        `morio.api.schema.violation`,
-        `morio.api.authentication.required`,
-        'morio.api.db.failure',
-        `morio.api.ratelimit.exceeded`,
       ]),
     },
   })
@@ -334,12 +266,15 @@ Note that you probably should not use this, and instead create a new entry.`,
       content: {
         'application/json': {
           schema: j2s(schema['req.inventory.createIp']).swagger,
-          example: { ip: '192.168.1.1', version: 'ipv4' },
+          example: { ip: '192.168.1.1', version: 'IPv4' },
         },
       },
     },
     responses: {
-      204: { description: 'No response body' },
+      201: {
+        desc: 'The IP data',
+        example: { ip: '192.168.1.1', version: 'IPv4' },
+      },
       ...errorResponses([
         `morio.api.schema.violation`,
         `morio.api.authentication.required`,
@@ -359,52 +294,16 @@ Note that you probably should not use this, and instead create a new entry.`,
     description: `Reads a IP from the inventory.`,
     responses: {
       200: response({
-        desc: 'The package data',
+        desc: 'The IP data',
         example: {
           ip: '192.168.1.1',
-          version: 'ipv4',
+          version: 'IPv4',
         },
       }),
       ...errorResponses([
         `morio.api.authentication.required`,
         `morio.api.ratelimit.exceeded`,
         `morio.api.internal.error`,
-      ]),
-    },
-  })
-
-  api.put('/inventory/ips/{id}', {
-    ...shared,
-    parameters: parameters_ips,
-    security,
-    operationId: 'ip.update',
-    summary: `Update IP`,
-    description: `Updates a ip in the inventory.
-  
-  Note that you probably should not use this, and instead create a new entry.`,
-    requestBody: {
-      description: 'The ip data',
-      required: true,
-      content: {
-        'application/json': {
-          schema: j2s(Joi.object({ ip: Joi.string(), version: Joi.string() })).swagger,
-          example: { ip: '192.168.1.1', version: 'ipv4' },
-        },
-      },
-    },
-    responses: {
-      200: response({
-        desc: 'The ip data',
-        example: {
-          ip: '192.168.1.1',
-          version: 'ipv4',
-        },
-      }),
-      ...errorResponses([
-        `morio.api.schema.violation`,
-        `morio.api.authentication.required`,
-        'morio.api.db.failure',
-        `morio.api.ratelimit.exceeded`,
       ]),
     },
   })
@@ -445,7 +344,10 @@ Note that you probably should not use this, and instead create a new entry.`,
       },
     },
     responses: {
-      204: { description: 'No response body' },
+      201: {
+        desc: 'The mac data',
+        example: { mac: '12:34:56:78:90:ab' },
+      },
       ...errorResponses([
         `morio.api.schema.violation`,
         `morio.api.authentication.required`,
@@ -474,41 +376,6 @@ Note that you probably should not use this, and instead create a new entry.`,
         `morio.api.authentication.required`,
         `morio.api.ratelimit.exceeded`,
         `morio.api.internal.error`,
-      ]),
-    },
-  })
-
-  api.put('/inventory/macs/{mac}', {
-    ...shared,
-    parameters: parameters_macs,
-    security,
-    operationId: 'mac.update',
-    summary: `Update mac address`,
-    description: `Updates a mac address in the inventory.
-    
-    Note that you probably should not use this, and instead create a new entry.`,
-    requestBody: {
-      description: 'The mac address',
-      required: true,
-      content: {
-        'application/json': {
-          schema: j2s(Joi.object({ mac: Joi.string() })).swagger,
-          example: { mac: '12:34:56:78:90:ab' },
-        },
-      },
-    },
-    responses: {
-      200: response({
-        desc: 'The mac address',
-        example: {
-          mac: '12:34:56:78:90:ab',
-        },
-      }),
-      ...errorResponses([
-        `morio.api.schema.violation`,
-        `morio.api.authentication.required`,
-        'morio.api.db.failure',
-        `morio.api.ratelimit.exceeded`,
       ]),
     },
   })
@@ -544,12 +411,15 @@ Note that you probably should not use this, and instead create a new entry.`,
       content: {
         'application/json': {
           schema: j2s(schema['req.inventory.createMod']).swagger,
-          example: { mod: 'module' },
+          example: { mod: 'module', data: 'optional data' },
         },
       },
     },
     responses: {
-      204: { description: 'No response body' },
+      201: {
+        desc: 'The mod data',
+        example: { mod: 'module', data: 'optional data' },
+      },
       ...errorResponses([
         `morio.api.schema.violation`,
         `morio.api.authentication.required`,
@@ -569,9 +439,10 @@ Note that you probably should not use this, and instead create a new entry.`,
     description: `Reads a Mod from the inventory.`,
     responses: {
       200: response({
-        desc: 'The mod address',
+        desc: 'The mod data',
         example: {
           mod: 'module',
+          data: 'optional data',
         },
       }),
       ...errorResponses([
@@ -582,30 +453,29 @@ Note that you probably should not use this, and instead create a new entry.`,
     },
   })
 
-  api.put('/inventory/mods/{mod}', {
+  api.patch('/inventory/mods/{mod}', {
     ...shared,
     parameters: parameters_mods,
     security,
     operationId: 'mod.update',
-    summary: `Update mod address`,
-    description: `Updates a mod address in the inventory.
-      
-      Note that you probably should not use this, and instead create a new entry.`,
+    summary: `Update mod data`,
+    description: `Updates a mod data in the inventory.`,
     requestBody: {
-      description: 'The mod name',
+      description: 'The mod data',
       required: true,
       content: {
         'application/json': {
           schema: j2s(Joi.object({ mod: Joi.string() })).swagger,
-          example: { mod: 'module' },
+          example: { data: 'optional data update' },
         },
       },
     },
     responses: {
       200: response({
-        desc: 'The mod name',
+        desc: 'The mod data',
         example: {
           mod: 'module',
+          data: 'optional data update',
         },
       }),
       ...errorResponses([
@@ -648,12 +518,15 @@ Note that you probably should not use this, and instead create a new entry.`,
       content: {
         'application/json': {
           schema: j2s(schema['req.inventory.createModvar']).swagger,
-          example: { id: 'module|4.13', val: 'moduleval', info: 'moduleinfo', mod: 'module' },
+          example: { id: 'module_4.13', val: 'moduleval', info: 'moduleinfo', mod: 'module' },
         },
       },
     },
     responses: {
-      204: { description: 'No response body' },
+      201: {
+        desc: 'The modvar data',
+        example: { id: 'module_4.13', val: 'moduleval', info: 'moduleinfo', mod: 'module' },
+      },
       ...errorResponses([
         `morio.api.schema.violation`,
         `morio.api.authentication.required`,
@@ -675,7 +548,7 @@ Note that you probably should not use this, and instead create a new entry.`,
       200: response({
         desc: 'The module variable data',
         example: {
-          id: 'module|4.13',
+          id: 'module_4.13',
           val: 'moduleval',
           info: 'moduleinfo',
           mod: 'module',
@@ -689,15 +562,13 @@ Note that you probably should not use this, and instead create a new entry.`,
     },
   })
 
-  api.put('/inventory/modvars/{id}', {
+  api.patch('/inventory/modvars/{id}', {
     ...shared,
     parameters: parameters_modvars,
     security,
     operationId: 'modvar.update',
     summary: `Update Module Variable`,
-    description: `Updates a module variable in the inventory.
-  
-  Note that you probably should not use this, and instead create a new entry.`,
+    description: `Updates a module variable in the inventory.`,
     requestBody: {
       description: 'The module variable data',
       required: true,
@@ -713,7 +584,7 @@ Note that you probably should not use this, and instead create a new entry.`,
       200: response({
         desc: 'The module variable data',
         example: {
-          id: 'module|4.13',
+          id: 'module_4.13',
           val: 'moduleval',
           info: 'moduleinfo',
           mod: 'module',
@@ -770,7 +641,16 @@ Note that you probably should not use this, and instead create a new entry.`,
       },
     },
     responses: {
-      204: { description: 'No response body' },
+      201: {
+        desc: 'The hostvar data',
+        example: {
+          id: 1,
+          key: 'key1',
+          val: 'hostval',
+          info: 'hostinfo',
+          host: '192.168.52.132',
+        },
+      },
       ...errorResponses([
         `morio.api.schema.violation`,
         `morio.api.authentication.required`,
@@ -807,15 +687,13 @@ Note that you probably should not use this, and instead create a new entry.`,
     },
   })
 
-  api.put('/inventory/hostvars/{id}', {
+  api.patch('/inventory/hostvars/{id}', {
     ...shared,
     parameters: parameters_hostvars,
     security,
     operationId: 'hostvar.update',
     summary: `Update Host Variable`,
-    description: `Updates a host variable in the inventory.
-  
-  Note that you probably should not use this, and instead create a new entry.`,
+    description: `Updates a host variable in the inventory.`,
     requestBody: {
       description: 'The host variable data',
       required: true,
@@ -896,7 +774,17 @@ Note that you probably should not use this, and instead create a new entry.`,
       },
     },
     responses: {
-      204: { description: 'No response body' },
+      201: {
+        desc: 'The modfile data',
+        example: {
+          id: 1,
+          mod: 'module',
+          folder: 'folder',
+          file: 'file.txt',
+          content: 'content',
+          source: 'source',
+        },
+      },
       ...errorResponses([
         `morio.api.schema.violation`,
         `morio.api.authentication.required`,
@@ -934,15 +822,13 @@ Note that you probably should not use this, and instead create a new entry.`,
     },
   })
 
-  api.put('/inventory/modfiles/{id}', {
+  api.patch('/inventory/modfiles/{id}', {
     ...shared,
     parameters: parameters_modfiles,
     security,
     operationId: 'modfile.update',
     summary: `Update Module File`,
-    description: `Updates a module file in the inventory.
-  
-  Note that you probably should not use this, and instead create a new entry.`,
+    description: `Updates a module file in the inventory.`,
     requestBody: {
       description: 'The module file data',
       required: true,
