@@ -41,10 +41,10 @@ describe('Inventory Hostvars Tests', async () => {
     assert.equal(body.mod, hostvar.mod)
   })
 
-  // PUT /inventory/hostvar/{id}
-  it(`Should PUT /inventory/hostvar/{id}`, async () => {
+  // PATCH /inventory/hostvar/{id}
+  it(`Should PATCH /inventory/hostvar/{id}`, async () => {
     // Force the user role
-    const [status, body] = await api.put(`/inventory/hostvars/${hostvar.id}`, {
+    const [status, body] = await api.patch(`/inventory/hostvars/${hostvar.id}`, {
       key: 'key2',
       val: 'hostval2',
       info: 'hostinfo2',

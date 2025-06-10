@@ -19,6 +19,7 @@ describe('Inventory Mods Tests', async () => {
   // POST /inventory/mod
   it(`Should POST /inventory/mod`, async () => {
     const [status, body] = await api.post('/inventory/mod', mod)
+
     assert.equal(status, 201)
     assert.equal(body.mod, mod.mod)
     assert.equal(body.data, mod.data)
@@ -33,10 +34,10 @@ describe('Inventory Mods Tests', async () => {
     assert.equal(body.data, mod.data)
   })
 
-  // PUT /inventory/mod/{mod}
-  it(`Should PUT /inventory/mod/{mod}`, async () => {
+  // PATCH /inventory/mod/{mod}
+  it(`Should PATCH /inventory/mods/{mod}`, async () => {
     // Force the user role
-    const [status, body] = await api.put(`/inventory/mods/${mod.mod}`, { data: 'modinfo' })
+    const [status, body] = await api.patch(`/inventory/mods/${mod.mod}`, { data: 'modinfo' })
     assert.equal(status, 200)
     assert.equal(body.mod, mod.mod)
     assert.equal(body.data, 'modinfo')

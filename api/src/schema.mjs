@@ -457,19 +457,19 @@ export const schema = {
   }),
   'req.inventory.createHostOs': Joi.object({
     host: Joi.string().required(),
-    id: Joi.string().required(),
+    os: Joi.string().required(),
   }),
   'req.inventory.readHostOs': Joi.object({
     host: Joi.string().required(),
-    id: Joi.string().required(),
+    os: Joi.string().required(),
   }),
   'req.inventory.createHostPkg': Joi.object({
     host: Joi.string().required(),
-    id: Joi.string().required(),
+    pkg: Joi.string().required(),
   }),
   'req.inventory.readHostPkg': Joi.object({
     host: Joi.string().required(),
-    id: Joi.string().required(),
+    pkg: Joi.string().required(),
   }),
   'req.inventory.createHostMod': Joi.object({
     host: Joi.string().required(),

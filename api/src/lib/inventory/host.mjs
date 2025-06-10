@@ -567,11 +567,14 @@ Host.prototype.unlinkHostIp = async function (host, ip) {
    */
 
   let result = false
-
-  result = await utils.db.write(`DELETE FROM inventory_host_ip WHERE host = :host AND ip = :ip`, {
-    host: host,
-    ip: ip,
-  })
+  try {
+    result = await utils.db.write(`DELETE FROM inventory_host_ip WHERE host = :host AND ip = :ip`, {
+      host: host,
+      ip: ip,
+    })
+  } catch (err) {
+    return false
+  }
 
   return result
 }
@@ -617,14 +620,17 @@ Host.prototype.unlinkHostMac = async function (host, mac) {
    */
 
   let result = false
-
-  result = await utils.db.write(
-    `DELETE FROM inventory_host_mac WHERE host = :host AND mac = :mac`,
-    {
-      host: host,
-      mac: mac,
-    }
-  )
+  try {
+    result = await utils.db.write(
+      `DELETE FROM inventory_host_mac WHERE host = :host AND mac = :mac`,
+      {
+        host: host,
+        mac: mac,
+      }
+    )
+  } catch (err) {
+    return false
+  }
 
   return result
 }
@@ -634,16 +640,16 @@ Host.prototype.unlinkHostMac = async function (host, mac) {
  *
  * @return {object} created - true if it is created, false if not
  */
-Host.prototype.linkOs = async function (host, id) {
-  if (!host || !id) {
+Host.prototype.linkOs = async function (host, os) {
+  if (!host || !os) {
     return false
   }
 
-  const sql = `INSERT INTO inventory_host_os(host, os) VALUES (:host, :id)`
+  const sql = `INSERT INTO inventory_host_os(host, os) VALUES (:host, :os)`
 
   const params = {
     host,
-    id,
+    os,
   }
 
   try {
@@ -661,20 +667,23 @@ Host.prototype.linkOs = async function (host, id) {
  * Helper method to unlink host-mac connection
  *
  * @param {string} host - The host of the record to delete
- * @param {string} id - The id of the os record to delete
+ * @param {string} os - The id of the os record to delete
  * @return {bool} result - true if it went ok, false if not
  */
-Host.prototype.unlinkHostOs = async function (host, id) {
+Host.prototype.unlinkHostOs = async function (host, os) {
   /*
    * Remove from database
    */
 
   let result = false
-
-  result = await utils.db.write(`DELETE FROM inventory_host_os WHERE host = :host AND os = :os`, {
-    host: host,
-    os: id,
-  })
+  try {
+    result = await utils.db.write(`DELETE FROM inventory_host_os WHERE host = :host AND os = :os`, {
+      host: host,
+      os: os,
+    })
+  } catch (err) {
+    return false
+  }
 
   return result
 }
@@ -684,16 +693,16 @@ Host.prototype.unlinkHostOs = async function (host, id) {
  *
  * @return {object} created - true if it is created, false if not
  */
-Host.prototype.linkPkg = async function (host, id) {
-  if (!host || !id) {
+Host.prototype.linkPkg = async function (host, pkg) {
+  if (!host || !pkg) {
     return false
   }
 
-  const sql = `INSERT INTO inventory_host_pkg(host, pkg) VALUES (:host, :id)`
+  const sql = `INSERT INTO inventory_host_pkg(host, pkg) VALUES (:host, :pkg)`
 
   const params = {
     host,
-    id,
+    pkg,
   }
 
   try {
@@ -711,23 +720,26 @@ Host.prototype.linkPkg = async function (host, id) {
  * Helper method to unlink host-mac connection
  *
  * @param {string} host - The host of the record to delete
- * @param {string} id - The id of the pkg record to delete
+ * @param {string} pkg - The id of the pkg record to delete
  * @return {bool} result - true if it went ok, false if not
  */
-Host.prototype.unlinkHostPkg = async function (host, id) {
+Host.prototype.unlinkHostPkg = async function (host, pkg) {
   /*
    * Remove from database
    */
 
   let result = false
-
-  result = await utils.db.write(
-    `DELETE FROM inventory_host_pkg WHERE host = :host AND pkg = :pkg`,
-    {
-      host: host,
-      pkg: id,
-    }
-  )
+  try {
+    result = await utils.db.write(
+      `DELETE FROM inventory_host_pkg WHERE host = :host AND pkg = :pkg`,
+      {
+        host: host,
+        pkg: pkg,
+      }
+    )
+  } catch (err) {
+    return false
+  }
 
   return result
 }
@@ -773,14 +785,17 @@ Host.prototype.unlinkHostMod = async function (host, mod) {
    */
 
   let result = false
-
-  result = await utils.db.write(
-    `DELETE FROM inventory_host_mod WHERE host = :host AND mod = :mod`,
-    {
-      host: host,
-      mod: mod,
-    }
-  )
+  try {
+    result = await utils.db.write(
+      `DELETE FROM inventory_host_mod WHERE host = :host AND mod = :mod`,
+      {
+        host: host,
+        mod: mod,
+      }
+    )
+  } catch (err) {
+    return false
+  }
 
   return result
 }

@@ -688,7 +688,7 @@ Controller.prototype.updateHost = async function (req, res) {
   /*
    * Take appropriate action
    */
-  const host = new Host().update(
+  const host = await new Host().update(
     valid.id,
     valid.arch,
     valid.cores,
@@ -1457,7 +1457,8 @@ Controller.prototype.updateMod = async function (req, res) {
   /*
    * Take appropriate action
    */
-  const mod = new Mod().update(valid.mod, valid.data)
+  const mod = await new Mod().update(valid.mod, valid.data)
+
   return res.status(200).send(mod)
 }
 
@@ -1577,7 +1578,7 @@ Controller.prototype.updateModvar = async function (req, res) {
   /*
    * Take appropriate action
    */
-  const modvar = new Modvar().update(valid.id, valid.val, valid.info, valid.mod)
+  const modvar = await new Modvar().update(valid.id, valid.val, valid.info, valid.mod)
   return res.status(200).send(modvar)
 }
 
@@ -1723,7 +1724,7 @@ Controller.prototype.updateHostvar = async function (req, res) {
   /*
    * Take appropriate action
    */
-  const hostvar = new Hostvar().update(valid.id, valid.key, valid.val, valid.info, valid.host)
+  const hostvar = await new Hostvar().update(valid.id, valid.key, valid.val, valid.info, valid.host)
   return res.status(200).send(hostvar)
 }
 
@@ -1850,7 +1851,7 @@ Controller.prototype.updateModfile = async function (req, res) {
   /*
    * Take appropriate action
    */
-  const modfile = new Modfile().update(
+  const modfile = await new Modfile().update(
     valid.id,
     valid.mod,
     valid.folder,
@@ -1959,7 +1960,7 @@ Controller.prototype.unlinkHostIp = async function (req, res) {
    */
   //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
 
-  return result === true
+  return result?.[0] === 200
     ? res.status(204).send()
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
@@ -2018,7 +2019,7 @@ Controller.prototype.unlinkHostMac = async function (req, res) {
    */
   //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
 
-  return result === true
+  return result?.[0] === 200
     ? res.status(204).send()
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
@@ -2035,13 +2036,13 @@ Controller.prototype.linkHostOs = async function (req, res) {
    */
   const [valid, err] = await utils.validate(`req.inventory.createHostOs`, {
     host: req.params.host,
-    id: req.params.id,
+    os: req.params.id,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
     })
-  const id = await new Host().linkOs(valid.host, valid.id)
+  const id = await new Host().linkOs(valid.host, valid.os)
 
   return id
     ? res.status(201).send({ ...valid, id })
@@ -2060,7 +2061,7 @@ Controller.prototype.unlinkHostOs = async function (req, res) {
    */
   const [valid, err] = await utils.validate(`req.inventory.readHostOs`, {
     host: req.params.host,
-    id: req.params.id,
+    os: req.params.id,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
@@ -2070,14 +2071,14 @@ Controller.prototype.unlinkHostOs = async function (req, res) {
   /*
    * Delete from inventory
    */
-  const result = await new Host().unlinkHostOs(valid.host, valid.id)
+  const result = await new Host().unlinkHostOs(valid.host, valid.os)
 
   /*
    * Be expicit when a key cannot be found
    */
   //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
 
-  return result === true
+  return result?.[0] === 200
     ? res.status(204).send()
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
@@ -2094,13 +2095,13 @@ Controller.prototype.linkHostPkg = async function (req, res) {
    */
   const [valid, err] = await utils.validate(`req.inventory.createHostPkg`, {
     host: req.params.host,
-    id: req.params.id,
+    pkg: req.params.id,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
     })
-  const id = await new Host().linkPkg(valid.host, valid.id)
+  const id = await new Host().linkPkg(valid.host, valid.pkg)
 
   return id
     ? res.status(201).send({ ...valid, id })
@@ -2119,7 +2120,7 @@ Controller.prototype.unlinkHostPkg = async function (req, res) {
    */
   const [valid, err] = await utils.validate(`req.inventory.readHostPkg`, {
     host: req.params.host,
-    id: req.params.id,
+    pkg: req.params.id,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
@@ -2129,14 +2130,14 @@ Controller.prototype.unlinkHostPkg = async function (req, res) {
   /*
    * Delete from inventory
    */
-  const result = await new Host().unlinkHostPkg(valid.host, valid.id)
+  const result = await new Host().unlinkHostPkg(valid.host, valid.pkg)
 
   /*
    * Be expicit when a key cannot be found
    */
   //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
 
-  return result === true
+  return result?.[0] === 200
     ? res.status(204).send()
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
@@ -2195,7 +2196,7 @@ Controller.prototype.unlinkHostMod = async function (req, res) {
    */
   //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
 
-  return result === true
+  return result?.[0] === 200
     ? res.status(204).send()
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }

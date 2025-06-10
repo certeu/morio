@@ -39,10 +39,10 @@ describe('Inventory Modvars Tests', async () => {
     assert.equal(body.mod, modvar.mod)
   })
 
-  // PUT /inventory/modvar/{id}
-  it(`Should PUT /inventory/modvar/{id}`, async () => {
+  // PATCH /inventory/modvar/{id}
+  it(`Should PATCH /inventory/modvar/{id}`, async () => {
     // Force the user role
-    const [status, body] = await api.put(`/inventory/modvars/${modvar.id}`, {
+    const [status, body] = await api.patch(`/inventory/modvars/${modvar.id}`, {
       val: 'moduleval2',
       info: 'moduleinfo2',
       mod: 'module2',
