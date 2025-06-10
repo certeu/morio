@@ -1627,11 +1627,11 @@ MorioClient.prototype.createClientInvite = async function (type) {
  * @param {string} version - An ip version
  * @return {object} - The result
  */
-MorioClient.prototype.createIp = async function (ip, host) {
+MorioClient.prototype.createIp = async function (ip) {
   return await this.call(`${morioConfig.api}/inventory/ip`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ ip, host }),
+    body: JSON.stringify({ ip }),
   })
 }
 

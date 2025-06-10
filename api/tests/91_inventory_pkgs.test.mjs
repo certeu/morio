@@ -36,18 +36,8 @@ describe('Inventory Pkgs Tests', async () => {
     assert.equal(body.version, pkg.version)
   })
 
-  // PUT /inventory/pkg/{id}
-  it(`Should PUT /inventory/pkg/{id}`, async () => {
-    // Force the user role
-    const [status, body] = await api.put(`/inventory/pkgs/${pkg.id}`, { version: '3' })
-    assert.equal(status, 200)
-    assert.equal(body.id, pkg.id)
-    assert.equal(body.name, pkg.name)
-    assert.equal(body.version, '3')
-  })
-
-  // DELETE /inventory/pkg/{id}
-  it(`Should DELETE /inventory/pkg/{id}`, async () => {
+  // DELETE /inventory/pkgs/{id}
+  it(`Should DELETE /inventory/pkgs/{id}`, async () => {
     // Force the user role
     const [status] = await api.delete(`/inventory/pkgs/${pkg.id}`)
     assert.equal(status, 204)

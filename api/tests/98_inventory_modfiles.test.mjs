@@ -45,10 +45,10 @@ describe('Inventory Modfiles Tests', async () => {
     assert.equal(body.source, modfile.source)
   })
 
-  // PUT /inventory/modfile/{id}
-  it(`Should PUT /inventory/modfile/{id}`, async () => {
+  // PATCH /inventory/modfile/{id}
+  it(`Should PATCH /inventory/modfile/{id}`, async () => {
     // Force the user role
-    const [status, body] = await api.put(`/inventory/modfiles/${modfile.id}`, {
+    const [status, body] = await api.patch(`/inventory/modfiles/${modfile.id}`, {
       mod: 'module1',
       folder: 'folder1',
       file: 'file1.txt',
@@ -61,7 +61,7 @@ describe('Inventory Modfiles Tests', async () => {
     assert.equal(body.folder, 'folder1')
     assert.equal(body.file, 'file1.txt')
     assert.equal(body.content, 'content1')
-    assert.equal(body.resource, 'source1')
+    assert.equal(body.source, 'source1')
   })
 
   // DELETE /inventory/modfile/{id}

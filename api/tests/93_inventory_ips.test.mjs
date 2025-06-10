@@ -5,8 +5,10 @@ import { errors } from '../src/errors.mjs'
 
 const ip = {
   ip: '192.168.1.1',
-  version: 'ipv4',
+  version: 'IPv4',
 }
+
+const ipaddress = '192.168.1.1'
 
 describe('Inventory Ips Tests', async () => {
   // POST /inventory/ip
@@ -18,34 +20,24 @@ describe('Inventory Ips Tests', async () => {
 
   // POST /inventory/ip
   it(`Should POST /inventory/ip`, async () => {
-    const [status, body] = await api.post('/inventory/ip', ip)
+    const [status, body] = await api.post('/inventory/ip', { ip: ipaddress })
     assert.equal(status, 201)
     assert.equal(body.ip, ip.ip)
-    assert.equal(body.version, ip.version)
   })
 
   // GET /inventory/ip/{ip}
-  it(`Should GET /inventory/ip/{ip}`, async () => {
+  it(`Should GET /inventory/ips/{ip}`, async () => {
     // Force the user role
-    const [status, body] = await api.get(`/inventory/ips/${ip.ip}`)
+    const [status, body] = await api.get(`/inventory/ips/${ipaddress}`)
     assert.equal(status, 200)
     assert.equal(body.ip, ip.ip)
     assert.equal(body.version, ip.version)
-  })
-
-  // PUT /inventory/ip/{ip}
-  it(`Should PUT /inventory/ip/{ip}`, async () => {
-    // Force the user role
-    const [status, body] = await api.put(`/inventory/ips/${ip.ip}`, { version: 'ipv6' })
-    assert.equal(status, 200)
-    assert.equal(body.ip, ip.ip)
-    assert.equal(body.version, 'ipv6')
   })
 
   // DELETE /inventory/ip/{ip}
   it(`Should DELETE /inventory/ip/{ip}`, async () => {
     // Force the user role
-    const [status] = await api.delete(`/inventory/ips/${ip.ip}`)
+    const [status] = await api.delete(`/inventory/ips/${ipaddress}`)
     assert.equal(status, 204)
   })
 })

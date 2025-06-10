@@ -36,18 +36,8 @@ describe('Inventory Oss Tests', async () => {
     assert.equal(body.version, os.version)
   })
 
-  // PUT /inventory/os/{id}
-  it(`Should PUT /inventory/os/{id}`, async () => {
-    // Force the user role
-    const [status, body] = await api.put(`/inventory/oss/${os.id}`, { version: '2' })
-    assert.equal(status, 200)
-    assert.equal(body.id, os.id)
-    assert.equal(body.name, os.name)
-    assert.equal(body.version, '2')
-  })
-
-  // DELETE /inventory/os/{id}
-  it(`Should DELETE /inventory/os/{id}`, async () => {
+  // DELETE /inventory/oss/{id}
+  it(`Should DELETE /inventory/oss/{id}`, async () => {
     // Force the user role
     const [status] = await api.delete(`/inventory/oss/${os.id}`)
     assert.equal(status, 204)
