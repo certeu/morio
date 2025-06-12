@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import { Popout } from 'components/popout.mjs'
-import { BoolNoIcon, BoolYesIcon } from 'components/icons.mjs'
+import { BoolNoIcon, BoolYesIcon, CertificateIcon, PuzzleIcon } from 'components/icons.mjs'
 
 /*
  * Cluster
@@ -264,55 +264,118 @@ export const cluster = (context, toggleValidate, update) => {
                   </button>
                 </p>,
               ],
-              'Key Data': ['### Optional: Provide a Key Data file'].concat(
-                context.preseed?.keys?.data
-                  ? [<Popout tip title="Key Data file Loaded" compact key="a" />]
-                  : [
-                      <Popout compact note key="b">
-                        This tab is only relevant to advanced deployments.
-                      </Popout>,
-                      {
-                        key: 'preseed.keys',
-                        label: 'Key Data file (JSON)',
-                        schema: Joi.object({
-                          data: Joi.string().required(),
-                          key: Joi.string().required(),
-                          seal: Joi.object({
-                            hash: Joi.string().required(),
-                            salt: Joi.string().required(),
-                          }),
-                        }),
-                        inputType: 'file',
-                        original: undefined,
-                        dropzoneConfig: {
-                          accept: { 'application/json': ['.json'] },
-                          maxFiles: 1,
-                          multiple: false,
-                        },
-                        transform: (upload) => {
-                          let data
-                          try {
-                            const chunks = upload.split(',')
-                            data = JSON.parse(atob(chunks[1]))
-                          } catch (err) {
-                            data = {}
-                          }
+              Advanced: [
+                {
+                  linearTabs: true,
+                  tabs: {
+                    'Key Data': context.preseed?.keys?.data
+                      ? [<Popout tip title="Key Data file Loaded" compact key="a" />]
+                      : [
+                          {
+                            key: 'preseed.keys',
+                            label: 'Key Data file (JSON)',
+                            schema: Joi.object({
+                              data: Joi.string().required(),
+                              key: Joi.string().required(),
+                              seal: Joi.object({
+                                hash: Joi.string().required(),
+                                salt: Joi.string().required(),
+                              }),
+                            }),
+                            inputType: 'file',
+                            original: undefined,
+                            dropzoneConfig: {
+                              accept: { 'application/json': ['.json'] },
+                              maxFiles: 1,
+                              multiple: false,
+                            },
+                            transform: (upload) => {
+                              let data
+                              try {
+                                const chunks = upload.split(',')
+                                data = JSON.parse(atob(chunks[1]))
+                              } catch (err) {
+                                data = {}
+                              }
 
-                          return data
-                        },
+                              return data
+                            },
+                          },
+                          <Popout tip key="c">
+                            <h5>What is a Key Data file?</h5>
+                            <p>
+                              If you provide a Key Data file here that you exported from another Morio
+                              instance, this Morio instance will be set up with the same cryptographic
+                              DNA.
+                              <br />
+                              This allows running Morio in a blue/green deployment.
+                            </p>
+                          </Popout>,
+                        ],
+                    'Certificate Authority': [
+                      {
+                        key: 'TMP.subca',
+                        schema: Joi.bool().label('Morio CA'),
+                        inputType: 'buttonList',
+                        title: 'Node vs Cluster',
+                        current: false,
+                        activeIcon:
+                          context.TMP?.subca === false ? (
+                              <CertificateIcon className="w-b w-8" />
+                          ) : (
+                            <PuzzleIcon className="w-b -w-8" />
+                          ),
+                        list: [
+                          {
+                            val: false,
+                            label: 'Create an independent Certificate Authority',
+                            about: context.TMP.subca ? false : (
+                              <>
+                                Set up Morio as a stand-alone Certificate Authority (CA)
+                                <ul className="list list-inside list-disc text-small ml-2 mt-1">
+                                  <li>Easiest setup</li>
+                                  <li>You need to add Morio&apos;s CA to your clients&apos; trust store</li>
+                                </ul>
+                              </>
+                            ),
+                          },
+                          {
+                            val: true,
+                            label: 'Create a subordinate Certificate Authority',
+                            about: (
+                              <>
+                                Set up Morio as a subordinate to an existing Certificate Authority  (CA)
+                                <ul className="list list-inside list-disc text-small ml-2 mt-1">
+                                  <li>More setup steps</li>
+                                  <li>You can benefit from existing trust in your clients&apos; trust store</li>
+                                </ul>
+                              </>
+                            ),
+                          },
+                        ],
                       },
-                      <Popout tip key="c">
-                        <h5>What is a Key Data file?</h5>
-                        <p>
-                          If you provide a Key Data file here that you exported from another Morio
-                          instance, this Morio instance will be set up with the same cryptographic
-                          DNA.
-                          <br />
-                          This allows running Morio in a blue/green deployment.
-                        </p>
-                      </Popout>,
+                      context.TMP.subca ? (
+                        <Popout fixme key="w">
+                          <h5>CA config here</h5>
+                        </Popout>
+                      ) : (
+                        <Popout tip key="c">
+                          <h5>Can you trust the Morio Certificate Authority?</h5>
+                          <p>
+                            Morio relies on <a
+                            href="https://en.wikipedia.org/wiki/X.509">X.509 certificates</a> for
+                            both <b>encryption</b> and <b>authentication</b>.
+                            Whether you should also trust its CA is <a
+                              href="https://morio.it/docs/guides/services/ca/#can-you-trust-the-morio-certificate-authority">
+                              a different matter altogether
+                            </a>.
+                          </p>
+                        </Popout>
+                      ),
                     ]
-              ),
+                  },
+                }
+              ]
             },
           },
         ],
@@ -320,7 +383,7 @@ export const cluster = (context, toggleValidate, update) => {
     },
   }
 
-  if (!context.TMP?.showMoreOptions) delete template.children.setup.form[0].tabs['Key Data']
+  if (!context.TMP?.showMoreOptions) delete template.children.setup.form[0].tabs.Advanced
   if (!context.TMP?.node_count || context.TMP.node_count < 2) {
     delete template.children.setup.form[0].tabs.Cluster
   }

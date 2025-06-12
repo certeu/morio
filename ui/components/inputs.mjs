@@ -405,7 +405,10 @@ export const ListInput = ({
               <div className="w-full text-lg leading-5">{item.label}</div>
               {item.about ? (
                 <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
-                  <Markdown>{item.about}</Markdown>
+                  {typeof item.about === 'string'
+                    ? <Markdown>{item.about}</Markdown>
+                    : item.about
+                  }
                 </div>
               ) : null}
               <div className="flex flex-row gap-1 flex-wrap items-center justify-around">
@@ -439,7 +442,10 @@ export const ListInput = ({
               </div>
               {item.about ? (
                 <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
-                  <Markdown>{item.about}</Markdown>
+                  {typeof item.about === 'string'
+                    ? <Markdown>{item.about}</Markdown>
+                    : item.about
+                  }
                 </div>
               ) : null}
             </ButtonFrame>
