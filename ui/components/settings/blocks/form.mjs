@@ -130,11 +130,21 @@ export const FormBlock = (props) => {
                 id={formEl.key}
               />
             )
+          if (formEl.div && formEl.form) {
+            return (
+              <div className={formEl.className || ''} key={i}>
+                <FormBlock {...props} form={formEl.form} />
+              </div>
+            )
+          }
           else return <p key={i}>formEl.schema is no schema</p>
         }
         if (typeof formEl === 'function')
           return <FormBlock {...props} form={formEl(props)} key={i} />
-        else return <p key={i}>Not sure what to do with {i}</p>
+        else {
+          console.log({formEl, i})
+          return <p key={i}>Not sure what to do with {i}</p>
+        }
       })}
     </>
   )

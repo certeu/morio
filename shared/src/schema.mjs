@@ -210,6 +210,18 @@ const preseed = Joi.alternatives().try(
 )
 
 /*
+ * The Morio prekey object
+ */
+const prekey = Joi.object({
+  ca: Joi.object({
+    state: Joi.string(),
+    locality: Joi.string(),
+    organization: Joi.string(),
+    unit: Joi.string(),
+  })
+})
+
+/*
  * The Morio settings object
  */
 const settings = Joi.object({
@@ -267,6 +279,7 @@ const settings = Joi.object({
   preseed,
   client,
   tap: Joi.object().optional(),
+  subca: Joi.object().optional(),
 }).required()
 
 /**

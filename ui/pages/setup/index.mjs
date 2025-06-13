@@ -41,7 +41,7 @@ export const EphemeralWrapper = ({ children }) => {
   }, [])
 
   return ephemeral === false ? (
-    <div className="flex flex-col justify-center h-screen py-2 mx-auto max-w-xl">
+    <div className="flex flex-col justify-center min-h-screen h-full py-2 mx-auto max-w-2xl">
       <div>
         <h1 className="flex flex-row gap-2 items-center justify-between">
           <MorioIcon className="w-12 h-12 text-primary" />
@@ -78,7 +78,7 @@ const ConfigWizardPage = (props) => {
     <PageWrapper {...props} layout={SplashLayout} header={false} footer={false} role={false}>
       <div className="px-4">
         <EphemeralWrapper>
-          <div className="flex flex-col justify-between h-screen py-2 mx-auto max-w-xl">
+          <div className="flex flex-col justify-between min-h-screen h-full py-2 mx-auto max-w-2xl">
             <span> </span>
             <div>
               <h1 className="flex flex-row gap-2 items-center justify-between">

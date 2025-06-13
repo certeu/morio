@@ -135,7 +135,7 @@ const SettingsUploadPage = (props) => {
       {error ? <pre>{JSON.stringify(error, null, 2)}</pre> : null}
       <div className="px-4">
         <EphemeralWrapper>
-          <div className="flex flex-col justify-between h-screen py-2 mx-auto max-w-xl">
+          <div className="flex flex-col justify-between min-h-screen h-full py-2 mx-auto max-w-xl">
             <span> </span>
             <div>
               <h1 className="flex flex-row gap-2 items-center justify-between">
