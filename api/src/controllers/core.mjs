@@ -198,6 +198,33 @@ Controller.prototype.setup = async function (req, res) {
 }
 
 /**
+ * Handles the generation of prekey data
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.prekey = async function (req, res) {
+  /*
+   * This route is only accessible when running in ephemeral mode
+   */
+  if (!utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', req.url)
+
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.prekey`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+
+
+  return res.send({ do: 'stuff'})
+}
+
+/**
  * Deploys new settings
  *
  * @param {object} req - The request object from Express

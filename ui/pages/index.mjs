@@ -62,7 +62,7 @@ const Setup = ({ pageProps }) => {
   return (
     <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false} role={false}>
       <div className="px-4">
-        <div className="flex flex-col justify-between h-screen py-2 mx-auto max-w-xl">
+        <div className="flex flex-col justify-between min-h-screen h-full py-2 mx-auto max-w-xl">
           <span> </span>
           <div>
             <h1 className="flex flex-row gap-2 items-center justify-between">
@@ -139,7 +139,7 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
   if (status === null)
     return (
       <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false}>
-        <div className="flex flex-col items-center justify-between h-screen">
+        <div className="flex flex-col items-center justify-between min-h-screen h-full">
           <span> </span>
           <div className="flex flex-col gap-2 text-center">
             <h5 className="font-bold">MORIO</h5>
