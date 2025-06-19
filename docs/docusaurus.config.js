@@ -169,6 +169,15 @@ const config = {
         additionalLanguages: ['yaml'],
       },
       algolia: {
+        /*
+         * This appID and apiKey are NOT secret.
+         * They are the account ID and public (read-only) access key
+         * to access the Algolia backend which powers the search on morio.it
+         * This is all public data, essentially the indexed contents of the website
+         * and reading this data via the API is not only allowed, it is required for search.
+         *
+         * So rest assured, this is here intentionally.
+         */
         appId: 'UZ39NUY47C',
         apiKey: 'f502f6d4701c9fbc8b735157198fbc0f',
         indexName: 'morio',
