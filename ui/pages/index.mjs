@@ -59,7 +59,6 @@ const Setup = ({ pageProps, status }) => {
   const { theme, toggleTheme } = useTheme()
   const { pushModal } = useContext(ModalContext)
 
-
   return (
     <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false} role={false}>
       <div className="px-4">
@@ -80,10 +79,7 @@ const Setup = ({ pageProps, status }) => {
                 )}
               </button>
             </h1>
-            {status?.core?.node?.subca_csr
-              ? <SubcaSetup />
-              : <NormalSetup />
-            }
+            {status?.core?.node?.subca_csr ? <SubcaSetup /> : <NormalSetup />}
           </div>
           <div>
             <p className="text-sm text-center">
@@ -117,7 +113,6 @@ const Setup = ({ pageProps, status }) => {
     </PageWrapper>
   )
 }
-
 
 const SubcaSetup = () => (
   <div className="flex flex-col gap-2 mt-4 mb-24">
@@ -172,7 +167,7 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
         </div>
       </PageWrapper>
     )
-  if (status.state?.ephemeral === true) return <Setup pageProps={pageProps} status={status}/>
+  if (status.state?.ephemeral === true) return <Setup pageProps={pageProps} status={status} />
 
   return children
 }

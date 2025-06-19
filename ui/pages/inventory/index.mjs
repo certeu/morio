@@ -61,20 +61,45 @@ export default function InventoryPage() {
       <ContentWrapper {...meta}>
         <div className="stats shadow w-full grid grid-cols-3 mb-2">
           <Stat title="Groups" nr={data?.groups} Icon={GroupIcon} link="/inventory/groups" />
-          <Stat title="Group Vars" nr={data?.groupvars} Icon={GroupvarIcon} link="/inventory/groupvars" />
+          <Stat
+            title="Group Vars"
+            nr={data?.groupvars}
+            Icon={GroupvarIcon}
+            link="/inventory/groupvars"
+          />
           <Stat title="Hosts" nr={data?.hosts} Icon={ServersIcon} link="/inventory/hosts" />
-          <Stat title="Host Vars" nr={data?.hostvars} Icon={HostvarIcon} link="/inventory/hostvars" />
+          <Stat
+            title="Host Vars"
+            nr={data?.hostvars}
+            Icon={HostvarIcon}
+            link="/inventory/hostvars"
+          />
         </div>
         <div className="stats shadow w-full grid grid-cols-4 mb-2">
           <Stat title="IP Addresses" nr={data?.ips} Icon={LocationIcon} link="/inventory/ips" />
           <Stat title="MAC Addresses" nr={data?.macs} Icon={HardwareIcon} link="/inventory/macs" />
           <Stat title="Morio Modules" nr={data?.mods} Icon={PuzzleIcon} link="/inventory/mods" />
-          <Stat title="Module Files" nr={data?.modfiles} Icon={CodeIcon} link="/inventory/modfiles" />
+          <Stat
+            title="Module Files"
+            nr={data?.modfiles}
+            Icon={CodeIcon}
+            link="/inventory/modfiles"
+          />
         </div>
         <div className="stats shadow w-full grid grid-cols-3 mb-2">
-          <Stat title="Module Vars" nr={data?.modvars} Icon={ModulevarIcon} link="/inventory/modvars" />
+          <Stat
+            title="Module Vars"
+            nr={data?.modvars}
+            Icon={ModulevarIcon}
+            link="/inventory/modvars"
+          />
           <Stat title="Operating Systems" nr={data?.oss} Icon={WindowIcon} link="/inventory/oss" />
-          <Stat title="Software Packages" nr={data?.pkgs} Icon={PackageIcon} link="/inventory/pkgs" />
+          <Stat
+            title="Software Packages"
+            nr={data?.pkgs}
+            Icon={PackageIcon}
+            link="/inventory/pkgs"
+          />
         </div>
         <ReloadDataButton onClick={() => setCount(count + 1)} />
       </ContentWrapper>

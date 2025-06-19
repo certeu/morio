@@ -207,7 +207,7 @@ Controller.prototype.subcaSetup = async function (req, res) {
   await writeKeyData(keys, valid.serial)
 
   /*
-   * Now write key data to disk
+   * Then write node data to disk
    */
   await writeNodeData(subcaData.node)
 
@@ -217,7 +217,7 @@ Controller.prototype.subcaSetup = async function (req, res) {
   await writeSettingsData({ ...subcaData.settings, subca: undefined }, valid.serial)
 
   /*
-   * Finally, update the CA config with teh new keys
+   * Finally, update the CA config with the new keys
    */
   await ensureCaConfig(keys)
 
@@ -398,7 +398,7 @@ const initialSetup = async function (req, settings) {
     if (!preseededSettings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.settings.setup`, preseededSettings)
   } else {
-    [valid, err] = await utils.validate(`req.settings.setup`, settings)
+    ;[valid, err] = await utils.validate(`req.settings.setup`, settings)
   }
 
   if (!valid?.cluster)

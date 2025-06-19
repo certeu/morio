@@ -154,7 +154,7 @@ Controller.prototype.setup = async function (req, res) {
     if (!settings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.setup`, settings)
   } else {
-    [valid, err] = await utils.validate(`req.setup`, body)
+    ;[valid, err] = await utils.validate(`req.setup`, body)
   }
 
   if (!valid) {
@@ -221,8 +221,9 @@ Controller.prototype.subcaSetup = async function (req, res) {
   }
 
   /*
-   * There is no further validation here, as the pending settings are not in the request
-   * However, they were validated prior, so we just pass this on to core.
+   * There is no further validation here, as the pending settings
+   * are not in the request and they were validated prior.
+   * So we just pass this on to core.
    *
    * This will take a while, and the default REST client times out
    * after 1.5 second, so we pass a custom timeout.
@@ -235,7 +236,7 @@ Controller.prototype.subcaSetup = async function (req, res) {
 }
 
 /**
- * Wipes the initial setup initial setup
+ * Wipes the initial setup settings
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express

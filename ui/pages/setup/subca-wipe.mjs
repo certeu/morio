@@ -78,18 +78,23 @@ const WipeSubcaSettingsPage = (props) => {
               <div>{props.title}</div>
               <WarningIcon className="w-10 h-10 text-error" />
             </h3>
-            <p><b>Current status:</b></p>
+            <p>
+              <b>Current status:</b>
+            </p>
             <PendingStatus {...{ pushModal, serial, csr }} />
             <p className="text-center">
-              <button className="btn btn-error btn-outline mt-4"
+              <button
+                className="btn btn-error btn-outline mt-4"
                 onClick={() =>
                   pushModal(
                     <ModalWrapper bg="error" bgOpacity={80}>
                       <div className="text-center">
-                        <WarningIcon className="mx-auto w-24 h-24 text-error"/>
+                        <WarningIcon className="mx-auto w-24 h-24 text-error" />
                         <h2>There is no way back from this</h2>
                         <p>If you wipe the pending settings, you will need to start over.</p>
-                        <button className="btn btn-error btn-lg" onClick={wipe}>I understand, wipe anyway</button>
+                        <button className="btn btn-error btn-lg" onClick={wipe}>
+                          I understand, wipe anyway
+                        </button>
                         <br />
                         <button className="btn btn-ghost mt-4">Cancel</button>
                       </div>

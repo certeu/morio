@@ -141,7 +141,9 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
                   Below is the Morio Root Token which you can use to authenticate while no (other)
                   authentication provider has been setup.
                 </p>
-                <Highlight title="Morio Root Token (MRT)">{deployResult.root_token?.value}</Highlight>
+                <Highlight title="Morio Root Token (MRT)">
+                  {deployResult.root_token?.value}
+                </Highlight>
               </Popout>
               <p className="text-center">
                 <Link className="btn btn-primary nt-4 btn-lg" href="/">
@@ -155,11 +157,15 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
               <Popout tip>
                 <h5>Have your parent CA sign this CSR</h5>
                 <p>
-                  Below is the Certificate Signing Request (CSR) for the Morio intermediate Certificate Authority (CA).
+                  Below is the Certificate Signing Request (CSR) for the Morio intermediate
+                  Certificate Authority (CA).
                   <br />
-                  You must have this signed by your CA, then return to the home page to complete the pending setup.
+                  You must have this signed by your CA, then return to the home page to complete the
+                  pending setup.
                 </p>
-                <Highlight title="Certificate Signing Request (CSR)">{deployResult.csr.replace(/\r\n/g, "\n")}</Highlight>
+                <Highlight title="Certificate Signing Request (CSR)">
+                  {deployResult.csr.replace(/\r\n/g, '\n')}
+                </Highlight>
               </Popout>
             </>
           ) : null}

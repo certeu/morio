@@ -50,10 +50,11 @@ export const Block = (props) => {
       </Popout>
     ) : (
       <>
-        {props.edit && props.template.lockOnEdit
-          ? <LockedOnEdit />
-          : <Component {...props} {...viewConfig} viewConfig={viewConfig} disabled={disabled} />
-        }
+        {props.edit && props.template.lockOnEdit ? (
+          <LockedOnEdit />
+        ) : (
+          <Component {...props} {...viewConfig} viewConfig={viewConfig} disabled={disabled} />
+        )}
       </>
     )
   } else {

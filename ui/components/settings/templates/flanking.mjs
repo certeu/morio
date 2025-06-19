@@ -40,9 +40,11 @@ const AddFlankingNode = ({ context }) => {
           </div>
           <button
             className="btn btn-primary"
-            disabled={(schema.validate(fqdn)?.error) ? true : false}
+            disabled={schema.validate(fqdn)?.error ? true : false}
             onClick={add}
-          >Add</button>
+          >
+            Add
+          </button>
         </formcontrol>
       </div>
     </>
@@ -77,32 +79,42 @@ const flankingServices = {
     tips: [
       'Run this on a flanking node if possible.',
       'Multiple instances only add value if you want to run healthchecks from different origins (eg: different data centres).',
-    ]
-  }
+    ],
+  },
 }
 
 const updateServiceLocation = ({ service, val, node, context }) => {
   // Cache service is special because it can only run in 1 place
   if (service === 'cache') context.update(`flanking_services.${service}.nodes`, val ? [node] : [])
-  else context.update(
-    `flanking_services.${service}.nodes`,
-    arrayMembers((context.mSettings.flanking_services?.[service]?.nodes || []), (val ? 'add' : 'del'), node)
-  )
+  else
+    context.update(
+      `flanking_services.${service}.nodes`,
+      arrayMembers(
+        context.mSettings.flanking_services?.[service]?.nodes || [],
+        val ? 'add' : 'del',
+        node
+      )
+    )
 }
 
 const FlankingNodeForm = ({ node, context }) => {
-
   return (
     <div className="">
       <details className="bg-primary/20 rounded mt-4 open:bg-transparent open:border-l-4 open:shadow hover:bg-primary/30 open:hover:bg-transparent open:cusor-default border-primary group">
         <summary className="flex flex-row gap-2 items-center justify-between hover:cursor-pointer px-2 group-open:bg-primary/20">
-          <h6><span className="text-xs opacity-70">Flanking Node:</span> {node}</h6>
+          <h6>
+            <span className="text-xs opacity-70">Flanking Node:</span> {node}
+          </h6>
         </summary>
         <div className="p-2">
           <h5>Flanking Services</h5>
           <p>You can choose which (flanking) services you want to run on this node.</p>
           {Object.entries(flankingServices).map(([service, info]) => {
-            const enabled = (context.mSettings.flanking_services?.[service]?.nodes || []).includes(node) ? true : false
+            const enabled = (context.mSettings.flanking_services?.[service]?.nodes || []).includes(
+              node
+            )
+              ? true
+              : false
 
             return (
               <>
@@ -111,9 +123,9 @@ const FlankingNodeForm = ({ node, context }) => {
                   <div className="mb-4">
                     <span className="font-bold">{info.desc}</span>
                     <ul className="list list-inside ml-2 list-disc text-sm">
-                      {info.tips.map(tip => (
+                      {info.tips.map((tip) => (
                         <li key={tip} className="flex flex-row items-start gap-2">
-                          <TipIcon className="w-4 h-4 text-success"/> {tip}
+                          <TipIcon className="w-4 h-4 text-success" /> {tip}
                         </li>
                       ))}
                     </ul>
@@ -126,7 +138,7 @@ const FlankingNodeForm = ({ node, context }) => {
                         { val: false, label: 'Disabled' },
                       ]}
                       current={enabled}
-                      dir='row'
+                      dir="row"
                       dense={true}
                       activeIcon={enabled ? <BoolYesIcon /> : <BoolNoIcon />}
                     />
@@ -152,12 +164,13 @@ export const flanking = (context) => {
   for (const node of context.mSettings?.cluster?.flanking_nodes || []) {
     flankingNodes.push(<FlankingNodeForm node={node} context={context} />)
   }
-  if (flankingNodes.length === 0) flankingNodes.push(
-    <Popout note>
-      <h5>This cluster currently has no flanking nodes</h5>
-      To add a flanking node, click the <b>Add a flanking node</b> button below.
-    </Popout>
-  )
+  if (flankingNodes.length === 0)
+    flankingNodes.push(
+      <Popout note>
+        <h5>This cluster currently has no flanking nodes</h5>
+        To add a flanking node, click the <b>Add a flanking node</b> button below.
+      </Popout>
+    )
 
   const template = {
     title: 'Flanking Services',
@@ -169,13 +182,15 @@ export const flanking = (context) => {
         form: [
           '### Flanking nodes',
           ...flankingNodes,
-          <p className="text-center" key='p'>
+          <p className="text-center" key="p">
             <button
-              onClick={() => context.pushModal((
-                <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-                  <AddFlankingNode context={context} />
-                </ModalWrapper>
-              ))}
+              onClick={() =>
+                context.pushModal(
+                  <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+                    <AddFlankingNode context={context} />
+                  </ModalWrapper>
+                )
+              }
               className="btn btn-primary"
             >
               Add a flanking node

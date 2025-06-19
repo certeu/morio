@@ -213,7 +213,7 @@ Controller.prototype.validateSubca = async function (req, res) {
   }
 
   /*
-   * We need to pass this to core for validate
+   * We need to pass this to core for validation
    */
   const result = await utils.coreClient.post(`/validate/subca`, valid)
 

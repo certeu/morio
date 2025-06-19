@@ -141,7 +141,10 @@ export const FormBlock = (props) => {
             return (
               <details className={`group ${formEl.className?.details || ''}`} key={i}>
                 <summary className="flex flex-row items-center gap-4 pl-2 p-1 pr-0 hover:cursor-pointer">
-                  <RightIcon stroke={3} className="w-6 h-6 pt-1 transition-transform group-open:rotate-90 group-hover:text-secondary" />
+                  <RightIcon
+                    stroke={3}
+                    className="w-6 h-6 pt-1 transition-transform group-open:rotate-90 group-hover:text-secondary"
+                  />
                   {formEl.summary}
                 </summary>
                 <div className="ml-4 border-l-2 pl-4 py-2">
@@ -149,13 +152,12 @@ export const FormBlock = (props) => {
                 </div>
               </details>
             )
-          }
-          else return <p key={i}>formEl.schema is no schema</p>
+          } else return <p key={i}>formEl.schema is no schema</p>
         }
         if (typeof formEl === 'function')
           return <FormBlock {...props} form={formEl(props)} key={i} />
         else {
-          console.log({formEl, i})
+          console.log({ formEl, i })
           return <p key={i}>Not sure what to do with {i}</p>
         }
       })}

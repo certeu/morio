@@ -231,7 +231,7 @@ async function getKeysSerial(updateState = true) {
 }
 
 /*
- * Find the most recent keys serial file that exists on disk
+ * Find the most recent subca serial file that exists on disk
  */
 async function getSubcaSerial() {
   return await getConfigFileSerial('subca')
