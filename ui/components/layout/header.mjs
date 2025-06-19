@@ -118,6 +118,9 @@ export const Header = ({
                 <NavButton href="/actions" label="Actions" active={isActive('/actions', asPath)}>
                   Actions
                 </NavButton>
+                <NavButton href="/eda" label="EdA" active={isActive('/eda', asPath)}>
+                  Automation
+                </NavButton>
                 <NavButton href="/boards" label="Dashboards" active={isActive('/boards', asPath)}>
                   Dashboards
                 </NavButton>

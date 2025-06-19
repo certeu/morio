@@ -36,6 +36,7 @@ import {
   PackageIcon,
   PlusCircleIcon,
   PuzzleIcon,
+  RobotIcon,
   WindowIcon,
   QuestionIcon,
   RightIcon,
@@ -67,6 +68,7 @@ const icons = {
   actions: WrenchIcon,
   api: CodeIcon,
   audit: FingerprintIcon,
+  eda: RobotIcon,
   boards: FlipoverIcon,
   broker: RedPanda,
   ca: CertificateIcon,
@@ -145,6 +147,10 @@ export const links = {
         r: 'operator',
       },
     },
+  },
+  eda: {
+    t: 'Automation',
+    r: 'operator',
   },
   boards: {
     t: 'Dashboards',
