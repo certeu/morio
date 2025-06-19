@@ -161,6 +161,24 @@ utils.getCacheNode = () => {
 utils.getCaConfig = () => store.get('config.ca')
 
 /**
+ * Helper method to get the CA trust chain
+ *
+ * The return will depend:
+ * - Normal setup: intermediate certificate + root certificate
+ * - SubCA setup: intermediate certificate + trust chain
+ *
+ * @return {string} chain - The trust chain
+ */
+utils.getCaTrustChain = () => {
+  const keys = utils.getKeys()
+  const chain = [keys.icrt]
+  if (keys.chain) chain.push(keys.chain)
+  else chain.push(keys.rcrt)
+
+  return chain.join('\n')
+}
+
+/**
  * Helper method to get the FQDN of the cluster
  */
 utils.getClusterFqdn = () => {
@@ -503,6 +521,20 @@ utils.getStartTime = () => store.get('state.start_time')
  * @return {number} time - The timestamp of when core was started
  */
 utils.getStatus = () => store.get('status')
+
+/**
+ * Helper method to get the subca_csr
+ *
+ * @return {string} CSR - The subca CSR
+ */
+utils.getSubcaCsr = () => store.get('state.subca_csr', false)
+
+/**
+ * Helper method to get the subca_serial
+ *
+ * @return {number} serial - The subca serial
+ */
+utils.getSubcaSerial = () => store.get('state.subca_serial', false)
 
 /**
  * Helper method to get the Morio uptime (in seconds)
@@ -973,6 +1005,28 @@ utils.setSettingsSerial = (serial) => {
 }
 
 /**
+ * Helper method to store the subca CSR
+ *
+ * @param {string} csr - The subca CSR
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSubcaCsr = (csr) => {
+  store.set('state.subca_csr', csr || false)
+  return utils
+}
+
+/**
+ * Helper method to store the subca serial
+ *
+ * @param {number|bool} serial - The subca serial, or false if there is none
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSubcaSerial = (serial) => {
+  store.set('state.subca_serial', Number(serial))
+  return utils
+}
+
+/**
  * Helper method to set the Morio version
  *
  * @param {string} version - The version number/string
@@ -1240,6 +1294,19 @@ utils.apiClient = restClient(
   }
 )
 
+/*
+ * Encrypt tokens
+ *
+ * @param {object} secrets - the tokens to encrypt
+ * @return {object} secrets - the encrypted tokens
+ */
+utils.ensureTokenSecrecy = (secrets) => {
+  for (let [key, val] of Object.entries(secrets)) {
+    if (!val?.vault && !utils.isEncrypted(val)) secrets[key] = utils.encrypt(val)
+  }
+
+  return secrets
+}
 /**
  * Used in resolveServiceConfiguration
  */

@@ -5,6 +5,7 @@ import { schemaViolation } from '#lib/response'
 import { keypairAsJwk, hashPassword } from '#shared/crypto'
 import { generateRootToken, formatRootTokenResponseData } from '../lib/crypto.mjs'
 import { writeJsonFile } from '#shared/fs'
+import forge from 'node-forge'
 
 /**
  * This crypto controller handles cryptography routes
@@ -136,4 +137,108 @@ Controller.prototype.rotateRootToken = async function (req, res) {
   utils.setKeysSerial(newKeysSerial)
 
   return res.send({ root_token: formatRootTokenResponseData(mrt) })
+}
+
+/**
+ * Validate the subca certificate against the CSR on disk
+ *
+ * This is only used when setting up Morio as a
+ * subordinate certificate authority.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.validateSubca = async function (req, res) {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await validate(`req.subca`, req.body)
+  if (!valid) return schemaViolation(err, res)
+
+  const report = await validateSubcaCertificate(valid.serial, valid.certificate)
+
+  return res.send(report)
+}
+
+/**
+ * Validate a CSR (intended for subca)
+ *
+ * @param {number} serial - The serial to validate
+ * @param {string} certificate - The certificate to validate
+ * @return {object} report - A report with findings
+ */
+async function validateSubcaCertificate(serial, certificate) {
+  // This object will hold our report
+  const report = {
+    valid: true,
+    success: [],
+    error: [],
+  }
+
+  // Validate serial
+  if (serial === utils.getSubcaSerial())
+    report.success.push(`The provided serial matches the most recent CSR`)
+  else {
+    report.valid = false
+    report.error.push(`The provided serial does not match the serial for the most recent CSR`)
+
+    return report
+  }
+
+  try {
+    const cert = forge.pki.certificateFromPem(certificate)
+    const csr = forge.pki.certificationRequestFromPem(utils.getSubcaCsr())
+
+    // Check public key match
+    const certPubKey = cert.publicKey
+    const csrPubKey = csr.publicKey
+
+    if (
+      certPubKey.n.toString() === csrPubKey.n.toString() &&
+      certPubKey.e.toString() === csrPubKey.e.toString()
+    ) {
+      report.success.push(`The public key matches`)
+    } else {
+      report.error.push(`Public key mismatch between the certificate and the CSR`)
+
+      return report
+    }
+
+    // Check if it's a CA certificate
+    const basicConstraints = cert.getExtension('basicConstraints')
+    if (basicConstraints && basicConstraints.cA === true) {
+      report.success.push('The certificate is a proper CA certificate')
+    } else {
+      report.error.push('The provided certificate is not a CA certificate')
+
+      return report
+    }
+
+    // Check key usage for CA extensions
+    const keyUsage = cert.getExtension('keyUsage')
+    if (keyUsage && keyUsage.keyCertSign && keyUsage.cRLSign) {
+      report.success.push(`The certificate's keyUsage extension includes the keyCertSign ability`)
+      report.success.push(`The certificate's keyUsage extension includes the cRLSign ability`)
+    } else {
+      report.valid = false
+      if (!keyUsage.keyCertSign)
+        report.error.push(`The certificate's keyUsage extension lacks the keyCertSign ability`)
+      else
+        report.success.push(`The certificate's keyUsage extension includes the keyCertSign ability`)
+      if (!keyUsage.cRLSign)
+        report.error.push(`The certificate's keyUsage extension lacks the cRLSign ability`)
+      else report.success.push(`The certificate's keyUsage extension includes the cRLSign ability`)
+
+      return report
+    }
+  } catch (error) {
+    report.error.push('Failed to validate certificate')
+
+    return report
+  }
+
+  // If we got here, we're good
+  report.valid = true
+
+  return report
 }

@@ -57,10 +57,16 @@ export function routes(app) {
   app.post(`/setup`, Core.setup)
 
   /*
-   * Endpoint to pre-generate the cryptographic key data prior to setup
-   * This is required to allow making the Morio CA a subordinate CA
+   * API route for continuing a subca setup of a Morio instance
+   * Note: This is a public/anonymous route, but will only work in ephemeral state
    */
-  app.post(`/prekey`, Core.prekey)
+  app.patch(`/setup`, Core.subcaSetup)
+
+  /*
+   * API route to wipe the initial setup of a Morio instance
+   * Note: This is a public/anonymous route, but will only work in ephemeral state with a subca setup
+   */
+  app.delete(`/setup`, Core.wipe)
 
   /*
    * API route to update (replace) Morio settings

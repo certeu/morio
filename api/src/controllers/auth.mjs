@@ -32,6 +32,7 @@ const allowedUrisBase = [
   `/status`,
   `/up`,
   `/validate/settings`,
+  `/validate/subca`,
 ]
 
 const blockedUris = [

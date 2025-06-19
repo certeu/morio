@@ -2,7 +2,7 @@ import { writeFile } from '@itsmorio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@itsmorio/config'
 import { pullConfig } from '@itsmorio/config'
 import { Store } from '@itsmorio/shared/store'
-import pkg from '../package.json' assert { type: 'json' }
+import pkg from '../package.json' with { type: 'json' }
 import { MORIO_GIT_ROOT, MORIO_DOCKER_LOG_DRIVER, MORIO_DOCKER_ADD_HOST } from '../config/cli.mjs'
 
 /*

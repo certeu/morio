@@ -35,7 +35,14 @@ Controller.prototype.getReloadData = async function (req, res) {
     data.sanitized_settings = utils.getSanitizedSettings()
     data.settings = utils.getSettings()
     data.keys = utils.getKeys()
-  }
+  } else
+    data.subca = utils.getSubcaSerial()
+      ? {
+          serial: utils.getSubcaSerial(),
+          csr: utils.getSubcaCsr(),
+        }
+      : false
+
   data.presets = utils.getPresets()
 
   return res.status(200).send(data)
@@ -45,6 +52,7 @@ Controller.prototype.getReloadData = async function (req, res) {
  * Helper method to construct the status object
  */
 function getStatus() {
+  const ephemeral = utils.isEphemeral()
   const data = {
     info: utils.getInfo(),
     status: {
@@ -57,11 +65,13 @@ function getStatus() {
     nodes: utils.getClusterNodes(),
     node: {
       uptime: utils.getUptime(),
-      cluster: utils.isEphemeral() ? undefined : utils.getClusterUuid(),
-      node: utils.isEphemeral() ? undefined : utils.getNodeUuid(),
-      node_serial: utils.isEphemeral() ? undefined : utils.getNodeSerial(),
-      ephemeral: utils.isEphemeral(),
-      ephemeral_uuid: utils.isEphemeral() ? utils.getEphemeralUuid() : undefined,
+      cluster: ephemeral ? undefined : utils.getClusterUuid(),
+      node: ephemeral ? undefined : utils.getNodeUuid(),
+      node_serial: ephemeral ? undefined : utils.getNodeSerial(),
+      ephemeral,
+      ephemeral_uuid: ephemeral ? utils.getEphemeralUuid() : undefined,
+      subca_serial: ephemeral ? utils.getSubcaSerial() : undefined,
+      subca_csr: ephemeral ? utils.getSubcaCsr() : undefined,
       reload_count: utils.getReloadCount(),
       config_resolved: utils.isConfigResolved(),
       settings_serial: utils.getSettingsSerial(),

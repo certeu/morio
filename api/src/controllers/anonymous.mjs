@@ -186,5 +186,38 @@ Controller.prototype.validateSettings = async function (req, res) {
    */
   const report = await validateSettings(req.body, req.headers)
 
-  return res.send(report).end()
+  return report
+    ? res.send(report).end()
+    : utils.sendErrorResponse(res, 'morio.api.internal.error', req.url)
+}
+
+/**
+ * Validate Morio subca certificate
+ *
+ * This checks whether the certificate matches the CSR
+ * that was generated when setting up Morio as a
+ * subordinate certificate authority.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.validateSubca = async function (req, res) {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await utils.validate(`req.subca`, req.body)
+  if (!valid) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  }
+
+  /*
+   * We need to pass this to core for validate
+   */
+  const result = await utils.coreClient.post(`/validate/subca`, valid)
+
+  return result[1]
+    ? res.send(result[1]).end()
+    : utils.sendErrorResponse(res, 'morio.api.internal.error', req.url)
 }

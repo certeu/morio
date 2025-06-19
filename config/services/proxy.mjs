@@ -139,14 +139,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
             //`${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/proxy:/etc/morio/proxy`,
             `${utils.getPreset('MORIO_DATA_ROOT')}/proxy/entrypoint.sh:/entrypoint.sh`,
-            `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/downloads/certs:/usr/local/share/ca-certificates`,
           ]
         : [
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/logs:/var/log/morio`,
             //`${utils.getPreset('MORIO_GIT_ROOT')}/data/config/shared:/etc/morio/shared`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/proxy:/etc/morio/proxy`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/downloads/certs:/usr/local/share/ca-certificates`,
           ],
       // Command
       command: [

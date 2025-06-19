@@ -20,6 +20,12 @@ export async function reload(hookParams = {}) {
   utils.beginReload()
 
   /*
+   * Wipe state that should not survive a reload
+   */
+  delete utils.encrypt
+  delete utils.decrypt
+
+  /*
    * This will (re)start all services if that is needed
    */
   await startMorio(hookParams)

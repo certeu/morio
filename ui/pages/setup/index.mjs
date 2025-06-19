@@ -78,53 +78,55 @@ const ConfigWizardPage = (props) => {
     <PageWrapper {...props} layout={SplashLayout} header={false} footer={false} role={false}>
       <div className="px-4">
         <EphemeralWrapper>
-          <div className="flex flex-col justify-between min-h-screen h-full py-2 mx-auto max-w-2xl">
+          <div className="flex flex-col justify-start min-h-screen h-full py-2 mx-auto max-w-2xl">
+            <div className="mt-24">
+              <div>
+                <h1 className="flex flex-row gap-2 items-center justify-between">
+                  <MorioIcon className="w-12 h-12 text-primary" />
+                  <div className="text-4xl text-center">Welcome to Morio</div>
+                  <button onClick={toggleTheme} title="Switch between dark and light mode">
+                    {theme === 'dark' ? (
+                      <LightThemeIcon className="w-12 h-12 text-accent hover:text-warning" />
+                    ) : (
+                      <DarkThemeIcon className="w-12 h-12 text-warning hover:text-accent" />
+                    )}
+                  </button>
+                </h1>
+              </div>
+              <DynamicSetupWizard />
+              <div>
+                <p className="text-sm text-center">
+                  <button
+                    onClick={() =>
+                      pushModal(
+                        <ModalWrapper>
+                          <EphemeralInfo />
+                        </ModalWrapper>
+                      )
+                    }
+                    className="btn btn-warning btn-outline"
+                  >
+                    <div className="flex flex-row gap-4 items-center">
+                      <WarningIcon />
+                      <span>Running in Ephemeral State</span>
+                      <WarningIcon />
+                    </div>
+                  </button>
+                </p>
+                <p className="text-center opacity-50 text-sm">
+                  <a
+                    href="https://cert.europa.eu/"
+                    className="text-base-content hover:text-primary"
+                    title="To the CERT-EU website"
+                  >
+                    <b>MORIO</b>
+                    <span className="px-2">by</span>
+                    <b>CERT-EU</b>
+                  </a>
+                </p>
+              </div>
+            </div>
             <span> </span>
-            <div>
-              <h1 className="flex flex-row gap-2 items-center justify-between">
-                <MorioIcon className="w-12 h-12 text-primary" />
-                <div className="text-4xl text-center">Welcome to Morio</div>
-                <button onClick={toggleTheme} title="Switch between dark and light mode">
-                  {theme === 'dark' ? (
-                    <LightThemeIcon className="w-12 h-12 text-accent hover:text-warning" />
-                  ) : (
-                    <DarkThemeIcon className="w-12 h-12 text-warning hover:text-accent" />
-                  )}
-                </button>
-              </h1>
-            </div>
-            <DynamicSetupWizard />
-            <div>
-              <p className="text-sm text-center">
-                <button
-                  onClick={() =>
-                    pushModal(
-                      <ModalWrapper>
-                        <EphemeralInfo />
-                      </ModalWrapper>
-                    )
-                  }
-                  className="btn btn-warning btn-outline"
-                >
-                  <div className="flex flex-row gap-4 items-center">
-                    <WarningIcon />
-                    <span>Running in Ephemeral State</span>
-                    <WarningIcon />
-                  </div>
-                </button>
-              </p>
-              <p className="text-center opacity-50 text-sm">
-                <a
-                  href="https://cert.europa.eu/"
-                  className="text-base-content hover:text-primary"
-                  title="To the CERT-EU website"
-                >
-                  <b>MORIO</b>
-                  <span className="px-2">by</span>
-                  <b>CERT-EU</b>
-                </a>
-              </p>
-            </div>
           </div>
         </EphemeralWrapper>
       </div>

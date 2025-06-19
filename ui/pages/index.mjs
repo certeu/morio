@@ -55,9 +55,10 @@ export const EphemeralInfo = () => (
   </div>
 )
 
-const Setup = ({ pageProps }) => {
+const Setup = ({ pageProps, status }) => {
   const { theme, toggleTheme } = useTheme()
   const { pushModal } = useContext(ModalContext)
+
 
   return (
     <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false} role={false}>
@@ -79,16 +80,10 @@ const Setup = ({ pageProps }) => {
                 )}
               </button>
             </h1>
-            <div className="flex flex-col gap-2 mt-4 mb-24">
-              <Link className="btn btn-primary btn-lg" href="/setup">
-                Use the Setup Wizard
-              </Link>
-              <div className="text-center">
-                <Link href="/setup/upload" className="btn btn-ghost">
-                  Upload a Settings File
-                </Link>
-              </div>
-            </div>
+            {status?.core?.node?.subca_csr
+              ? <SubcaSetup />
+              : <NormalSetup />
+            }
           </div>
           <div>
             <p className="text-sm text-center">
@@ -123,6 +118,33 @@ const Setup = ({ pageProps }) => {
   )
 }
 
+
+const SubcaSetup = () => (
+  <div className="flex flex-col gap-2 mt-4 mb-24">
+    <Link className="btn btn-primary btn-lg" href="/setup/subca-complete">
+      Complete Pending Setup
+    </Link>
+    <div className="text-center">
+      <Link href="/setup/subca-wipe" className="btn btn-ghost">
+        Wipe Pending Setup
+      </Link>
+    </div>
+  </div>
+)
+
+const NormalSetup = () => (
+  <div className="flex flex-col gap-2 mt-4 mb-24">
+    <Link className="btn btn-primary btn-lg" href="/setup">
+      Use the Setup Wizard
+    </Link>
+    <div className="text-center">
+      <Link href="/setup/upload" className="btn btn-ghost">
+        Upload a Settings File
+      </Link>
+    </div>
+  </div>
+)
+
 export const NotUnlessSetup = ({ children, pageProps }) => {
   const { api } = useApi()
   const [status, setStatus] = useState(null)
@@ -150,7 +172,7 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
         </div>
       </PageWrapper>
     )
-  if (status.state?.ephemeral === true) return <Setup pageProps={pageProps} />
+  if (status.state?.ephemeral === true) return <Setup pageProps={pageProps} status={status}/>
 
   return children
 }

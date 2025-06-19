@@ -123,7 +123,7 @@ export async function createX509Certificate(data) {
       },
       {
         httpsAgent: new https.Agent({
-          ca: utils.getCaConfig().certificate,
+          ca: utils.getCaTrustChain(),
           keepAlive: false,
         }),
       }
@@ -232,10 +232,7 @@ export async function ensureServiceCertificate(service, internal = false, chain 
       : certAndKey.certificate.crt
   )
   await writeFile(`/etc/morio/${service}/tls-key.pem`, certAndKey.key)
-  await writeFile(
-    `/etc/morio/${service}/tls-ca.pem`,
-    utils.getCaConfig().intermediate + utils.getCaConfig().certificate
-  )
+  await writeFile(`/etc/morio/${service}/tls-ca.pem`, utils.getCaTrustChain())
 
   /*
    * Also write broker certificates to the downloads folder
