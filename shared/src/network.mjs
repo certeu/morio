@@ -155,7 +155,9 @@ export function restClient(api, onError, options={}) {
   })
 
   return {
+    delete: async (url, options={}) => http(mergeOptions({ ...options, method: 'DELETE', url }), onError),
     get: async (url, options={}) => http(mergeOptions({ ...options, url }), onError),
+    patch: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'PATCH', data, url }), onError),
     post: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'POST', data, url }), onError),
     put: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'PUT', data, url }), onError),
   }

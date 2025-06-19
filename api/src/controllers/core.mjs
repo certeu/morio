@@ -154,7 +154,7 @@ Controller.prototype.setup = async function (req, res) {
     if (!settings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.setup`, settings)
   } else {
-    ;[valid, err] = await utils.validate(`req.setup`, body)
+    [valid, err] = await utils.validate(`req.setup`, body)
   }
 
   if (!valid) {
@@ -198,12 +198,12 @@ Controller.prototype.setup = async function (req, res) {
 }
 
 /**
- * Handles the generation of prekey data
+ * Handles the pending subca setup
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.prekey = async function (req, res) {
+Controller.prototype.subcaSetup = async function (req, res) {
   /*
    * This route is only accessible when running in ephemeral mode
    */
@@ -211,17 +211,50 @@ Controller.prototype.prekey = async function (req, res) {
     return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', req.url)
 
   /*
-   * Validate input
+   * Validate request against the schema
    */
-  const [valid, err] = await utils.validate(`req.prekey`, req.body)
-  if (!valid)
+  const [valid, err] = await utils.validate(`req.subca`, req.body)
+  if (!valid) {
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
     })
+  }
 
+  /*
+   * There is no further validation here, as the pending settings are not in the request
+   * However, they were validated prior, so we just pass this on to core.
+   *
+   * This will take a while, and the default REST client times out
+   * after 1.5 second, so we pass a custom timeout.
+   */
+  const [status, result] = await utils.coreClient.patch(`/setup`, bodyPlusHeaders(req), {
+    timeout: 30000,
+  })
 
+  return res.status(status).send(result)
+}
 
-  return res.send({ do: 'stuff'})
+/**
+ * Wipes the initial setup initial setup
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.wipe = async function (req, res) {
+  /*
+   * This route is only accessible when running in ephemeral mode
+   */
+  if (!utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', req.url)
+
+  /*
+   * Pass request to core
+   */
+  const [status] = await utils.coreClient.delete(`/setup`)
+
+  return status === 204
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.internal.error', req.url)
 }
 
 /**

@@ -8,6 +8,7 @@ import {
   keys,
   keysFile,
   mrt,
+  subca,
   version,
   nodeSerial,
   settings,
@@ -101,6 +102,8 @@ export const schema = {
     ct: Joi.string().required(),
   }),
   'req.rotate.mrt': Joi.object({ mrt }),
+  // Subca validation
+  'req.subca': subca,
 
   /*
    * Responses

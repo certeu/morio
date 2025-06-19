@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Added endpoints for the management of inventory assets
 - [cache] Cache service is now available at the cluster level
 - [cache] Enable ACL and authentication for cross-cluster access
+- [core] Added ability to deploy Morio as a subordinate CA
 - [core] Add selective deployment of flanking services
 - [eda] Added the new EdA service for event-driven automation
 - [eda] Implemented custom storage plugin to use Morio's db service

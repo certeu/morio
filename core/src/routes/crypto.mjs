@@ -32,4 +32,9 @@ export function routes(app) {
    * Rotate the root token
    */
   app.post('/rotate/mrt', Crypto.rotateRootToken)
+
+  /*
+   * Validate the subca certificate against the CSR
+   */
+  app.post('/validate/subca', Crypto.validateSubca)
 }

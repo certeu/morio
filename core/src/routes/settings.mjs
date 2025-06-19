@@ -15,6 +15,16 @@ export function routes(app) {
   app.post('/setup', Settings.setup)
 
   /*
+   * Deploy pending subca settings
+   */
+  app.patch('/setup', Settings.subcaSetup)
+
+  /*
+   * Wipe the pending subca settings
+   */
+  app.delete('/setup', Settings.wipeSubca)
+
+  /*
    * Deploy a new set of settings
    */
   app.post('/settings', Settings.deploy)

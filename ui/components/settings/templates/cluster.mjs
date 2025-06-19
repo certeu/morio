@@ -32,8 +32,8 @@ export const cluster = (...params) => {
               Sizing: sizingTab(...params),
               Names: namesTab(...params),
               Cluster: clusterTab(...params),
+              Optional: optTab(...params),
               Validate: validateTab(...params),
-              Advanced: advancedTab(...params),
             },
           },
         ],
@@ -42,7 +42,6 @@ export const cluster = (...params) => {
   }
 
   const [context, toggleValidate] = params
-  if (!context?.TMP?.showMoreOptions) delete template.children.setup.form[0].tabs.Advanced
   if (!context?.TMP?.node_count || context?.TMP?.node_count < 2) {
     delete template.children.setup.form[0].tabs.Cluster
   }
@@ -59,7 +58,7 @@ export const cluster = (...params) => {
   return template
 }
 
-function sizingTab (context) {
+function sizingTab () {
   return [
     `### Choose your deployment size`,
     {
@@ -143,7 +142,7 @@ function namesTab (context) {
   )
 }
 
-function clusterTab(context) {
+function clusterTab() {
   return [
     '### Cluster settings',
     '##### Cluster Name',
@@ -162,11 +161,9 @@ function clusterTab(context) {
   ]
 }
 
-function moriohubTab(context, toggleValidate, update) {
+function optMorioHubTab(context) {
   const withMoriohub = [
     [
-      '###### Load client modules?',
-      '###### Provide live dashboarding?',
       {
         key: 'TMP.moriohub_modules',
         schema: Joi.bool().label('Moriohub Client Modules'),
@@ -193,6 +190,17 @@ function moriohubTab(context, toggleValidate, update) {
         ],
       },
       {
+        div: true,
+        className: "mt-2 ml-2",
+        form: [
+          <>
+            <b>Load Morio client modules</b>
+            <br />
+            <small>Configuration modules for the various agents</small>
+          </>
+        ],
+      },
+      {
         key: 'TMP.moriohub_dashboarding',
         schema: Joi.bool().label('Moriohub Live Dashboarding'),
         inputType: 'buttonList',
@@ -216,77 +224,76 @@ function moriohubTab(context, toggleValidate, update) {
           },
         ],
       },
+      {
+        div: true,
+        className: "mt-2 ml-2",
+        form: [
+          <>
+            <b>Add support for live dashboarding</b>
+            <br />
+            <small>Adds visualisation logic and stream processors</small>
+          </>
+        ],
+      },
     ],
   ]
-  const withoutMoriohub = [
+
+  return [
+    [
+      {
+        key: 'TMP.moriohub',
+        schema: Joi.bool().label('MorioHub Integration'),
+        inputType: 'buttonList',
+        title: 'MorioHub',
+        lockOnEdit: true,
+        dir: 'row',
+        current: false,
+        dense: true,
+        activeIcon: context.TMP?.moriohub ? (
+          <BoolYesIcon size={6} />
+        ) : (
+          <BoolNoIcon size={6} />
+        ),
+        list: [
+          {
+            val: true,
+            label: 'Yes',
+          },
+          {
+            val: false,
+            label: 'No',
+          },
+        ],
+      },
+      {
+        div: true,
+        className: "mt-2 ml-2",
+        form: [
+          <>
+            <b>Enable MorioHub integration</b>
+            <br />
+              <small>Disabled by default, but highly recommended</small>
+          </>
+        ],
+      },
+    ],
+  ].concat(context.TMP?.moriohub ? withMoriohub : [])
+  .concat([
     <Popout tip key="tip">
       <h5>No need to re-invent the observability wheel</h5>
       <p>
         <a href="https://morio.it/hub/" target="_BLANK">
-          Moriohub
+          MorioHub
         </a>{' '}
         is a curated collection of Morio configuration and plugins for various use
         cases.
       </p>
-      <small>
-        We recommend to <b>enable Moriohub integration</b> and load its{' '}
-        <b>client modules</b>. If you would like <b>live dashboarding</b> inside
-        Morio, you should enable that too.
-      </small>
-      <p className="text-center">
-        <button
-          onClick={() => {
-            update([
-              ['TMP.moriohub', true],
-              ['TMP.moriohub_modules', true],
-              ['TMP.moriohub_dashboarding', true],
-            ])
-          }}
-          className="btn btn-primary"
-        >
-          Enable Moriohub Integration
-        </button>
-      </p>
     </Popout>,
-  ]
+  ])
 
-  return [
-    '### Moriohub Integration',
-    '##### Do you want to make Moriohub content available?',
-    <small key="note">
-      This adds{' '}
-      <a href="https://morio.it/hub/" target="_BLANK">
-        Moriohub
-      </a>{' '}
-      as a preseeding source.
-    </small>,
-    {
-      key: 'TMP.moriohub',
-      schema: Joi.bool().label('Moriohub Integration'),
-      inputType: 'buttonList',
-      title: 'Node vs Cluster',
-      lockOnEdit: true,
-      dir: 'row',
-      activeIcon: context.TMP?.moriohub ? (
-        <BoolYesIcon size={8} />
-      ) : (
-        <BoolNoIcon size={8} />
-      ),
-      list: [
-        {
-          val: true,
-          label: 'Yes',
-        },
-        {
-          val: false,
-          label: 'No',
-        },
-      ],
-    },
-  ].concat(context.TMP?.moriohub ? withMoriohub : withoutMoriohub)
 }
 
-function validateTab(context, toggleValidate, update) {
+function validateTab(context, toggleValidate) {
   return [
     '### Pre-flight check: All systems go?',
     'Before we deploy Morio using these settings, we will run a series of validation tests.',
@@ -295,33 +302,32 @@ function validateTab(context, toggleValidate, update) {
       <button className="btn btn-primary btn-lg px-12 mt-4" onClick={toggleValidate}>
         Validate Morio Settings
       </button>
-      <br />
-      <button
-        className="mt-2 btn btn-ghost"
-        onClick={() =>
-          update('TMP.showMoreOptions', context.TMP?.showMoreOptions ? false : true)
-        }
-      >
-        {context.TMP?.showMoreOptions ? 'Hide' : 'Show'} advanced settings
-      </button>
     </p>,
   ]
 }
 
-function advancedTab (...params) {
+function optTab (...params) {
   return [
+    '### Optional settings',
     {
-      linearTabs: true,
-      tabs: {
-        Moriohub: moriohubTab(...params),
-        'Certificate Authority': advancedCaTab(...params),
-        'Key Data': advancedKeydataTab(...params),
-      },
-    }
+      details: true,
+      summary: <h4>Certificate Authority</h4>,
+      form: optCaTab(...params),
+    },
+    {
+      details: true,
+      summary: <h4>Import Key Data</h4>,
+      form: optKeydataTab(...params),
+    },
+    {
+      details: true,
+      summary: <h4>MorioHub Integration</h4>,
+      form: optMorioHubTab(...params),
+    },
   ]
 }
 
-function advancedKeydataTab (context) {
+function optKeydataTab (context) {
   if (context.preseed?.keys?.data) return [<Popout tip title="Key Data file Loaded" compact key="a" />]
 
   return [
@@ -368,25 +374,50 @@ function advancedKeydataTab (context) {
   ]
 }
 
-function advancedCaTab (context) {
+function optCaTab (context) {
   const subit = context?.subca?.enable ? true : false
-  const saca = subit ? [] : [
-    <Popout tip key="c">
-      <h5>Can you trust the Morio Certificate Authority?</h5>
-      <p>
-        Morio relies on <a
-        href="https://en.wikipedia.org/wiki/X.509">X.509 certificates</a> for
-        both <b>encryption</b> and <b>authentication</b>.
-        Whether you should also trust its CA is <a
-          href="https://morio.it/docs/guides/services/ca/#can-you-trust-the-morio-certificate-authority">
-          a different matter altogether
-        </a>.
-      </p>
-    </Popout>
-  ]
-  const subca = subit ? [
-    '#### Optional:  Certificate Authority Properties',
-    <div className="text-success text-sm flex flex-row items-center gap-1">
+
+  return [
+    {
+      key: 'subca.enable',
+      schema: Joi.bool().label('Morio CA'),
+      inputType: 'buttonList',
+      title: 'Node vs Cluster',
+      current: false,
+      activeIcon: subit
+        ? <PuzzleIcon className="w-b -w-8" />
+        : <CertificateIcon className="w-b w-8" />,
+      list: [
+        {
+          val: false,
+          label: 'Create an independent Certificate Authority',
+          about: context?.subca?.enable ? false : (
+            <>
+              Set up Morio as a stand-alone Certificate Authority (CA)
+              <ul className="list list-inside list-disc text-small ml-2 mt-1">
+                <li>Easiest setup</li>
+                <li>To avoid certificate warnings, add Morio&apos;s CA to your clients&apos; trust store</li>
+              </ul>
+            </>
+          ),
+        },
+        {
+          val: true,
+          label: 'Create a subordinate Certificate Authority',
+          about: (
+            <>
+              Set up Morio as a subordinate to an existing Certificate Authority (CA)
+              <ul className="list list-inside list-disc text-small ml-2 mt-1">
+                <li>More setup steps</li>
+                <li>Can benefit from existing trust in your organisation</li>
+              </ul>
+            </>
+          ),
+        },
+      ],
+    },
+    '##### Certificate Authority Properties',
+    <div className="text-success text-sm flex flex-row items-center gap-1" key="tip">
       <TipIcon className="w-5 h-5"/>
       <em>
       Feel free to leave these fields empty (or lie), since they are cosmetic only
@@ -458,50 +489,19 @@ function advancedCaTab (context) {
           schema: Joi.string().label('Country').allow(''),
         },
       ]
-    }
-  ] : []
-
-  return [
-    {
-      key: 'subca.enable',
-      schema: Joi.bool().label('Morio CA'),
-      inputType: 'buttonList',
-      title: 'Node vs Cluster',
-      current: false,
-      activeIcon: subit
-        ? <PuzzleIcon className="w-b -w-8" />
-        : <CertificateIcon className="w-b w-8" />,
-      list: [
-        {
-          val: false,
-          label: 'Create an independent Certificate Authority',
-          about: context?.subca?.enable ? false : (
-            <>
-              Set up Morio as a stand-alone Certificate Authority (CA)
-              <ul className="list list-inside list-disc text-small ml-2 mt-1">
-                <li>Easiest setup</li>
-                <li>To avoid certificate warnings, add Morio&apos;s CA to your clients&apos; trust store</li>
-              </ul>
-            </>
-          ),
-        },
-        {
-          val: true,
-          label: 'Create a subordinate Certificate Authority',
-          about: (
-            <>
-              Set up Morio as a subordinate to an existing Certificate Authority (CA)
-              <ul className="list list-inside list-disc text-small ml-2 mt-1">
-                <li>More setup steps</li>
-                <li>Can benefit from existing trust in your organisation</li>
-              </ul>
-            </>
-          ),
-        },
-      ],
     },
-    ...saca,
-    ...subca,
+    <Popout tip key="c">
+      <h5>Can you trust the Morio Certificate Authority?</h5>
+      <p>
+        Morio relies on <a
+        href="https://en.wikipedia.org/wiki/X.509">X.509 certificates</a> for
+        both <b>encryption</b> and <b>authentication</b>.
+        Whether you should also trust its CA is <a
+          href="https://morio.it/docs/guides/services/ca/#can-you-trust-the-morio-certificate-authority">
+          a different matter altogether
+        </a>.
+      </p>
+    </Popout>
   ]
 }
 

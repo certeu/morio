@@ -18,7 +18,7 @@ import set from 'lodash/set.js'
 import { useStateObject } from 'hooks/use-state-object.mjs'
 import { Progress } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
-import { CloseIcon, TrashIcon } from 'components/icons.mjs'
+import { CloseIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
 import { TokenSelect } from './tokens.mjs'
 
 export const loadFormDefaults = (defaults, form) => {
@@ -135,6 +135,19 @@ export const FormBlock = (props) => {
               <div className={formEl.className || ''} key={i}>
                 <FormBlock {...props} form={formEl.form} />
               </div>
+            )
+          }
+          if (formEl.details && formEl.summary && formEl.form) {
+            return (
+              <details className={`group ${formEl.className?.details || ''}`} key={i}>
+                <summary className="flex flex-row items-center gap-4 pl-2 p-1 pr-0 hover:cursor-pointer">
+                  <RightIcon stroke={3} className="w-6 h-6 pt-1 transition-transform group-open:rotate-90 group-hover:text-secondary" />
+                  {formEl.summary}
+                </summary>
+                <div className="ml-4 border-l-2 pl-4 py-2">
+                  <FormBlock {...props} form={formEl.form} />
+                </div>
+              </details>
             )
           }
           else return <p key={i}>formEl.schema is no schema</p>

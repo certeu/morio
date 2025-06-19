@@ -498,6 +498,22 @@ MorioClient.prototype.setup = async function (settings) {
 }
 
 /**
+ * Complete pending setup with subca settings
+ *
+ * This endpoint does not require authentication but only
+ * works on an ephemeral node
+ * @param {object} settings - The settings to deploy
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.subcaSetup = async function ({ certificate, chain, serial }) {
+  return await this.call(`${morioConfig.api}/setup`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ certificate, chain, serial }),
+  })
+}
+
+/**
  * Initial preseed
  *
  * This endpoint does not require authentication but only
@@ -1915,6 +1931,37 @@ MorioClient.prototype.linkHostToMod = async function (host, mod) {
  */
 MorioClient.prototype.unlinkHostToMod = async function (host, mod) {
   return await this.call(`${morioConfig.api}/inventory/link/host/${host}/mod/${mod}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  })
+}
+
+/**
+ * Validates a subordinate CA certificate (subca settings)
+ *
+ * This endpoint does not require authentication but only works under specific circumstances
+ * @param {string} certificate - The certificate to validate
+ * @param {string} serial - The subca serial
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.validateSubca = async function ({ certificate, chain, serial }) {
+  return await this.call(`${morioConfig.api}/validate/subca`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ certificate, chain, serial: Number(serial) }),
+  })
+}
+
+/**
+ * Wipes the settings - Only valid in ephemeral mode with subca settings
+ *
+ * This endpoint does not require authentication but only works under specific circumstances
+ * @param {string} certificate - The certificate to validate
+ * @param {string} serial - The subca serial
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.wipeSubca = async function () {
+  return await this.call(`${morioConfig.api}/setup`, {
     headers: this.jsonHeaders,
     method: 'DELETE',
   })

@@ -179,8 +179,9 @@ async function reloadCaConfiguration() {
 
 /*
  * @param {object} keys - The preseeded key data (optional)
+ * @param {object} custom - Any custom properties for the CA certificates (optional)
  */
-export async function generateCaConfig(keys = {}) {
+export async function generateCaConfig(keys = {}, custom = {}) {
   /*
    * Check for preseeded Key Data
    */
@@ -212,10 +213,11 @@ export async function generateCaConfig(keys = {}) {
     /*
      * Generate keys and certificates
      */
-    const init = await generateCaRoot(
-      utils.getSettings('cluster.broker_nodes'),
-      utils.getSettings('cluster.name')
-    )
+    const init = await generateCaRoot({
+      san: utils.getSettings('cluster.broker_nodes'),
+      ou: utils.getSettings('cluster.name'),
+      ...custom,
+    })
 
     /*
      * Generate JWK
@@ -235,6 +237,7 @@ export async function generateCaConfig(keys = {}) {
       rpwd: init.password,
       icrt: init.intermediate.certificate,
       ikey: init.intermediate.keys.private,
+      ipwd: init.password,
     })
 
     /*
@@ -255,11 +258,11 @@ export async function generateCaConfig(keys = {}) {
   await ensureCaConfig()
 }
 
-export async function ensureCaConfig(clusterKeys = false) {
+export async function ensureCaConfig(withKeys = false) {
   /*
    * Save root certificate and fingerprint in memory
    */
-  const keys = clusterKeys ? clusterKeys : utils.getKeys()
+  const keys = withKeys ? withKeys : utils.getKeys()
   utils.setCaConfig({
     url: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}`,
     fingerprint: keys.rfpr,
@@ -274,6 +277,8 @@ export async function ensureCaConfig(clusterKeys = false) {
   await mkdir('/morio/data/downloads/certs/')
   await writeFile('/morio/data/downloads/certs/root.pem', keys.rcrt)
   await writeFile('/morio/data/downloads/certs/intermediate.pem', keys.icrt)
+  // Write a chain that will just work
+  await writeFile('/morio/data/downloads/certs/chain.pem', utils.getCaTrustChain())
 
   /*
    * Construct step-ca (server) configuration

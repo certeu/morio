@@ -210,18 +210,6 @@ const preseed = Joi.alternatives().try(
 )
 
 /*
- * The Morio prekey object
- */
-const prekey = Joi.object({
-  ca: Joi.object({
-    state: Joi.string(),
-    locality: Joi.string(),
-    organization: Joi.string(),
-    unit: Joi.string(),
-  })
-})
-
-/*
  * The Morio settings object
  */
 const settings = Joi.object({
@@ -282,6 +270,16 @@ const settings = Joi.object({
   subca: Joi.object().optional(),
 }).required()
 
+/*
+ * SubCA validation
+ */
+const subca = Joi.object({
+  serial: Joi.number().integer(),
+  certificate: Joi.string(),
+  chain: Joi.string(),
+})
+
+
 /**
  * Validates input
  *
@@ -324,6 +322,7 @@ export {
   keysFile,
   mrt,
   passwordHash,
+  subca,
   version,
   nodeSerial,
   settings,

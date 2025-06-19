@@ -30,24 +30,44 @@ export function hash(string) {
 }
 
 /**
+ * Decrypt a private key formatted as PEM
+ *
+ * @param {string} encryptedKey - The encrypted (private) key to decrypt
+ * @param {string} passphrase - The passphrase to use
+ * @param {boolean} [asPem = true] - Set this to false to return the Forge key object
+ * @return {string} key - The decrypted private key (as PEM if asked)
+ */
+export function decryptPrivateKeyPem(encryptedKey, passphrase, asPem=false) {
+  const key = forge.pki.decryptRsaPrivateKey(encryptedKey, passphrase)
+
+  return asPem
+    ? forge.pki.privateKeyToPem(key)
+    : key
+}
+
+/**
  * Generate a certificate signing request (csr)
  *
  * @param {object} data - Data to encode in the CSR
+ * @param {object} keypair - An optional keypair to use (as forge key objects)
  * @return {object} jwt - The JSON web token
  */
-export async function generateCsr(data) {
+export async function generateCsr(data, keypair=false) {
   /*
-   * Generate a key pair
+   * Generate a key pair if none was passed in
    */
-  const keypair = forge.rsa.generateKeyPair(2048)
+  if (!keypair) keypair = forge.rsa.generateKeyPair(2048)
+
   /*
    * Initiate the CSR
    */
   const csr = forge.pki.createCertificationRequest()
+
   /*
    * Add public key
    */
   csr.publicKey = keypair.publicKey
+
   /*
    * Set subject (needs some reformatting)
    */
@@ -69,7 +89,7 @@ export async function generateCsr(data) {
       extensions: [
         {
           name: 'subjectAltName',
-          altNames: data.san.map((value) => ({ type: 2, value })),
+          altNames: (data.san || []).map((value) => ({ type: 2, value })),
         },
       ],
     },
@@ -172,6 +192,33 @@ export async function generateGpgKeyPair(uuid) {
 }
 
 /**
+ * Turns a PEM-encoded key into a forge key object
+ *
+ * @param {string} pem - The PEM-encoded key
+ * @return {object} key - The forge key object
+ */
+export function pemKeyAsForgeKey (pem) {
+  if (pem.includes('PUBLIC') || pem.includes('BEGIN CERTIFICATE')) return forge.pki.publicKeyFromPem(pem)
+  if (pem.includes('PRIVATE')) return forge.pki.privateKeyFromPem(pem)
+
+  return false
+}
+
+/**
+ * Extracts the public key from a PEM-encoded certificate
+ *
+ * @param {string} certificate - The PEM-encoded certificate
+ * @return {object} key - The forge key object
+ */
+export function publicKeyFromPemCertificate (certificate, asPem=false) {
+  const cert = forge.pki.certificateFromPem(certificate)
+
+  return asPem
+    ? forge.pki.publicKeyToPem(cert.publicKey)
+    : cert.publicKey
+}
+
+/**
  * Generates a random string
  *
  * @param {int} bytes - Number of random bytes to generate
@@ -212,16 +259,16 @@ export function generateCaCertificate(subjectAttributes, issuerAttributes, years
 /**
  * Generates a key pair and CA root certificate
  */
-export function generateCaRoot(hostnames, name) {
+export function generateCaRoot(custom={}) {
   /*
    * Defaults for root and intermediate certificate subjects
    */
   const dflts = {
-    countryName: getPreset('MORIO_X509_C'),
-    ST: getPreset('MORIO_X509_ST'),
-    localityName: getPreset('MORIO_X509_L'),
-    organizationName: getPreset('MORIO_X509_OU'),
-    OU: name,
+    countryName: custom.c || getPreset('MORIO_X509_C'),
+    ST: custom.st || getPreset('MORIO_X509_ST'),
+    localityName: custom.l || getPreset('MORIO_X509_L'),
+    organizationName: custom.o || getPreset('MORIO_X509_OU'),
+    OU: custom.ou || 'No OU specified',
   }
 
   /*
@@ -232,18 +279,18 @@ export function generateCaRoot(hostnames, name) {
   /*
    * Add names as SAN type 2 entries
    */
-  if (hostnames.length > 0)
+  if (custom.san && custom.san.length > 0)
     extentions.push({
       name: 'subjectAltName',
-      altNames: hostnames.map((value) => ({ type: 2, value })),
+      altNames: custom.san.map((value) => ({ type: 2, value })),
     })
 
   /*
    * Generate Root certificate
    */
   const root = generateCaCertificate(
-    { ...dflts, commonName: getPreset('MORIO_ROOT_CA_COMMON_NAME') },
-    { ...dflts, commonName: getPreset('MORIO_ROOT_CA_COMMON_NAME') },
+    { ...dflts, commonName: custom.rcn || getPreset('MORIO_ROOT_CA_COMMON_NAME') },
+    { ...dflts, commonName: custom.rcn || getPreset('MORIO_ROOT_CA_COMMON_NAME') },
     Number(getPreset('MORIO_ROOT_CA_VALID_YEARS')),
     extentions
   )
@@ -252,8 +299,8 @@ export function generateCaRoot(hostnames, name) {
    * Generate Intermediate certificate
    */
   const intermediate = generateCaCertificate(
-    { ...dflts, commonName: getPreset('MORIO_INTERMEDIATE_CA_COMMON_NAME') },
-    { ...dflts, commonName: getPreset('MORIO_ROOT_CA_COMMON_NAME') },
+    { ...dflts, commonName: custom.icn || getPreset('MORIO_INTERMEDIATE_CA_COMMON_NAME') },
+    { ...dflts, commonName: custom.icn || getPreset('MORIO_ROOT_CA_COMMON_NAME') },
     Number(getPreset('MORIO_INTERMEDIATE_CA_VALID_YEARS')),
     extentions
   )
@@ -550,3 +597,33 @@ export function convertPkcs1ToPkcs8(key) {
     forge.pki.wrapRsaPrivateKey(forge.pki.privateKeyToAsn1(forge.pki.privateKeyFromPem(key)))
   )
 }
+
+/**
+ * Unseals key data
+ *
+ * We allow people to export key data, but obviously there's a chicken/egg
+ * situation where to encrypt key data we need the key data
+ * So we obfuscate and deobfuscate instead.
+ *
+ * @param {object} keydata - The keydata object
+ * @param {object} utils - The utils object
+ * @param {object} log - The logging handler object
+ * @return {object} keys - The decrypted keys
+ */
+export function unsealKeyData(keydata, utils, log) {
+  const unseal = hash(keydata.seal.salt + keydata.seal.hash)
+  const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+    unseal,
+    hash(keydata.seal.salt + unseal),
+    log
+  )
+  if (!utils.encrypt) utils.encrypt = encrypt
+  if (!utils.decrypt) utils.decrypt = decrypt
+  if (!utils.isEncrypted) utils.isEncrypted = isEncrypted
+
+  /*
+   * Return unsealed key data
+   */
+  return decrypt(keydata.data)
+}
+

@@ -149,6 +149,10 @@ html {
   animation: bounceright 1s 3;
 }
 
+.animate-bounce-right-forever {
+  animation: bounceright 1s infinite;
+}
+
 @keyframes bounceright {
   0%,
   100% {

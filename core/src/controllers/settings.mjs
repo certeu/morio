@@ -1,19 +1,29 @@
 import { resolveHostAsIp } from '#shared/network'
-import { writeJsonFile } from '#shared/fs'
+import { readDirectory, rm, readJsonFile, writeJsonFile } from '#shared/fs'
 import {
+  decryptPrivateKeyPem,
   encryptionMethods,
+  generateCsr,
   generateJwtKey,
   generateKeyPair,
   generateGpgKeyPair,
   hash,
   hashPassword,
+  publicKeyFromPemCertificate,
   uuid,
 } from '#shared/crypto'
 import { reload } from '../reload.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
-import { generateCaConfig } from '../lib/services/ca.mjs'
-import { unsealKeyData, loadKeysFromDisk, templateSettings } from '../lib/services/core.mjs'
+import { generateCaConfig, ensureCaConfig } from '../lib/services/ca.mjs'
+import {
+  unsealKeyData,
+  loadKeysFromDisk,
+  templateSettings,
+  writeKeyData,
+  writeNodeData,
+  writeSettingsData,
+} from '../lib/services/core.mjs'
 import {
   loadPreseededSettings,
   ensurePreseededContent,
@@ -29,14 +39,6 @@ import { generateKeySeal, generateRootToken, formatRootTokenResponseData } from 
  * @returns {object} Controller - The settings controller object
  */
 export function Controller() {}
-
-const ensureTokenSecrecy = (secrets) => {
-  for (let [key, val] of Object.entries(secrets)) {
-    if (!val?.vault && !utils.isEncrypted(val)) secrets[key] = utils.encrypt(val)
-  }
-
-  return secrets
-}
 
 /**
  * Deploy new settings
@@ -97,6 +99,8 @@ Controller.prototype.deploy = async function (req, res) {
  * Setup initial settings
  *
  * This will write the new config to disk and restart Morio
+ * Unless the settings hold subca.enable
+ * In this case, we need to generate a CSR and wait for the certificate
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
@@ -121,9 +125,9 @@ Controller.prototype.setup = async function (req, res) {
   } else log.info(`Processing request to setup Morio with initial settings`)
 
   /*
-   * Ensure preseeded content
+   * Ensure preseeded content, but only if there's no subca enabled
    */
-  if (body.preseed) {
+  if (body.preseed && !body.subca?.enable) {
     log.debug(`Running preseed handler`)
     await preseedHandler(body?.preseed, true)
   }
@@ -137,13 +141,93 @@ Controller.prototype.setup = async function (req, res) {
    * Send error, or data
    */
   if (data === false && error) return utils.sendErrorResponse(res, error[0], req.url, error?.[1])
-  else res.send(data)
 
   /*
    * Trigger a reload, but don't await it.
    */
-  log.info(`Bring Morio out of ephemeral mode`)
-  return reload({ initialSetup: true })
+  log.info(`Reloading Morio after initial setup`)
+  reload({ initialSetup: true })
+
+  return res.send(data)
+}
+
+/**
+ * Setup pending subca settings
+ *
+ * This will write the new config to disk and restart Morio
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.subcaSetup = async function (req, res) {
+  /*
+   * Only allow this endpoint when running in ephemeral mode
+   */
+  if (!utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
+
+  /*
+   * Only allow this endpoint when we have subca settings
+   */
+  const serial = utils.getSubcaSerial()
+  if (!serial) return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
+
+  /*
+   * Validate request against schema, but strip headers from body first
+   */
+  const body = { ...req.body }
+  delete body.headers
+  const [valid, err] = await utils.validate(`req.subca`, body)
+  if (!valid) {
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  } else log.info(`Processing request to deploy pending subca settings`)
+
+  /*
+   * Load the subca file from disk
+   */
+  const subcaData = await readSubcaFile(valid.serial)
+
+  /*
+   * Unseal key data
+   */
+  const keys = unsealKeyData(subcaData.keydata)
+
+  /*
+   * Replace the original intermediate certificate with the one provided
+   */
+  keys.icrt = valid.certificate
+  keys.chain = valid.chain
+  utils.setKeys(keys)
+
+  /*
+   * Now write key data to disk
+   */
+  await writeKeyData(keys, valid.serial)
+
+  /*
+   * Now write key data to disk
+   */
+  await writeNodeData(subcaData.node)
+
+  /*
+   * And also write settings to disk, but keep subca out of it
+   */
+  await writeSettingsData({ ...subcaData.settings, subca: undefined }, valid.serial)
+
+  /*
+   * Finally, update the CA config with teh new keys
+   */
+  await ensureCaConfig(keys)
+
+  /*
+   * Trigger a reload, but don't await it.
+   */
+  log.info(`Reloading Morio after completing the subca setup`)
+  reload({ initialSetup: true })
+
+  return res.status(204).send()
 }
 
 /**
@@ -166,6 +250,7 @@ Controller.prototype.restart = async function (req, res) {
   }
 
   reload({ restart: true })
+
   return res.status(204).send()
 }
 
@@ -208,6 +293,59 @@ Controller.prototype.exportKeys = async function (req, res) {
   const { keys } = await loadKeysFromDisk()
 
   return res.send({ keys })
+}
+
+/**
+ * Wipe the subca settings
+ *
+ * This will only work in ephemeral mode when we have subca settings on disk
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.wipeSubca = async function (req, res) {
+  /*
+   * Only allow this endpoint when running in ephemeral mode
+   */
+  if (!utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
+
+  /*
+   * Only allow this endpoint when we have subca settings
+   */
+  const serial = utils.getSubcaSerial()
+  if (!serial) return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
+
+  /*
+   * Remove all subca files
+   */
+  const files = await getSubcaFiles()
+  for (const file of files) await rm(`/etc/morio/${file}`)
+
+  /*
+   * Remove from state
+   */
+  utils.setSubcaSerial(false)
+  utils.setSubcaCsr(false)
+
+  /*
+   * Don't await reload, just return
+   */
+  reload({ hotReload: true })
+
+  return res.status(204).send()
+}
+
+async function getSubcaFiles() {
+  return ((await readDirectory(`/etc/morio`)) || [])
+    .filter((file) => new RegExp(`subca.[0-9]+.json`).test(file))
+    .sort()
+}
+
+async function readSubcaFile(serial) {
+  const file = (await getSubcaFiles()).filter((file) => file === `subca.${serial}.json`).pop()
+
+  return readJsonFile(`/etc/morio/${file}`)
 }
 
 /**
@@ -260,7 +398,7 @@ const initialSetup = async function (req, settings) {
     if (!preseededSettings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.settings.setup`, preseededSettings)
   } else {
-    ;[valid, err] = await utils.validate(`req.settings.setup`, settings)
+    [valid, err] = await utils.validate(`req.settings.setup`, settings)
   }
 
   if (!valid?.cluster)
@@ -289,6 +427,20 @@ const initialSetup = async function (req, settings) {
   utils.beginReload()
 
   /*
+   * Generate node UUID
+   */
+  node.uuid = uuid()
+  log.debug(`Node UUID: ${node.uuid}`)
+
+  /*
+   * Figure out what type of setup to run
+   */
+  if (settings?.subca?.enable) return await subcaSetup(valid, node)
+  else return await dfltSetup(valid, node)
+}
+
+async function dfltSetup(valid, node) {
+  /*
    * Generate serial for use in file names
    */
   const serial = Date.now()
@@ -297,15 +449,150 @@ const initialSetup = async function (req, settings) {
   /*
    * This is the initial deploy, generate keys, UUIDs and so on
    */
+  const { keys, mrt } = await generateCryptographicRoots(valid, serial)
+
+  /*
+   * Write the settings to disk
+   */
+  let result = await writeSettingsData(valid, serial)
+  if (!result) return [false, ['morio.core.fs.write.failed']]
+
+  /*
+   * Also write the keys to disk
+   * Note that we're loading from the store, which was updated by generateCaConfig()
+   */
+  result = await writeKeyData(utils.getKeys(), serial)
+  if (!result) return [false, ['morio.core.fs.write.failed']]
+
+  /*
+   * Write the node info to disk
+   */
+  result = await writeNodeData(node)
+  if (!result) return [false, ['morio.core.fs.write.failed']]
+
+  /*
+   * The data to return
+   */
+  return [
+    {
+      result: 'success',
+      uuids: {
+        node: node.uuid,
+        cluster: keys.cluster,
+      },
+      root_token: mrt.includes('preseeded')
+        ? {
+            about:
+              'This Morio instance was preseeded with key data: no new Morio root token was generated. Use the preseeded root token instead.',
+            value: mrt,
+          }
+        : formatRootTokenResponseData(mrt),
+    },
+    false,
+  ]
+}
+
+async function subcaSetup(valid, node) {
+  /*
+   * Generate serial to track this CSR
+   */
+  const serial = Date.now()
+  log.debug(`SubCA setup, tracking this CSR as: ${serial}`)
+
+  /*
+   * This will end up holding our keys
+   */
+  const { mrt } = await generateCryptographicRoots(valid, serial)
+  const keys = utils.getKeys()
+
+  /*
+   * Keep preseeded keys out of the settings
+   */
+  const saveSettings = cloneAsPojo(valid)
+  if (typeof saveSettings.preseed?.keys !== 'undefined') delete saveSettings.preseed.keys
+  utils.setSettings(saveSettings)
+
+  /*
+   * Now ensure token secrecy before we write to disk
+   */
+  if (saveSettings.tokens?.secrets) {
+    saveSettings.tokens.secrets = utils.ensureTokenSecrecy(saveSettings.tokens.secrets)
+    utils.setSettings(saveSettings)
+  }
+
+  /*
+   * And last but not least, generate the intermediate CA CSR
+   */
+  const csrConfig = {
+    c: utils.getPreset('MORIO_X509_C'),
+    st: utils.getPreset('MORIO_X509_ST'),
+    l: utils.getPreset('MORIO_X509_L'),
+    o: utils.getPreset('MORIO_X509_O'),
+    ou: utils.getPreset('MORIO_X509_OU'),
+  }
+  for (const key in csrConfig) {
+    if (valid.subca?.[key]) csrConfig[key] = valid.subca[key]
+  }
+
+  const csr = await generateCsr(
+    csrConfig,
+    // Note that we are using the intermediate key/cert
+    {
+      publicKey: publicKeyFromPemCertificate(keys.icrt),
+      privateKey: decryptPrivateKeyPem(keys.ikey, keys.ipwd, false),
+    }
+  )
+
+  /*
+   * Write keys & settings to disk as subca file
+   */
+  log.debug(`Writing initial setup data to subca.${serial}.json`)
+  const subcadata = {
+    keydata: {
+      data: await utils.encrypt(utils.getKeys()),
+      key: keys.private,
+      seal: keys.seal,
+    },
+    settings: saveSettings,
+    node: node,
+    csr: csr.csr,
+  }
+  const result = await writeJsonFile(`/etc/morio/subca.${serial}.json`, subcadata, log, 0o600)
+  if (!result) return [false, ['morio.core.fs.write.failed']]
+
+  /*
+   * The data to return
+   */
+  return [
+    {
+      result: 'success',
+      csr: csr.csr,
+      uuids: {
+        node: node.uuid,
+        cluster: keys.cluster,
+      },
+      root_token: mrt.includes('preseeded')
+        ? {
+            about:
+              'This Morio instance was preseeded with key data: no new Morio root token was generated. Use the preseeded root token instead.',
+            value: mrt,
+          }
+        : formatRootTokenResponseData(mrt),
+    },
+    false,
+  ]
+}
+
+const generateCryptographicRoots = async function (valid, serial) {
+  /*
+   * Object to hold the key data
+   */
   const keys = valid.preseed?.keys ? unsealKeyData(valid.preseed.keys) : {}
 
   /*
    * Generate UUIDs for node and cluster
    */
-  log.debug(`Generating UUIDs`)
-  node.uuid = uuid()
   keys.cluster = uuid()
-  log.debug(`Node UUID: ${node.uuid}`)
   log.debug(`Cluster UUID: ${keys.cluster}`)
 
   /*
@@ -354,18 +641,15 @@ const initialSetup = async function (req, settings) {
   utils.setKeys(keys)
 
   /*
-   * Keep preseeded keys out of the settings
-   */
-  const saveSettings = cloneAsPojo(valid)
-  if (typeof saveSettings.preseed?.keys !== 'undefined') delete saveSettings.preseed.keys
-  utils.setSettings(saveSettings)
-
-  /*
    * We need to generate the CA config & certificates early so that
    * we can pass them along the join invite to cluster nodes
    */
   log.debug(`Generating CA config`)
-  await generateCaConfig(keys)
+  const caProps = { ...keys }
+  for (const prop of ['c', 'st', 'l', 'o', 'ou', 'rcn', 'icn']) {
+    if (valid.subca?.[prop]) caProps[prop] = valid.subca[prop]
+  }
+  await generateCaConfig(caProps)
 
   /*
    * Add encryption methods, unless they are already added
@@ -382,60 +666,9 @@ const initialSetup = async function (req, settings) {
   }
 
   /*
-   * Now ensure token secrecy before we write to disk
+   * Return keys object and mrt
    */
-  if (saveSettings.tokens?.secrets) {
-    saveSettings.tokens.secrets = ensureTokenSecrecy(saveSettings.tokens.secrets)
-    utils.setSettings(saveSettings)
-  }
-
-  /*
-   * Write the settings to disk
-   */
-  log.debug(`Writing initial settings to settings.${serial}.json`)
-  let result = await writeJsonFile(`/etc/morio/settings.${serial}.json`, saveSettings)
-  if (!result) return [false, ['morio.core.fs.write.failed']]
-
-  /*
-   * Also write the keys to disk
-   * Note that we're loading from the store, which was updated by generateCaConfig()
-   */
-  log.debug(`Writing key data to morio.keys`)
-  const keydata = {
-    data: await utils.encrypt(utils.getKeys()),
-    key: keys.private,
-    seal: keys.seal,
-  }
-  result = await writeJsonFile(`/etc/morio/keys.${serial}.json`, keydata, log, 0o600)
-  if (!result) return [false, ['morio.core.fs.write.failed']]
-
-  /*
-   * Write the node info to disk
-   */
-  log.debug(`Writing node data to node.json`)
-  result = await writeJsonFile(`/etc/morio/node.json`, node)
-  if (!result) return [false, ['morio.core.fs.write.failed']]
-
-  /*
-   * The data to return
-   */
-  return [
-    {
-      result: 'success',
-      uuids: {
-        node: node.uuid,
-        cluster: keys.cluster,
-      },
-      root_token: morioRootToken.includes('preseeded')
-        ? {
-            about:
-              'This Morio instance was preseeded with key data: no new Morio root token was generated. Use the preseeded root token instead.',
-            value: morioRootToken,
-          }
-        : formatRootTokenResponseData(morioRootToken),
-    },
-    false,
-  ]
+  return { keys, mrt: morioRootToken }
 }
 
 const deployNewSettings = async function (settings) {
@@ -449,7 +682,7 @@ const deployNewSettings = async function (settings) {
    * Handle secrets
    */
   if (settings.tokens?.secrets)
-    settings.tokens.secrets = ensureTokenSecrecy(settings.tokens.secrets)
+    settings.tokens.secrets = utils.ensureTokenSecrecy(settings.tokens.secrets)
 
   /*
    * Write the protected settings to disk

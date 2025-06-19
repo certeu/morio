@@ -353,6 +353,7 @@ export const TextInput = ({
   disabled = false, // Allows rendering a disabled view
   help = false, // Optional link to help / docs
   code = false, // Allows using fixed-width font for input
+  className='', // Any classes for the textarea
 }) => {
   const isValid = typeof valid === 'function' ? valid(current) : valid
 
@@ -367,7 +368,7 @@ export const TextInput = ({
         onChange={(evt) => update(evt.target.value)}
         className={`input w-full bg-base-100 input-bordered py-2 ${
           current === original ? 'input-secondary' : isValid ? 'input-success' : 'input-error'
-        } ${code ? 'font-mono h-96' : 'h-36'}`}
+        } ${code ? 'font-mono h-96' : 'h-36'} ${className}`}
       />
     </FormControl>
   )

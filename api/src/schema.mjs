@@ -6,6 +6,7 @@ import {
   uuid,
   fqdn,
   mrt,
+  subca,
   preseedKeys,
 } from '#shared/schema'
 import { roles } from '#config/roles'
@@ -485,6 +486,8 @@ export const schema = {
   'req.kv.set': Joi.object(kv),
   'req.kv.get': Joi.object({ key: kv.key }),
   'req.rotate.mrt': Joi.object({ mrt }),
+  // Subca validation
+  'req.subca': subca,
 
   /*
    * Responses
