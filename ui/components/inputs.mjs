@@ -353,7 +353,7 @@ export const TextInput = ({
   disabled = false, // Allows rendering a disabled view
   help = false, // Optional link to help / docs
   code = false, // Allows using fixed-width font for input
-  className='', // Any classes for the textarea
+  className = '', // Any classes for the textarea
 }) => {
   const isValid = typeof valid === 'function' ? valid(current) : valid
 
@@ -406,10 +406,7 @@ export const ListInput = ({
               <div className="w-full text-lg leading-5">{item.label}</div>
               {item.about ? (
                 <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
-                  {typeof item.about === 'string'
-                    ? <Markdown>{item.about}</Markdown>
-                    : item.about
-                  }
+                  {typeof item.about === 'string' ? <Markdown>{item.about}</Markdown> : item.about}
                 </div>
               ) : null}
               <div className="flex flex-row gap-1 flex-wrap items-center justify-around">
@@ -443,10 +440,7 @@ export const ListInput = ({
               </div>
               {item.about ? (
                 <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
-                  {typeof item.about === 'string'
-                    ? <Markdown>{item.about}</Markdown>
-                    : item.about
-                  }
+                  {typeof item.about === 'string' ? <Markdown>{item.about}</Markdown> : item.about}
                 </div>
               ) : null}
             </ButtonFrame>

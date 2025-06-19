@@ -11,7 +11,17 @@ import { Highlight } from 'components/highlight.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
 import { TextInput } from 'components/inputs.mjs'
 import { Link, linkClasses } from 'components/link.mjs'
-import { BoolYesIcon, BoolNoIcon, CertificateIcon, RightIcon, OkIcon, MorioIcon, DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
+import {
+  BoolYesIcon,
+  BoolNoIcon,
+  CertificateIcon,
+  RightIcon,
+  OkIcon,
+  MorioIcon,
+  DarkThemeIcon,
+  LightThemeIcon,
+  WarningIcon,
+} from 'components/icons.mjs'
 import { useTheme } from 'hooks/use-theme.mjs'
 import { EphemeralInfo } from 'pages/index.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
@@ -81,8 +91,7 @@ const CompleteSubcaSettingsPage = (props) => {
       if (content?.core?.node?.subca_csr) {
         setCsr(content.core.node.subca_csr)
         setSerial(content.core.node.subca_serial)
-      }
-      else setError('noCsr')
+      } else setError('noCsr')
     }
     if (!status) loadStatus()
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -94,7 +103,8 @@ const CompleteSubcaSettingsPage = (props) => {
   const validate = async () => {
     setLoadingStatus([true, 'Validating certificates'])
     const [data, status] = await api.validateSubca({ certificate, chain, serial })
-    if (status !== 200) return setLoadingStatus([true, `Certificate validation failed`, true, false])
+    if (status !== 200)
+      return setLoadingStatus([true, `Certificate validation failed`, true, false])
     else {
       setValidationResult(data)
       setLoadingStatus([true, 'Validation completed', true, true])
@@ -111,8 +121,7 @@ const CompleteSubcaSettingsPage = (props) => {
     if (result[1] !== 204) {
       setError('deployFailed')
       return setLoadingStatus([true, `Deploy failed`, true, false])
-    }
-    else {
+    } else {
       setDeployed(true)
       setLoadingStatus([true, 'Deployment initialized', true, true])
     }
@@ -146,11 +155,15 @@ const CompleteSubcaSettingsPage = (props) => {
       </h3>
       <pre>{JSON.stringify(deployed)}</pre>
       <details>
-        <summary className="hover:cursor-pointer"><b>Current status</b></summary>
+        <summary className="hover:cursor-pointer">
+          <b>Current status</b>
+        </summary>
         <PendingStatus {...{ pushModal, serial, csr }} />
       </details>
       <details open>
-        <summary className="hover:cursor-pointer"><b>Next step</b></summary>
+        <summary className="hover:cursor-pointer">
+          <b>Next step</b>
+        </summary>
         <h5>Provide Certificates for a Subordinate CA</h5>
         <p>To complete setup, we need two certificates:</p>
         <ul className="list list-inside list-disc ml-4">
@@ -158,26 +171,25 @@ const CompleteSubcaSettingsPage = (props) => {
             <b>Intermediate Certificate</b>
             <small className="block ml-4 -mt-1">
               This is the result of signing{' '}
-              <CsrModal {...{pushModal, serial, csr }}>the CSR</CsrModal>
+              <CsrModal {...{ pushModal, serial, csr }}>the CSR</CsrModal>
             </small>
           </li>
           <li>
             <b>Root Certificate</b>
             <small className="block ml-4 -mt-1">
               This is the root of the parent CA who signed{' '}
-              <CsrModal {...{pushModal, serial, csr }}>the CSR</CsrModal>
+              <CsrModal {...{ pushModal, serial, csr }}>the CSR</CsrModal>
             </small>
           </li>
         </ul>
         <TextInput
           placeholder={placeholder}
           label="Intermediate Certificate"
-          labelBL={<>This is the result of signing
-            the CSR with the parent CA</>}
+          labelBL={<>This is the result of signing the CSR with the parent CA</>}
           valid={() => true}
           current={certificate}
           update={setCertificate}
-          className='text-xs font-mono'
+          className="text-xs font-mono"
         />
         <TextInput
           placeholder={placeholder}
@@ -186,11 +198,11 @@ const CompleteSubcaSettingsPage = (props) => {
           valid={() => true}
           current={chain}
           update={setChain}
-          className='text-xs font-mono'
+          className="text-xs font-mono"
         />
         <MiniTip>
-          If the CSR was signed by an intermediate certificate authority,
-          please include its certificate followed by the root certificate so we can complete the trust chain.
+          If the CSR was signed by an intermediate certificate authority, please include its
+          certificate followed by the root certificate so we can complete the trust chain.
         </MiniTip>
         <p className="flex flex-row items-center justify-center gap-2">
           <button
@@ -217,7 +229,6 @@ export const getStaticProps = () => ({
     page: ['setup', 'subca-complete'],
   },
 })
-
 
 const CsrValidationReport = (props) => (
   <LocalPageWrapper {...props}>
@@ -248,17 +259,23 @@ const CsrValidationReport = (props) => (
     {props.report.valid ? (
       <>
         <p className="text-center">
-          <button className="btn btn-primary btn-lg mt-4" onClick={props.deploy}>Deploy Pending Settings</button>
+          <button className="btn btn-primary btn-lg mt-4" onClick={props.deploy}>
+            Deploy Pending Settings
+          </button>
         </p>
         <p className="text-center">
-          <button className="btn btn-ghost" onClick={() => props.setValidationResult(false)}>Cancel</button>
+          <button className="btn btn-ghost" onClick={() => props.setValidationResult(false)}>
+            Cancel
+          </button>
         </p>
       </>
     ) : (
       <>
         <p>Please address the issues above, before we can continue.</p>
         <p className="text-center">
-          <button className="btn btn-primary" onClick={() => props.setValidationResult(false)}>Back</button>
+          <button className="btn btn-primary" onClick={() => props.setValidationResult(false)}>
+            Back
+          </button>
         </p>
       </>
     )}
@@ -270,9 +287,7 @@ const CsrDeploying = (props) => (
     <Box color="accent">
       <div className="flex flex-row gap-4 items-center w-full">
         <Spinner />
-        <div className="text-inherit">
-          Please wait while your settings are being deployed
-        </div>
+        <div className="text-inherit">Please wait while your settings are being deployed</div>
       </div>
     </Box>
   </LocalPageWrapper>
@@ -281,7 +296,9 @@ const CsrDeploying = (props) => (
 const CsrDeployed = (props) => (
   <LocalPageWrapper {...props}>
     <h4>Settings deployed</h4>
-    <p>You can return to <Link href="/">the home page</Link></p>
+    <p>
+      You can return to <Link href="/">the home page</Link>
+    </p>
   </LocalPageWrapper>
 )
 
@@ -289,8 +306,8 @@ export const ErrorNoCsr = (props) => (
   <LocalPageWrapper {...props}>
     <h5>No CSR Present</h5>
     <p>
-      This page allows one to provide the certificate when configuring Morio
-      as a subordinate Certificate Authority (CA).
+      This page allows one to provide the certificate when configuring Morio as a subordinate
+      Certificate Authority (CA).
       <br />
       As that does not seem to be the case, there is nothing to do here.
     </p>
@@ -311,15 +328,14 @@ export const PendingStatus = ({ pushModal, serial, csr }) => (
     <li className="flex flex-row items-center gap-2">
       <OkIcon className="w-5 h-5 text-success" stroke={4} />
       <div>
-        Generate{' '}
-        <CsrModal {...{pushModal, serial, csr }}>Certificate Signing Request</CsrModal>
+        Generate <CsrModal {...{ pushModal, serial, csr }}>Certificate Signing Request</CsrModal>
       </div>
     </li>
     <li className="flex flex-row items-center gap-2 italic font-bold">
       <RightIcon className="w-5 h-5 text-warning animate-bounce-right-forever" stroke={4} />
       <div className="border-l-2 border-warning pl-2 py-2">
-      <span>Provide Certificate for the Subordinate Certificate Authority</span>
-      <span className="text-xs block text-warning">Currently waiting for this input</span>
+        <span>Provide Certificate for the Subordinate Certificate Authority</span>
+        <span className="text-xs block text-warning">Currently waiting for this input</span>
       </div>
     </li>
     <li className="flex flex-row items-center gap-2">
@@ -347,9 +363,7 @@ export const LocalPageWrapper = (props) => (
                 )}
               </button>
             </h1>
-            <div className="py-12 px-4 max-w-xl m-auto">
-              {props.children}
-            </div>
+            <div className="py-12 px-4 max-w-xl m-auto">{props.children}</div>
           </div>
           <div>
             <p className="text-sm text-center">
@@ -393,7 +407,9 @@ const CsrModal = ({ pushModal, serial, csr, children }) => (
     onClick={() =>
       pushModal(
         <ModalWrapper keepOpenOnClick>
-          <Highlight title={`CSR ${serial}`} label="Certificate Signing Request">{csr.replace(/\r\n/g, "\n")}</Highlight>
+          <Highlight title={`CSR ${serial}`} label="Certificate Signing Request">
+            {csr.replace(/\r\n/g, '\n')}
+          </Highlight>
         </ModalWrapper>
       )
     }
@@ -402,4 +418,3 @@ const CsrModal = ({ pushModal, serial, csr, children }) => (
     {children}
   </button>
 )
-

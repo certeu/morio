@@ -58,7 +58,7 @@ export const cluster = (...params) => {
   return template
 }
 
-function sizingTab () {
+function sizingTab() {
   return [
     `### Choose your deployment size`,
     {
@@ -76,38 +76,38 @@ function sizingTab () {
 - Recommended for small deployments
 - Provides a simpler setup with less moving parts
 `,
-    },
-    {
-      val: 3,
-      label: 'Morio Clustered Deployment',
-      about: `
+        },
+        {
+          val: 3,
+          label: 'Morio Clustered Deployment',
+          about: `
 - Setup a Morio cluster with 3 broker nodes
 - Recommended for larger deployments
 - Provides high availibility
 `,
-    },
-    {
-      label: 'Morio Large Cluster Deployment',
-      about: `
+        },
+        {
+          label: 'Morio Large Cluster Deployment',
+          about: `
 - Setup a Morio cluster with 5, 7, or 9 broker nodes
 - Recommended for increased throughput
 - Size matters, but bigger is not always better
 `,
-            hide: 'Show larger cluster sizes',
-            val: {
-              type: 'select',
-              values: [5, 7, 9],
-              labels: ['5 broker nodes', '7 broker nodes', '9 broker nodes'],
-              label: 'Cluster nodes',
-              about: 'Choose the amount of broker nodes in the Morio cluster',
-            },
+          hide: 'Show larger cluster sizes',
+          val: {
+            type: 'select',
+            values: [5, 7, 9],
+            labels: ['5 broker nodes', '7 broker nodes', '9 broker nodes'],
+            label: 'Cluster nodes',
+            about: 'Choose the amount of broker nodes in the Morio cluster',
           },
-        ],
-      },
-    ]
+        },
+      ],
+    },
+  ]
 }
 
-function namesTab (context) {
+function namesTab(context) {
   return [
     '### Name your Morio deployment',
     '##### A global display name for this Morio deployment',
@@ -134,9 +134,7 @@ function namesTab (context) {
       : [
           <Popout tip key={1}>
             <h5>You need to choose a cluster size first</h5>
-            <p>
-              Once you have chosen a cluster size, you can enter the node names here.
-            </p>
+            <p>Once you have chosen a cluster size, you can enter the node names here.</p>
           </Popout>,
         ]
   )
@@ -151,11 +149,7 @@ function clusterTab() {
       key: 'cluster.fqdn',
       label: 'Cluser Name',
       labelBL: 'A fully qualified domain name for the entire Morio cluster',
-      labelBR: (
-        <span className="italic opacity-70">
-          Create a round-robin A record for this
-        </span>
-      ),
+      labelBR: <span className="italic opacity-70">Create a round-robin A record for this</span>,
       schema: Joi.string().hostname().required().label('Cluster Name'),
     },
   ]
@@ -191,13 +185,13 @@ function optMorioHubTab(context) {
       },
       {
         div: true,
-        className: "mt-2 ml-2",
+        className: 'mt-2 ml-2',
         form: [
           <>
             <b>Load Morio client modules</b>
             <br />
             <small>Configuration modules for the various agents</small>
-          </>
+          </>,
         ],
       },
       {
@@ -226,13 +220,13 @@ function optMorioHubTab(context) {
       },
       {
         div: true,
-        className: "mt-2 ml-2",
+        className: 'mt-2 ml-2',
         form: [
           <>
             <b>Add support for live dashboarding</b>
             <br />
             <small>Adds visualisation logic and stream processors</small>
-          </>
+          </>,
         ],
       },
     ],
@@ -249,11 +243,7 @@ function optMorioHubTab(context) {
         dir: 'row',
         current: false,
         dense: true,
-        activeIcon: context.TMP?.moriohub ? (
-          <BoolYesIcon size={6} />
-        ) : (
-          <BoolNoIcon size={6} />
-        ),
+        activeIcon: context.TMP?.moriohub ? <BoolYesIcon size={6} /> : <BoolNoIcon size={6} />,
         list: [
           {
             val: true,
@@ -267,30 +257,29 @@ function optMorioHubTab(context) {
       },
       {
         div: true,
-        className: "mt-2 ml-2",
+        className: 'mt-2 ml-2',
         form: [
           <>
             <b>Enable MorioHub integration</b>
             <br />
-              <small>Disabled by default, but highly recommended</small>
-          </>
+            <small>Disabled by default, but highly recommended</small>
+          </>,
         ],
       },
     ],
-  ].concat(context.TMP?.moriohub ? withMoriohub : [])
-  .concat([
-    <Popout tip key="tip">
-      <h5>No need to re-invent the observability wheel</h5>
-      <p>
-        <a href="https://morio.it/hub/" target="_BLANK">
-          MorioHub
-        </a>{' '}
-        is a curated collection of Morio configuration and plugins for various use
-        cases.
-      </p>
-    </Popout>,
-  ])
-
+  ]
+    .concat(context.TMP?.moriohub ? withMoriohub : [])
+    .concat([
+      <Popout tip key="tip">
+        <h5>No need to re-invent the observability wheel</h5>
+        <p>
+          <a href="https://morio.it/hub/" target="_BLANK">
+            MorioHub
+          </a>{' '}
+          is a curated collection of Morio configuration and plugins for various use cases.
+        </p>
+      </Popout>,
+    ])
 }
 
 function validateTab(context, toggleValidate) {
@@ -306,7 +295,7 @@ function validateTab(context, toggleValidate) {
   ]
 }
 
-function optTab (...params) {
+function optTab(...params) {
   return [
     '### Optional settings',
     {
@@ -327,8 +316,9 @@ function optTab (...params) {
   ]
 }
 
-function optKeydataTab (context) {
-  if (context.preseed?.keys?.data) return [<Popout tip title="Key Data file Loaded" compact key="a" />]
+function optKeydataTab(context) {
+  if (context.preseed?.keys?.data)
+    return [<Popout tip title="Key Data file Loaded" compact key="a" />]
 
   return [
     {
@@ -364,9 +354,8 @@ function optKeydataTab (context) {
     <Popout tip key="c">
       <h5>What is a Key Data file?</h5>
       <p>
-        If you provide a Key Data file here that you exported from another Morio
-        instance, this Morio instance will be set up with the same cryptographic
-        DNA.
+        If you provide a Key Data file here that you exported from another Morio instance, this
+        Morio instance will be set up with the same cryptographic DNA.
         <br />
         This allows running Morio in a blue/green deployment.
       </p>
@@ -374,7 +363,7 @@ function optKeydataTab (context) {
   ]
 }
 
-function optCaTab (context) {
+function optCaTab(context) {
   const subit = context?.subca?.enable ? true : false
 
   return [
@@ -384,19 +373,26 @@ function optCaTab (context) {
       inputType: 'buttonList',
       title: 'Node vs Cluster',
       current: false,
-      activeIcon: subit
-        ? <PuzzleIcon className="w-b -w-8" />
-        : <CertificateIcon className="w-b w-8" />,
+      activeIcon: subit ? (
+        <PuzzleIcon className="w-b -w-8" />
+      ) : (
+        <CertificateIcon className="w-b w-8" />
+      ),
       list: [
         {
           val: false,
           label: 'Create an independent Certificate Authority',
-          about: context?.subca?.enable ? false : (
+          about: context?.subca?.enable ? (
+            false
+          ) : (
             <>
               Set up Morio as a stand-alone Certificate Authority (CA)
               <ul className="list list-inside list-disc text-small ml-2 mt-1">
                 <li>Easiest setup</li>
-                <li>To avoid certificate warnings, add Morio&apos;s CA to your clients&apos; trust store</li>
+                <li>
+                  To avoid certificate warnings, add Morio&apos;s CA to your clients&apos; trust
+                  store
+                </li>
               </ul>
             </>
           ),
@@ -418,14 +414,12 @@ function optCaTab (context) {
     },
     '##### Certificate Authority Properties',
     <div className="text-success text-sm flex flex-row items-center gap-1" key="tip">
-      <TipIcon className="w-5 h-5"/>
-      <em>
-      Feel free to leave these fields empty (or lie), since they are cosmetic only
-      </em>
+      <TipIcon className="w-5 h-5" />
+      <em>Feel free to leave these fields empty (or lie), since they are cosmetic only</em>
     </div>,
     {
       div: true,
-      className: "grid grid-cols-3 gap-2 w-full",
+      className: 'grid grid-cols-3 gap-2 w-full',
       form: [
         {
           key: `subca.c`,
@@ -448,11 +442,11 @@ function optCaTab (context) {
           placeholder: `Brussels`,
           schema: Joi.string().label('City').allow(''),
         },
-      ]
+      ],
     },
     {
       div: true,
-      className: "grid grid-cols-2 gap-2 w-full -mt-6",
+      className: 'grid grid-cols-2 gap-2 w-full -mt-6',
       form: [
         {
           key: `subca.o`,
@@ -472,7 +466,7 @@ function optCaTab (context) {
     },
     {
       div: true,
-      className: "grid grid-cols-2 gap-2 w-full -mt-6",
+      className: 'grid grid-cols-2 gap-2 w-full -mt-6',
       form: [
         {
           key: `subca.rcn`,
@@ -488,20 +482,18 @@ function optCaTab (context) {
           placeholder: `Morio Intermediate Certificate Authority`,
           schema: Joi.string().label('Country').allow(''),
         },
-      ]
+      ],
     },
     <Popout tip key="c">
       <h5>Can you trust the Morio Certificate Authority?</h5>
       <p>
-        Morio relies on <a
-        href="https://en.wikipedia.org/wiki/X.509">X.509 certificates</a> for
-        both <b>encryption</b> and <b>authentication</b>.
-        Whether you should also trust its CA is <a
-          href="https://morio.it/docs/guides/services/ca/#can-you-trust-the-morio-certificate-authority">
+        Morio relies on <a href="https://en.wikipedia.org/wiki/X.509">X.509 certificates</a> for
+        both <b>encryption</b> and <b>authentication</b>. Whether you should also trust its CA is{' '}
+        <a href="https://morio.it/docs/guides/services/ca/#can-you-trust-the-morio-certificate-authority">
           a different matter altogether
-        </a>.
+        </a>
+        .
       </p>
-    </Popout>
+    </Popout>,
   ]
 }
-
