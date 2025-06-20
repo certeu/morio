@@ -87,7 +87,7 @@ export async function testUrl(url, customOptions = {}, onError) {
       try {
         onError({ url, options, err, result })
       }
-      catch () {
+      catch {
         // Ah well
       }
     }
