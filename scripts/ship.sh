@@ -61,6 +61,15 @@ docker push itsmorio/core:${MORIO_VERSION_TAG}${TAG_SUFFIX}
 docker push itsmorio/core:${RELEASE_CHANNEL_TAG}
 docker push itsmorio/api:${MORIO_VERSION_TAG}${TAG_SUFFIX}
 docker push itsmorio/api:${RELEASE_CHANNEL_TAG}
+docker push itsmorio/tap:${MORIO_VERSION_TAG}${TAG_SUFFIX}
+docker push itsmorio/tap:${RELEASE_CHANNEL_TAG}
 docker push itsmorio/ui:${MORIO_VERSION_TAG}${TAG_SUFFIX}
 docker push itsmorio/ui:${RELEASE_CHANNEL_TAG}
+# Testing requires an extra tag
+if [ "$RELEASE_CHANNEL" = "testing" ]; then
+  docker push itsmorio/core:${MORIO_VERSION_TAG}-testing
+  docker push itsmorio/api:${MORIO_VERSION_TAG}-testing
+  docker push itsmorio/tap:${MORIO_VERSION_TAG}-testing
+  docker push itsmorio/ui:${MORIO_VERSION_TAG}-testing
+fi
 

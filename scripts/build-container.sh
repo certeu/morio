@@ -13,6 +13,7 @@ then
   RELEASE_CHANNEL_TAG="dev"
   NAMESPACE="devmorio"
   TAG_SUFFIX=""
+  EXTRA_OPTIONS=""
 else
   if [ "stable" == $2 ]
   then
@@ -23,6 +24,7 @@ else
     RELEASE_CHANNEL_TAG="latest"
     NAMESPACE="itsmorio"
     TAG_SUFFIX=""
+    EXTRA_OPTIONS=""
   elif [ "canary" == $2 ]
   then
     echo ""
@@ -32,6 +34,7 @@ else
     RELEASE_CHANNEL_TAG="canary"
     NAMESPACE="itsmorio"
     TAG_SUFFIX="-canary"
+    EXTRA_OPTIONS=""
   elif [ "testing" == $2 ]
   then
     echo ""
@@ -40,7 +43,8 @@ else
     RELEASE_CHANNEL="testing"
     RELEASE_CHANNEL_TAG="testing"
     NAMESPACE="itsmorio"
-    TAG_SUFFIX="-$(git rev-parse HEAD)"
+    TAG_SUFFIX="-testing"
+    EXTRA_OPTIONS="--tag $NAMESPACE/$1:$MORIO_VERSION_TAG-$(git rev-parse HEAD) "
   else
     echo ""
     echo "Building container for Morio development environment."
@@ -49,6 +53,7 @@ else
     RELEASE_CHANNEL_TAG="dev"
     NAMESPACE="itsmorio"
     TAG_SUFFIX="-dev"
+    EXTRA_OPTIONS=""
   fi
 fi
 
@@ -71,6 +76,7 @@ else
     --file Containerfile.$RELEASE_CHANNEL \
     --tag $NAMESPACE/$CONTAINER:$RELEASE_CHANNEL_TAG \
     --tag $NAMESPACE/$CONTAINER:$MORIO_VERSION_TAG$TAG_SUFFIX \
+    $EXTRA_OPTIONS \
     -
 fi
 
