@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Allow users to define where to run flanking services
 - [api] Run in PM2 and restart when memory exceeds 250MB
+- [api] Avoid validation issues with local node connectivity
 - [broker] Upgraded Redpanda from v24.2.20 to v24.2.21
 - [ca] Upgrated StepCA from 0.28.2 to 0.28.3
 - [connector] Upgraded Vector from 0.45.0-debian to 0.46.1-debian

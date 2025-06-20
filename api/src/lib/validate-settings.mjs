@@ -106,44 +106,52 @@ export async function validateSettings(newSettings, headers = false) {
     return abort()
   }
 
-  const httpPromises = []
-  i = 0
-  for (const node of newSettings.cluster.broker_nodes) {
-    i++
-    /*
-     * Try contacting nodes over HTTPS, ignore certificate
-     */
-    const url = `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`
-    // Do not test ourselves
-    if (node !== utils.getNodeFqdn())
-      httpPromises.push(
-        await testUrl(url, { ignoreCertificate: true, returnAs: 'json' }, log.debug).then(
-          (status) => {
-            if (status?.info) report.info.push(`Node ${i} is reachable over HTTPS`)
-            else {
-              report.info.push(`Validation failed for node ${i}`)
-              report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
+  /*
+   * Connecting to a DNS name that resolves to the same machine
+   * the container is running on is ripe for errors. So we only
+   * run this step when there's multiple nodes.
+   */
+  if (newSettings.cluster.broker_nodes.length > 1) {
+    const httpPromises = []
+    i = 0
+    for (const node of newSettings.cluster.broker_nodes) {
+      i++
+      /*
+       * Try contacting nodes over HTTPS, ignore certificate
+       */
+      const url = `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`
+      // Do not test ourselves
+      log.todo({ node, fqdn: utils.getNodeFqdn() || 'unknown' }, 'FIXME: check yoself')
+      if (node !== utils.getNodeFqdn())
+        httpPromises.push(
+          await testUrl(url, { ignoreCertificate: true, returnAs: 'json' }, log.debug).then(
+            (status) => {
+              if (status?.info) report.info.push(`Node ${i} is reachable over HTTPS`)
+              else {
+                report.info.push(`Validation failed for node ${i}`)
+                report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
 
-              return abort()
-            }
+                return abort()
+              }
 
-            if (status.state?.ephemeral) {
-              report.info.push(`Node ${i} runs Morio and is ready for setup`)
-            } else {
-              if (status.info?.name === '@itsmorio/api') {
-                report.warnings.push(
-                  `Node ${i} runs Morio but is not in ephemeral mode, its settings would be overwritten`
-                )
+              if (status.state?.ephemeral) {
+                report.info.push(`Node ${i} runs Morio and is ready for setup`)
               } else {
-                report.errors.push(`Node ${i} does not seem to run Morio`)
-                abort()
+                if (status.info?.name === '@itsmorio/api') {
+                  report.warnings.push(
+                    `Node ${i} runs Morio but is not in ephemeral mode, its settings would be overwritten`
+                  )
+                } else {
+                  report.errors.push(`Node ${i} does not seem to run Morio`)
+                  abort()
+                }
               }
             }
-          }
+          )
         )
-      )
+    }
+    await Promise.all(httpPromises)
   }
-  await Promise.all(httpPromises)
 
   /*
    * Check that the current URL is also one of the nodes
@@ -159,6 +167,14 @@ export async function validateSettings(newSettings, headers = false) {
     }, but that is not one of the broker nodes.
       Please make sure to use the FQDN of the broker nodes to configure your system.`)
   }
+
+  /*
+   * Inform people we did not test the local node connectivity
+   * (as it can fail even when everything is fine)
+   */
+  report.info.push(
+    `As on-box Docker networking makes lookback connectivity brittle, we did not validate this step for the local node.`
+  )
 
   /*
    * Looks good
