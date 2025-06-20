@@ -83,7 +83,14 @@ export async function testUrl(url, customOptions = {}, onError) {
     result = await axios(url, options)
   } catch (err) {
     // Invoke error handler if it is provided
-    if (typeof onError === 'function') onError({ url, options, err, result })
+    if (typeof onError === 'function') {
+      try {
+        onError({ url, options, err, result })
+      }
+      catch () {
+        // Ah well
+      }
+    }
 
     return options.returnError ? err : false
   }
