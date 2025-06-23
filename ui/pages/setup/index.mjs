@@ -1,4 +1,5 @@
 import { useContext, useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
@@ -73,6 +74,19 @@ export const EphemeralWrapper = ({ children }) => {
 const ConfigWizardPage = (props) => {
   const { theme, toggleTheme } = useTheme()
   const { pushModal } = useContext(ModalContext)
+  const { api } = useApi()
+  const router = useRouter()
+  const [status, setStatus] = useState(null)
+
+  useEffect(() => {
+    const loadStatus = async () => {
+      const [content] = await api.getStatus()
+      setStatus(content)
+      if (content?.core?.node?.subca_csr) router.push('/')
+    }
+    if (!status) loadStatus()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [])
 
   return (
     <PageWrapper {...props} layout={SplashLayout} header={false} footer={false} role={false}>
