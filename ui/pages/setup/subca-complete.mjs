@@ -137,12 +137,12 @@ const CompleteSubcaSettingsPage = (props) => {
     deploy,
   }
 
-  // Don't bother without a CSR
-  if (error === 'noCsr') return <ErrorNoCsr {...drillProps} />
-
   // Show deploy result
   if (deployed === 'ongoing') return <CsrDeploying {...drillProps} />
   if (deployed) return <CsrDeployed {...drillProps} />
+
+  // Don't bother without a CSR
+  if (error === 'noCsr') return <ErrorNoCsr {...drillProps} />
 
   // Show validation result
   if (validationResult) return <CsrValidationReport {...drillProps} report={validationResult} />
@@ -153,7 +153,6 @@ const CompleteSubcaSettingsPage = (props) => {
         <div>{props.title}</div>
         <CertificateIcon className="w-10 h-10 text-success" />
       </h3>
-      <pre>{JSON.stringify(deployed)}</pre>
       <details>
         <summary className="hover:cursor-pointer">
           <b>Current status</b>
