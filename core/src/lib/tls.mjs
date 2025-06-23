@@ -201,13 +201,9 @@ export async function ensureServiceCertificate(service, internal = false, chain 
     run: async () =>
       await createX509Certificate({
         certificate: {
+          ...utils.getCertificateDefaults(),
           //cn: `${service}.infra.${utils.getClusterUuid()}.morio`,
           cn: internal ? utils.getInternalServiceCn(service) : utils.getClusterFqdn(),
-          c: utils.getPreset('MORIO_X509_C'),
-          st: utils.getPreset('MORIO_X509_ST'),
-          l: utils.getPreset('MORIO_X509_L'),
-          o: utils.getPreset('MORIO_X509_O'),
-          ou: utils.getPreset('MORIO_X509_OU'),
           san: utils.getBrokerFqdns(),
         },
         notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
