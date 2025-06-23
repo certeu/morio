@@ -1,14 +1,13 @@
 {
-    "req": {
-      "id": "local.testAccount1722234021332",
-      "status": "disabled"
-    },
-    "res": {
-      "username": "testAccount1722234021332",
-      "about": "This account is disabled as a part of test",
-      "provider": "local",
-      "role": "user",
-      "status": "disabled"
-    }
+  "req": {
+    "id": "local.testAccount1722234021332",
+    "status": "disabled"
+  },
+  "res": {
+    "username": "testAccount1722234021332",
+    "about": "This account is disabled as a part of test",
+    "provider": "local",
+    "role": "user",
+    "status": "disabled"
   }
-  
+}
