@@ -54,5 +54,8 @@ RUN npm install pm2 -g
 ## Copy build artifact from builder
 COPY --from=builder /morio/core/dist/index.mjs ./dist/index.mjs
 
+## Copy eda modules
+COPY --from=builder /morio/core/lib ./lib
+
 ## Now run NodeJS code inside PM2
 CMD [ "pm2-runtime", "start", "/morio/core/pm2.config.js" ]
