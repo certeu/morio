@@ -179,6 +179,22 @@ utils.getCaTrustChain = () => {
 }
 
 /**
+ * Helper method to get the defaults for a certificate
+ *
+ */
+utils.getCertificateDefaults = () => {
+  const subca = utils.getSettings('subca', {})
+
+  return {
+    c: subca.c || utils.getPreset('MORIO_X509_C'),
+    st: subca.st || utils.getPreset('MORIO_X509_ST'),
+    l: subca.l || utils.getPreset('MORIO_X509_L'),
+    o: subca.o || utils.getPreset('MORIO_X509_O'),
+    ou: subca.ou || utils.getPreset('MORIO_X509_OU'),
+  }
+}
+
+/**
  * Helper method to get the FQDN of the cluster
  */
 utils.getClusterFqdn = () => {

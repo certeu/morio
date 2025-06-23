@@ -69,16 +69,43 @@ export async function generateCsr(data, keypair=false) {
   csr.publicKey = keypair.publicKey
 
   /*
-   * Set subject (needs some reformatting)
+   * Prepare subject
    */
-  csr.setSubject(
-    Object.keys(data)
-      .filter((key) => key !== 'san')
-      .map((key) => ({
-        shortName: key.toUpperCase(),
-        value: data[key],
-      }))
-  )
+  const subject = [
+    // Common Name
+    {
+      name: 'commonName',
+      value: data.commonName || data.rcn || data.icn || data.cn || data.CN || false
+    },
+    // Country
+    {
+      name: 'countryName',
+      value: data.countryName || data.c || data.C || false
+    },
+    // State
+    {
+      shortName: 'ST',
+      value: data.st || data.ST || data.state || false
+    },
+    // Locality
+    {
+      name: 'localityName',
+      value: data.l || data.L || data.locality || data.localityName || false
+    },
+    // Organisation
+    {
+      name: 'organizationName',
+      value: data.o || data.O || data.organizationName || false
+    },
+    // Organisational Unit
+    {
+      shortName: 'OU',
+      value: data.ou || data.OU || false
+    },
+  ].filter(entry => entry.value)
+
+  // Set subject
+  csr.setSubject(subject)
 
   /*
    * Add SANs
@@ -300,7 +327,7 @@ export function generateCaRoot(custom={}) {
    */
   const intermediate = generateCaCertificate(
     { ...dflts, commonName: custom.icn || getPreset('MORIO_INTERMEDIATE_CA_COMMON_NAME') },
-    { ...dflts, commonName: custom.icn || getPreset('MORIO_ROOT_CA_COMMON_NAME') },
+    { ...dflts, commonName: custom.rcn || getPreset('MORIO_ROOT_CA_COMMON_NAME') },
     Number(getPreset('MORIO_INTERMEDIATE_CA_VALID_YEARS')),
     extentions
   )

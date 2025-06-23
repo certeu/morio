@@ -533,6 +533,7 @@ async function subcaSetup(valid, node) {
   for (const key in csrConfig) {
     if (valid.subca?.[key]) csrConfig[key] = valid.subca[key]
   }
+  if (valid.subca?.icn) csrConfig.cn = valid.subca.icn
 
   const csr = await generateCsr(
     csrConfig,
@@ -645,11 +646,11 @@ const generateCryptographicRoots = async function (valid, serial) {
    * we can pass them along the join invite to cluster nodes
    */
   log.debug(`Generating CA config`)
-  const caProps = { ...keys }
+  const caProps = {}
   for (const prop of ['c', 'st', 'l', 'o', 'ou', 'rcn', 'icn']) {
     if (valid.subca?.[prop]) caProps[prop] = valid.subca[prop]
   }
-  await generateCaConfig(caProps)
+  await generateCaConfig(keys, caProps)
 
   /*
    * Add encryption methods, unless they are already added
