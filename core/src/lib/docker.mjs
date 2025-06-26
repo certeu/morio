@@ -254,7 +254,13 @@ export function generateContainerConfig(serviceName) {
     },
   }
   opts.NetworkingConfig.EndpointsConfig[utils.getNetworkName()] = {
-    Aliases: [name, `${name}_${utils.getNodeSerial() || 1}`, ...aliases],
+    Aliases: [
+      name,
+      `${name}.internal`,
+      `${name}_${utils.getNodeSerial() || 1}`,
+      `${name}_${utils.getNodeSerial() || 1}.internal`,
+      ...aliases,
+    ],
   }
 
   /*

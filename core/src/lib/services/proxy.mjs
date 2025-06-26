@@ -18,7 +18,7 @@ export const service = {
      */
     heartbeat: async () => {
       const result = await testUrl(
-        `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}proxy/api/overview`,
+        `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}proxy.internal/api/overview`,
         {
           returnAs: 'json',
           ignoreCertificate: true,

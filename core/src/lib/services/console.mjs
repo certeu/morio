@@ -17,7 +17,7 @@ export const service = {
      */
     heartbeat: async () => {
       const result = await testUrl(
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}console:${utils.getPreset('MORIO_CONSOLE_PORT')}/console/api/brokers`,
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}console.internal:${utils.getPreset('MORIO_CONSOLE_PORT')}/console/api/brokers`,
         { returnAs: 'json', timeout: 12000 }
       )
       const status = Array.isArray(result) && result.length > 0 && result[0].brokerId ? 0 : 1

@@ -71,7 +71,7 @@ export async function reloadApi() {
 
 const isApiUp = async (reload = false) => {
   const status = await testUrl(
-    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/${reload ? 'reload' : 'up'}`,
+    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api.internal:${utils.getPreset('MORIO_API_PORT')}/${reload ? 'reload' : 'up'}`,
     {
       returnAs: 'status',
     }
