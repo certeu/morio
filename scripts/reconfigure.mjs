@@ -1,4 +1,4 @@
-import { writeFile } from '@itsmorio/shared/fs'
+import { readFile, writeFile } from '@itsmorio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@itsmorio/config'
 import { pullConfig } from '@itsmorio/config'
 import { Store } from '@itsmorio/shared/store'
@@ -68,6 +68,7 @@ const getHelpers = (env) => {
   return { store, utils }
 }
 
+
 const config = {
   core: {
     /*
@@ -94,10 +95,28 @@ const config = {
 /*
  * Generate run files for development
  */
-const cliOptions = (name, env) => `\\
+const cliOptions = async (name, env) => {
+  /*
+   * The local/clioptions.dev file can be used to add extra
+   * docker cli options. For example, to configure a proxy
+   */
+  let extraCliOptions = ''
+  if (env === 'dev') {
+    try {
+      const extra = await readFile('./local/clioptions.dev')
+      if (extra) extraCliOptions = extra
+      else console.log('No lolca/clioptions.dev file found')
+    }
+    catch(err) {
+      console.log('Error reading local/clioptions.dev', err)
+    }
+  }
+
+  return `\\
   ${env === 'test' ? '--interactive --rm' : '-d'} \\
   --user root \\
   --name=morio-${config[name][env].container.container_name} \\
+  --network-alias=morio-${config[name][env].container.container_name}.internal \\
   --hostname=morio-${config[name][env].container.container_name} \\
   --label morio.service=${name} \\
   --log-driver=${MORIO_DOCKER_LOG_DRIVER} \\
@@ -119,11 +138,13 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
   -e GITHUB_PR_NUMBER=${process.env['GITHUB_PR_NUMBER']} \\
   -e CODECOV_TOKEN=${process.env['CODECOV_TOKEN']} \\
   -e NODE_ENV=${presetGetters[env]('NODE_ENV')} \\
+  ${extraCliOptions.trim()} \
 ${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="' + MORIO_DOCKER_ADD_HOST + '"' : ''} \\
   ${
     env !== 'prod' ? '-e MORIO_GIT_ROOT=' + MORIO_GIT_ROOT + ' \\\n  ' : ''
   }${config[name][env].container.image}:${env === 'prod' ? 'v' + pkg.version : 'dev'} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}
-`
+  `
+}
 
 const preApiTest = `
 #
@@ -178,7 +199,7 @@ if [ -z "\${MORIO_FQDN}" ]; then
 fi
 `
 
-const script = (name, env) => `#!/bin/bash
+const script = async (name, env) => `#!/bin/bash
 #
 # This file is auto-generated
 #
@@ -189,13 +210,15 @@ ${name === 'core' && env === 'test' ? testFqdnCheck : ''}
 ${name === 'api' && env === 'test' ? testFqdnCheck : ''}
 ${name === 'api' ? preApiTest : ''}
 
-docker run ${cliOptions(name, env)}
+docker run ${(await cliOptions(name, env))}
 ${name === 'api' ? postApiTest : ''}
 `
 for (const env of ['dev', 'test', 'prod']) {
-  await writeFile(`core/run-${env}-container.sh`, script('core', env), false, 0o755)
+  const content = await script('core', env)
+  await writeFile(`core/run-${env}-container.sh`, content, false, 0o755)
 }
-await writeFile(`api/run-test-container.sh`, script('api', 'test'), false, 0o755)
+const content = await script('core', 'test')
+await writeFile(`api/run-test-container.sh`, content, false, 0o755)
 
 await writeFile(`VERSION`, pkg.version)
 

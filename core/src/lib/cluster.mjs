@@ -600,10 +600,15 @@ export async function ensureMorioCluster() {
       {
         Aliases: [
           `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core`,
+          `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core.internal`,
           `${utils.getPreset('MORIO_CONTAINER_PREFIX')}coredocs`,
-          utils.isEphemeral()
-            ? `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core_ephemeral`
-            : `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core_${utils.getNodeSerial()}`,
+          `${utils.getPreset('MORIO_CONTAINER_PREFIX')}coredocs.internal`,
+          ...(utils.isEphemeral()
+            ? [`${utils.getPreset('MORIO_CONTAINER_PREFIX')}core_ephemeral`]
+            : [
+                `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core_${utils.getNodeSerial()}`,
+                `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core_${utils.getNodeSerial()}.internal`,
+              ]),
         ],
       } // Endpoint config
     )

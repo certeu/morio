@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [console] Upgraded Redpanda Console from qlite from v2.8.3 to v2.8.5
 - [core] Run in PM2 and restart when memory exceeds 250MB
 - [core] Cluster join/heartbeat changes for flanking nodes
+- [core] Add .internal network aliases to facilitate proxy configuration
 - [db] Upgraded Rqlite from 8.36.12 to 8.36.16
 - [docs] Upgraded Docusaurus from 3.7.0 to 3.8.0
 - [proxy] Upgraded Traefik from v3.3.4 to v3.3.5

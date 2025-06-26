@@ -110,7 +110,7 @@ async function ensureLocalPrerequisites() {
      * is tell it what kind of a node we are on, it's FQDN and the cluster FQDN.
      */
     const settings = {
-      api: `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}`,
+      api: `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api.internal:${utils.getPreset('MORIO_API_PORT')}`,
       broker: {
         brokers: utils
           .getBrokerFqdns()
@@ -125,7 +125,7 @@ async function ensureLocalPrerequisites() {
         },
       },
       db: {
-        local: `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+        local: `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db.internal:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
         ccdb: `https://${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
         connection: utils.isBrokerNode() ? 'local' : 'ccdb',
         tablePrefix: utils.getPreset('MORIO_EDA_TABLE_PREFIX'),

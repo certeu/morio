@@ -16,7 +16,7 @@ export const service = {
      */
     heartbeat: async () => {
       const result = await testUrl(
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db.internal:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
         {
           returnAs: 'json',
         }
@@ -106,7 +106,7 @@ async function ensureLocalPrerequisites() {
  */
 export async function isDbUp() {
   const result = await testUrl(
-    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
+    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db.internal:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
     {
       ignoreCertificate: true,
       // This endpoint does not return JSON
