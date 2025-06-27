@@ -131,7 +131,6 @@ export const Login = ({ setAccount, account = false, role = false }) => {
       } else {
         const [result, status] = await api.getIdps()
         if (status === 200 && result.idps) {
-          console.log(result)
           setIdps(result.idps)
           setUi(result.ui)
           /*
