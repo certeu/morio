@@ -57,7 +57,7 @@ Controller.prototype.listDownloads = async function (req, res) {
 }
 
 /**
- * Loads the available idenitity/authentication providers (IDPs)
+ * Loads the available identity/authentication providers (IDPs)
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
@@ -82,6 +82,8 @@ Controller.prototype.getIdps = async function (req, res) {
           label: conf.label,
           about: conf.about || false,
         }
+        // Add available roles
+        if (typeof conf.rbac === 'object' && Object.keys(conf.rbac).length > 0) idps[id].roles = Object.keys(conf.rbac)
       }
     }
   }

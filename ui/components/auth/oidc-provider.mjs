@@ -4,8 +4,8 @@ import { RoleInput } from '../inputs.mjs'
 /**
  * The login for an OIDC provider
  */
-export const OidcProvider = ({ id }) => {
-  const [role, setRole] = useState('user')
+export const OidcProvider = ({ id, roles=false }) => {
+  const [role, setRole] = useState(roles[0] || 'user')
 
   return (
     <>
@@ -13,7 +13,7 @@ export const OidcProvider = ({ id }) => {
       <form method="POST" action="/-/api/login-form">
         <input type="hidden" name="provider" value={id} />
         <input type="hidden" name="role" value={role} />
-        <RoleInput {...{ role, setRole }} maxRole="engineer" />
+        <RoleInput {...{ role, setRole, availableRoles: roles }} maxRole="engineer" />
         <button role="submit" className="btn btn-lg btn-primary w-full">
           Sign in
         </button>
