@@ -222,11 +222,13 @@ export function getLabels(provider_id, user) {
   if (!provider || typeof provider.label_attributes !== 'object') return false
   const prefix = `${provider.provider}/${provider_id}/`
   const labels = []
-  for (const attr of Object.values(provider.label_attributes)) {
-    if (user[attr]) labels.push(...asLabels(user[attr]).map((label) => prefix + attr + '/' + label))
+  for (const [morioAttr, idpAttr] of Object.entries(provider.label_attributes)) {
+    if (user[idpAttr])
+      labels.push(...asLabels(user[idpAttr]).map((label) => prefix + morioAttr + '/' + label))
   }
 
-  return labels
+  // Weed out duplicate labels and sort them
+  return [...new Set(labels)].sort()
 }
 
 function asLabels(value, wrap = true) {

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Endpoint for cross-cluster database authentication
 - [api] Added endpoints for the management of inventory assets
+- [api] Added support for remapping OIDC label names
 - [cache] Cache service is now available at the cluster level
 - [cache] Enable ACL and authentication for cross-cluster access
 - [core] Added ability to deploy Morio as a subordinate CA
