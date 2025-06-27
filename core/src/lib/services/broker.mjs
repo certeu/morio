@@ -31,7 +31,7 @@ export const service = {
        * Get the status from the broker admin API
        */
       const result = await testUrl(
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpadmin.internal:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
         { returnAs: 'json', returnError: true }
       )
       if (result?.message) {
@@ -154,7 +154,7 @@ export const service = {
        */
       if (typeof utils.brokerAdminApi === 'undefined') {
         utils.brokerAdminApi = restClient(
-          `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1`,
+          `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker.internal:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1`,
           ({ options, err }) => {
             log.warn(
               {
@@ -244,7 +244,7 @@ async function enforceAuthorization() {
  */
 async function isBrokerUp() {
   const result = await testUrl(
-    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
+    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker.internal:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
     {
       ignoreCertificate: true,
       returnAs: 'json',
@@ -262,7 +262,7 @@ async function isBrokerUp() {
  */
 export async function isBrokerLeading() {
   const result = await testUrl(
-    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
+    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker.internal:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
     {
       ignoreCertificate: true,
       returnAs: 'json',

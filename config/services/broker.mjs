@@ -68,8 +68,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
           ],
       // Aliases to use on the docker network (used for proxying the RedPanda admin API)
       aliases: [
-        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpadmin`,
-        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpproxy`,
+        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpadmin.internal`,
+        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpproxy.internal`,
       ],
       // Command
       command: [

@@ -34,7 +34,7 @@ export async function createDbClient (utils, log) {
     log.debug(`Creating local database client`)
 
     return dbHandlers(
-      restClient(`http://morio-db:${utils.getPreset('MORIO_DB_HTTP_PORT')}`, dbErrorHandler)
+      restClient(`http://morio-db.internal:${utils.getPreset('MORIO_DB_HTTP_PORT')}`, dbErrorHandler)
     )
   }
 
