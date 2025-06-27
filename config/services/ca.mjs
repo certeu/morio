@@ -93,6 +93,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `ca.${utils.getClusterUuid()}.morio.internal`,
         'localhost',
         `${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca`,
+        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca.internal`,
       ],
       logger: {
         format: 'json',
