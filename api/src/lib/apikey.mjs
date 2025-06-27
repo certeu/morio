@@ -133,7 +133,7 @@ export async function createApikey(data, recreate = false) {
 
   // Now either delete + insert, or just insert
   const result = recreate
-    ? await utils.db.writeMany([
+    ? await utils.db.write([
         [`DELETE FROM apikeys WHERE id=:id`, { id: data.id }],
         [query, params],
       ])

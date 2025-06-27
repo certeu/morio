@@ -976,7 +976,7 @@ Host.prototype.save = async function (id, data) {
  * @return {boolean} result - True if it went ok, false if not
  */
 Host.prototype.enroll = async function (uuid, data, replace = false) {
-  const exists = await this.load(uuid)
+  const exists = await this.read(uuid)
   /*
    * By default, we do not allow replacing/updating a host
    */
@@ -1025,7 +1025,7 @@ Host.prototype.enroll = async function (uuid, data, replace = false) {
 
   let result
   try {
-    result = await utils.db.writeMany(queries)
+    result = await utils.db.write(queries)
   } catch (err) {
     log.debug(err, `Failed to bulk-write updates for host enrollment`)
   }
@@ -1311,7 +1311,7 @@ Host.prototype.remove = async function (uuid) {
   ].map((table) => [`DELETE from ${table} WHERE host=:host`, params])
   queries.push([`DELETE from inventory_hosts WHERE id=:host`, params])
 
-  await utils.db.writeMany(queries)
+  await utils.db.write(queries)
 }
 
 /**
@@ -1346,7 +1346,7 @@ Host.prototype.setClientModules = async function (uuid, modules) {
   for (const module of modules)
     queries.push([`INSERT INTO inventory_host_mod VALUES(:uuid, :module)`, { uuid, module }])
 
-  const result = await utils.db.writeMany(queries)
+  const result = await utils.db.write(queries)
   const failed = []
   if (result[0] === 200 && result[1].results) {
     for (const i in modules) {
@@ -1582,7 +1582,7 @@ Host.prototype.setClientVariables = async function (uuid, vars = {}) {
     }
   }
 
-  const result = await utils.db.writeMany(queries)
+  const result = await utils.db.write(queries)
   const failed = []
   if (result[0] === 200 && result[1].results) {
     const varNames = toStore.map((kv) => kv[0])
@@ -1632,7 +1632,7 @@ Host.prototype.getClientCommandId = async function (clients = false) {
 }
 
 Host.prototype.cleanupClientCommands = async function () {
-  await utils.db.writeMany([
+  await utils.db.write([
     [`DELETE FROM client_commands WHERE datetime(created_at) < datetime('none', '-4 hours')`],
     [`DELETE FROM client_command_data WHERE datetime(created_at) < datetime('none', '-4 hours')`],
   ])
