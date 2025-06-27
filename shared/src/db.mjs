@@ -100,6 +100,7 @@ const dbHandlers = (dbClient) => ({
  * @return {array} body - The request body for Rqlite
  */
 function rqliteBody (query, params=false) {
+  if (Array.isArray(query)) return query
   if (typeof query === 'string') return params
     ? [[query, params]]
     : [[query]]
