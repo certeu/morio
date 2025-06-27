@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow users to define where to run flanking services
 - [api] Run in PM2 and restart when memory exceeds 250MB
 - [api] Avoid validation issues with local node connectivity
+- [api] Return list of available roles for IDP providers
 - [broker] Upgraded Redpanda from v24.2.20 to v24.2.21
 - [ca] Upgrated StepCA from 0.28.2 to 0.28.3
 - [connector] Upgraded Vector from 0.45.0-debian to 0.46.1-debian
@@ -42,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [proxy] Upgraded Traefik from v3.3.4 to v3.3.5
 - [shared] Improved error handling for REST client
 - [ui] Improved flags UI in the settings wizard
+- [ui] Do not show OIDC role selection if only 1 role is available
 - [watcher] Upgraded Elastic Heartbeat from 8.16.5 to 8.17.4
 
 ### Fixed

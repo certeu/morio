@@ -589,24 +589,32 @@ export const RoleInput = ({
   labelTR,
   hide = ['root'],
   help = false, // Optional link to help / docs
-}) => (
-  <ListInput
-    label={label}
-    {...{ labelBL, labelBR, labelTR, help }}
-    dense
-    dir="row"
-    update={(val) => (role === val ? setRole(false) : setRole(val))}
-    current={role}
-    list={roles
-      .filter((role) => !hide.includes(role))
-      .map((role, i) => ({
-        val: role,
-        label: <span className="text-center block">{role}</span>,
-        disabled: maxRole ? i > roles.indexOf(maxRole) : false,
-      }))}
-    dflt="user"
-  />
-)
+  availableRoles = false, // Optionally limit list of available roles
+}) => {
+  const allRoles = availableRoles || roles
+
+  // Do not bother rendering a UI if there is only 1 role to choose from
+  if (allRoles.length < 2) return null
+
+  return (
+    <ListInput
+      label={label}
+      {...{ labelBL, labelBR, labelTR, help }}
+      dense
+      dir="row"
+      update={(val) => (role === val ? setRole(false) : setRole(val))}
+      current={role}
+      list={allRoles
+        .filter((role) => !hide.includes(role))
+        .map((role, i) => ({
+          val: role,
+          label: <span className="text-center block">{role}</span>,
+          disabled: maxRole ? i > roles.indexOf(maxRole) : false,
+        }))}
+      dflt={allRoles.includes("user") ? "user" : allRoles[0]}
+    />
+  )
+}
 
 /*
  * This is a special wrapper component around an input type that adds
