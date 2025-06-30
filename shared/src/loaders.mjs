@@ -530,7 +530,7 @@ export async function loadClientModules(settings, log, utils) {
                   content: raw,
                   source: repo,
                 }
-                const data = await loadMorioDataFromModule(raw, log)
+                const data = await loadMorioDataFromModule(raw, log, targetFile)
                 if (data) {
                   modules[module].info = [...modules[module].info, data.info]
                   modules[module].vars = { ...modules[module].vars, ...data.vars }
@@ -572,16 +572,18 @@ async function storeClientModules(modules, log, utils) {
      * We completely remove all modules and recreate them
      * because only through preseeding can modules be loaded
      */
-    const result = await utils.db.write(
+    const result = await utils.db.write([
       [`DELETE FROM inventory_mods where 1`],
       ...queries,
-    )
+    ])
     if (result[0] === 200 && result[1].results) {
       let failed = 0
+      let added = 0
       for (const insert of result[1].results) {
         if (!insert.last_insert_id) failed++
+        else added++
       }
-      if (failed === 0) log.debug(`[client] All client modules & vars added to the database`)
+      if (failed === 0) log.debug(`[client] All (${added}) client modules & vars added to the database`)
       else log.warn(`[client] Failed ${failed} queries when adding modules & vars to the database`)
     } else log.warn(`[client] Database failure while adding modules & vars to the database`)
   }
@@ -604,16 +606,18 @@ async function storeClientModuleFiles(files, log, utils) {
      * We completely remove all module files and recreate them
      * because only through preseeding can module files be loaded
      */
-    const result = await utils.db.write(
+    const result = await utils.db.write([
       [ `DELETE FROM inventory_modfiles where 1`],
       ...queries,
-    )
+    ])
     if (result[0] === 200 && result[1].results?.[0]) {
       let failed = 0
+      let added = 0
       for (const insert of result[1].results) {
         if (!insert.last_insert_id) failed++
+        else added++
       }
-      if (failed === 0) log.debug(`[client] All client module files added to the database`)
+      if (failed === 0) log.debug(`[client] All (${added}) client module files added to the database`)
       else
         log.warn(
           `[client] Failed ${failed} queries when adding client module files to the database`
@@ -622,13 +626,21 @@ async function storeClientModuleFiles(files, log, utils) {
   }
 }
 
-async function loadMorioDataFromModule(raw, log) {
+async function loadMorioDataFromModule(raw, log, targetFile) {
   const rendered = mustache.render(raw, {}, {}, { tags: ['{|', '|}'] })
   let yml = false
   try {
     yml = yaml.load(rendered)
     if (!yml) {
-      log.debug(`Failed to parse Moriodata as YAML`)
+      /*
+       * Might be a noop placeholder file, but let's make sure
+       * If it is, it should only have empty lines or comments (start with #)
+       */
+      if (rendered.split("\n").filter(line => (line.trim().length === 0 || line.trim()[0] === '#')).lenght > 0) {
+        log.warn(`Failed to parse Moriodata as YAML in ${targetFile}`)
+      }
+      else log.debug(`The config in ${targetFile} is a noop placeholder`)
+
       return false
     }
   } catch (err) {
