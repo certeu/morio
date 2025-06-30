@@ -1,6 +1,7 @@
 package cmd
 
 import (
+  "morio/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -12,7 +13,7 @@ var configFile string
 // Other comands will add themselves as children of the root
 var RootCmd = &cobra.Command{
 	Use:     "morio",
-	Version: "0.1",
+	Version: version.Version,
 	Short:   "The morio client",
 	Long: `morio: The Morio client
 
