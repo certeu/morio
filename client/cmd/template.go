@@ -28,7 +28,6 @@ func init() {
 }
 
 func EnsureTemplateVars() {
-	EnsureGlobalVars()
 	EnsureTemplateFolderVars("audit/module-templates.d")
 	EnsureTemplateFolderVars("metrics/module-templates.d")
 	EnsureTemplateFolderVars("logs/module-templates.d")
@@ -406,30 +405,6 @@ func AddDefaultProcessorsToInputs(inputs []map[string]interface{}, from string) 
 	}
 
 	return inputs
-}
-
-// FIXME: Make this platform agnostic
-func EnsureGlobalVars() map[string]string {
-	// Read the file from disk
-	data, err := os.ReadFile("/etc/morio/global-vars.yml")
-	if err != nil {
-		fmt.Println("Cannot read global variables file. Bailing out.")
-		panic(err)
-	}
-
-	// Parse as YAML into vars
-	var vars map[string]interface{}
-	yaml.Unmarshal([]byte(data), &vars)
-
-	// Parse for default values and store then as strings
-	defaults := ExtractDefaultsFromVars(vars)
-
-	// Iterate over them an write them to disk
-	for key, val := range defaults {
-		SetDefaultVar(key, val)
-	}
-
-	return defaults
 }
 
 // FIXME: Make this platform agnostic

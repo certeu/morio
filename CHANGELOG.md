@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Return list of available roles for IDP providers
 - [broker] Upgraded Redpanda from v24.2.20 to v24.2.21
 - [ca] Upgrated StepCA from 0.28.2 to 0.28.3
+- [client] Drop global-vars file in favor of default vars
 - [connector] Upgraded Vector from 0.45.0-debian to 0.46.1-debian
 - [console] Upgraded Redpanda Console from qlite from v2.8.3 to v2.8.5
 - [core] Run in PM2 and restart when memory exceeds 250MB
