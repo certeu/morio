@@ -59,7 +59,12 @@ async function ensureLocalPrerequisites() {
    */
   const secrets = [keys.mrt.hash, keys.private]
   // FIXME: Allow users to (re)generate the password for the default user (for CLI access)
-  const acl = `user tap on #${hash(secrets.map((s) => hash(s + 'tap')).join(''))} +@read +@write +@string +@list +@set +@hash +@sortedset +info ~* &*
+  const acl = `user tap on #${hash(
+    secrets
+      .map((s) => hash(s + 'tap'))
+      .join('')
+      .slice(10, 42)
+  )} +@read +@write +@string +@list +@set +@hash +@sortedset +info ~* &*
 user api on #${hash(secrets.map((s) => hash(s + 'api')).join(''))} +@read ~* &*
 user default on #${hash(keys.seal.salt)} ~* &* +@all`
   await writeFile(`/etc/morio/valkey/users.acl`, acl, log)

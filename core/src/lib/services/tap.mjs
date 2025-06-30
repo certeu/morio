@@ -106,7 +106,10 @@ async function ensureLocalPrerequisites() {
       lazyConnect: true,
       connectionName: `morio.tap.${utils.getNodeUuid()}`,
       username: 'tap',
-      password: [keys.mrt.hash, keys.private].map((s) => hash(s + 'tap')).join(''),
+      password: [keys.mrt.hash, keys.private]
+        .map((s) => hash(s + 'tap'))
+        .join('')
+        .slice(10, 42),
       host: localCache ? 'morio-cache' : utils.getCacheNode(),
       port: localCache ? 6379 : 6661,
       tls: localCache
