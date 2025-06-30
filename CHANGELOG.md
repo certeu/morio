@@ -53,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Fix an issue in flanking node validation
 - [api] Skip connection test to local node in validation
 - [api] Ensure broker is up prior to instantiating Kafka client
+- [core] Deploy tap processors into shared config and make them accessible
 
 ## [0.8.1] - 2025-03-12
 

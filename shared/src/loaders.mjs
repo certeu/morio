@@ -663,9 +663,9 @@ export async function loadStreamProcessors(settings, log) {
   if (!Array.isArray(globs) || globs.length < 1) return settings
 
   /*
-   * Folder inside the core container where to store the client files
+   * Folder inside the core container where to store the processor files
    */
-  const targetFolder = '/morio/tap/processors'
+  const targetFolder = '/etc/morio/shared/processors'
 
   /*
    * Clear processors folder
@@ -704,7 +704,7 @@ export async function loadStreamProcessors(settings, log) {
               2112
             ) // 2112 is the user id of the user inside the tap container
             if (copy) {
-              log.debug(`Seeding stream processing file: ${targetFile}`)
+              log.debug(`Seeding stream processing file: ${targetFile} in ${targetFolder}`)
               /*
                * We need to dynamically load the stream processor's settings too
                * For this, we will dynamically import the file and check for the

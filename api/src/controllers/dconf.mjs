@@ -27,15 +27,14 @@ Controller.prototype.tap = async function (req, res) {
 }
 
 async function loadTapUiConfig() {
-  const folder = path.resolve('../tap/processors')
+  const folder = '/etc/morio/shared/processors'
   const list = await globDir(folder)
-
   /*
    * First, iterate over all files
    */
   const processors = {}
   for (const file of list) {
-    const processor = file.split('/')[4]
+    const processor = file.split('/')[5]
     if (typeof processors[processor] === 'undefined') {
       processors[processor] = { module_files: [] }
     }
