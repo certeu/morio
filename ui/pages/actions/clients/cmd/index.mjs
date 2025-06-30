@@ -84,8 +84,6 @@ const ClientCommandBox = () => {
     } else {
       setLoadingStatus([true, 'The reponse from the server was unexpected', false, true])
     }
-
-    console.log(result)
   }
 
   const impacted = Object.keys(selected).length
