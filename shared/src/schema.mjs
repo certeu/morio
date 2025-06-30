@@ -252,6 +252,7 @@ const settings = Joi.object({
   flanking_services: Joi.object({
     cache: Joi.object({ nodes: flankingNodes }).optional(),
     connector: Joi.object({ nodes: flankingNodes }).optional(),
+    eda: Joi.object({ nodes: flankingNodes }).optional(),
     tap: Joi.object({ nodes: flankingNodes }).optional(),
     watcher: Joi.object({ nodes: flankingNodes }).optional(),
   }),
