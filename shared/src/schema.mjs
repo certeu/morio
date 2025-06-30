@@ -53,6 +53,24 @@ const client = Joi.object({
 })
 
 /*
+ * settings.env
+ */
+const env = Joi.object({
+  all: Joi.object().optional(),
+  api: Joi.object().optional(),
+  broker: Joi.object().optional(),
+  ca: Joi.object().optional(),
+  cache: Joi.object().optional(),
+  connector: Joi.object().optional(),
+  console: Joi.object().optional(),
+  db: Joi.object().optional(),
+  proxy: Joi.object().optional(),
+  tap: Joi.object().optional(),
+  ui: Joi.object().optional(),
+  watcher: Joi.object().optional(),
+}).optional()
+
+/*
  * settings.flanking_nodes
  */
 
@@ -268,6 +286,7 @@ const settings = Joi.object({
   client,
   tap: Joi.object().optional(),
   subca: Joi.object().optional(),
+  env,
 }).required()
 
 /*

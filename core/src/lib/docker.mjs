@@ -285,10 +285,15 @@ export function generateContainerConfig(serviceName) {
 
   /*
    * Environment variables
+   * Can come from config, but also from settings
    */
-  if (config.container.environment) {
-    opts.Env = Object.entries(config.container.environment).map(([key, val]) => `${key}=${val}`)
+  const env = utils.getSettings('env', {})
+  const allEnvVars = {
+    ...(config.container?.environment || {}),
+    ...(env.all || {}),
+    ...(env[serviceName] || {}),
   }
+  opts.Env = Object.entries(allEnvVars).map(([key, val]) => `${key}=${val}`)
 
   /*
    * Labels
