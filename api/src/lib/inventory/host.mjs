@@ -1389,7 +1389,7 @@ Host.prototype.getClientModules = async function (uuid) {
 Host.prototype.getAllClientModules = async function () {
   const result = await utils.db.read(`SELECT mod from inventory_mods WHERE 1`)
   const modules = []
-  if (result[0] === 200 && result[1].results) {
+  if (result[0] === 200 && result[1].results?.[0]?.values) {
     for (const read of result[1].results[0].values) modules.push(read[0])
   }
 
