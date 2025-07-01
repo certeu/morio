@@ -23,11 +23,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Some helpers
    */
-  const nodes = utils.isEphemeral() ? [] : [
-    utils.getClusterFqdn(),
-    utils.getNodeFqdn()
-  ]
-  const clusterFqdn = utils.isDistributed() ? '' : utils.getSettings('cluster.fqdn', false)
+  const nodes = utils.isEphemeral() ? [] : [ utils.getNodeFqdn() ]
+  if (utils.isBrokerNode()) nodes.push(utils.getClusterFqdn())
   const extraCliFlags = []
   const extraPorts = []
 
@@ -68,7 +65,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('tls.stores.default.defaultgeneratedcert.resolver', 'ca')
       .set(
         'tls.stores.default.defaultgeneratedcert.domain.main',
-        clusterFqdn ? clusterFqdn : utils.getSettings(['cluster', 'broker_nodes', 0])
+        utils.isDistributed() ? utils.getClusterFqdn() : utils.getNodeFqdn()
       )
       .set('tls.stores.default.defaultgeneratedcert.domain.sans', nodes.join(', '))
       .set(
