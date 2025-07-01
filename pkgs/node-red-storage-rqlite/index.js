@@ -31,6 +31,7 @@ function RqliteStorage() {
   this.tablePrefix = this.settings.tablePrefix || 'nodered_'
   this.connection = this.settings.connection
   this.initialized = false
+  this.token = false
 
   /*
    * Define table names
@@ -59,6 +60,9 @@ function RqliteStorage() {
  */
 RqliteStorage.prototype.init = async function() {
   if (this.initialized) return
+
+  console.log(`[morio-storage] Initializing Morio storage driver for node-red`)
+  console.log(`[morio-storage] Using database endpoint at ${this.baseUrl}`)
 
   const createTableQueries = [
     /*
@@ -125,6 +129,7 @@ RqliteStorage.prototype.init = async function() {
    * Always wrap your async code in try...catch kids
    */
   try {
+    console.log(`[morio-storage] Will create node-red tables. Table prefix is '${this.tablePrefix}'.`)
     await this._write(createTableQueries)
     this.initialized = true
     console.log(`[morio-storage] Initialized with table prefix: ${this.tablePrefix}`)
@@ -136,15 +141,36 @@ RqliteStorage.prototype.init = async function() {
 
 /*
  * Grab JWT for cross-cluster database connection
+ * Note that this is always loaded from the local API
  */
 RqliteStorage.prototype._getCcdbToken = async function() {
+  /*
+   * Perhaps the token we have is still ok?
+   * Note that we change for tokens older than 5 hours here
+   * (18 million milliseconds) since ccdb tokens have a 6-hour
+   * expiry, this should be fine
+   */
+  if (
+    this.token &&
+    this.token.jwt &&
+    this.token.iat &&
+    (Date.now() - this.token.iat < 18000000)
+  ) return this.token.jwt
+  // Nope, let's get a new one
   let token = false
+  console.log(`[morio-storage] Requesting authentication token for cross-cluster database access`)
   try {
-    const response = await fetch(`${this.settings.api}/ccdbauth/token`)
+    const response = await fetch(`${this.settings.api}/token/ccdbauth`)
     const data = await response.json()
     if (data.jwt) token = data.jwt
   } catch (err) {
-    console.log(err)
+    console.log(`[morio-storage] Failed to load token. Please escalate to a human.`, err)
+  }
+
+  if (typeof token === 'string' && token.length > 0) {
+    console.log(`[morio-storage] Authentication token loaded`)
+    // Store for future use
+    this.token = { jwt: token, iat: Date.now() }
   }
 
   return token
@@ -156,8 +182,15 @@ RqliteStorage.prototype._getCcdbToken = async function() {
 RqliteStorage.prototype._ccdbHeaders = async function() {
   const headers = {}
   if (this.connection === 'ccdb') {
-    const token = await this._getCcdbToken()
-    if (token.jwt) headers.authorization = `Bearer ${token}`
+    let token
+    try {
+      token = await this._getCcdbToken()
+    }
+    catch (err) {
+      console.log(`[morio-storage] Token request error:`, err)
+    }
+    if (typeof token === 'string' && token.length > 0) headers.authorization = `Bearer ${token}`
+    else console.log(`[morio-storage] Loaded token, but its format was unexpected. Please escalate to a human.`, { token })
   }
 
   return headers
@@ -210,11 +243,11 @@ RqliteStorage.prototype._query = async function(type='read', queries) {
       result = await response.json()
     }
     catch (err) {
-      console.log(err)
+      console.log('[morio-storage]', err)
     }
   }
   catch (err) {
-    console.log(err)
+    console.log('[morio-storage]', err)
   }
 
   return result

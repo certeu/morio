@@ -83,7 +83,8 @@ Controller.prototype.getIdps = async function (req, res) {
           about: conf.about || false,
         }
         // Add available roles
-        if (typeof conf.rbac === 'object' && Object.keys(conf.rbac).length > 0) idps[id].roles = Object.keys(conf.rbac)
+        if (typeof conf.rbac === 'object' && Object.keys(conf.rbac).length > 0)
+          idps[id].roles = Object.keys(conf.rbac)
       }
     }
   }

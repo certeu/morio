@@ -119,14 +119,14 @@ async function ensureLocalPrerequisites() {
         logLevel: 'info',
         ssl: {
           rejectUnauthorized: false,
-          ca: [await readFile(`/etc/morio/eda/tls-cert.pem`)],
+          ca: [utils.getCaTrustChain()],
           cert: await readFile(`/etc/morio/eda/tls-cert.pem`),
           key: await readFile(`/etc/morio/eda/tls-key.pem`),
         },
       },
       db: {
         local: `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db.internal:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
-        ccdb: `https://${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
+        ccdb: `https://${utils.getLeaderFqdn() || utils.getCentralFqdns()[0]}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
         connection: utils.isBrokerNode() ? 'local' : 'ccdb',
         tablePrefix: utils.getPreset('MORIO_EDA_TABLE_PREFIX'),
       },

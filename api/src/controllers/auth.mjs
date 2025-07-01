@@ -466,11 +466,10 @@ Controller.prototype.getCcdbToken = async function (req, res) {
     options: {
       /*
        * If this token expires, EdA will break.
-       * It is renewed at each init() command, so in priciple this
-       * should not be a problem. But let's make it longer than the
-       * default 4h anyway
+       * Here we set 6 hours for the expiry, and in the
+       * morio storage plugin for node-red, we refresh every 5 hours
        */
-      expiresIn: '24h',
+      expiresIn: '6h',
     },
   })
 
@@ -526,7 +525,7 @@ const verifyToken = (token) => {
     ? new Promise((resolve) =>
         jwt.verify(
           token,
-          utils.getKeys().public,
+          publicKey.trim(),
           {
             audience: 'morio',
             issuer: 'morio',

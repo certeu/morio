@@ -82,6 +82,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Environment
       environment: {
         MORIO_FQDN: process.env['MORIO_FQDN'],
+        NODE_EXTRA_CA_CERTS: '/etc/morio/eda/tls-ca.pem',
       },
       // Add extra hosts
       hosts: [],

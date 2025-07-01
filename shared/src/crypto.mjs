@@ -147,9 +147,9 @@ export async function generateCsr(data, keypair=false) {
  * @return {object} jwt - The JSON web token
  */
 export function generateJwt({ data, key, passphrase = false, options = {}, noDefaults = false }) {
+  const backdate = Math.floor(Date.now() / 1000) - 30
   const dfltOptions = {
     expiresIn: '4h',
-    notBefore: 0,
     audience: 'morio',
     subject: 'morio',
     issuer: 'morio',
@@ -157,7 +157,7 @@ export function generateJwt({ data, key, passphrase = false, options = {}, noDef
   }
 
   return jwt.sign(
-    data,
+    { iat: backdate, nbf: backdate, ...data },
     passphrase
       ? createPrivateKey({ key, passphrase, format: 'pem' }).export({
           type: 'pkcs8',
