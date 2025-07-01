@@ -23,7 +23,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Some helpers
    */
-  const nodes = utils.isEphemeral() ? [] : utils.getAllFqdns()
+  const nodes = utils.isEphemeral() ? [] : [
+    utils.getClusterFqdn(),
+    utils.getNodeFqdn()
+  ]
   const clusterFqdn = utils.isDistributed() ? '' : utils.getSettings('cluster.fqdn', false)
   const extraCliFlags = []
   const extraPorts = []
@@ -52,7 +55,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Enable ACME certificate resolver
       '--certificatesresolvers.ca.acme.storage=acme.json',
       // Set CA server
-      `--certificatesresolvers.ca.acme.caserver=https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/acme/acme/directory`,
+      `--certificatesresolvers.ca.acme.caserver=https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca.internal:${utils.getPreset('MORIO_CA_PORT')}/acme/acme/directory`,
       //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
       '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
       // Point to root CA (will only work after CA is initialized)
@@ -70,13 +73,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('tls.stores.default.defaultgeneratedcert.domain.sans', nodes.join(', '))
       .set(
         'http.middlewares.api-auth.forwardAuth.address',
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/auth`
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api.internal:${utils.getPreset('MORIO_API_PORT')}/auth`
       )
       .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
       .set('http.routers.api.middlewares', ['api-auth@file', 'redirect-to-https@file'])
       .set(
         'http.middlewares.ccdb-auth.forwardAuth.address',
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/ccdbauth`
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api.internal:${utils.getPreset('MORIO_API_PORT')}/ccdbauth`
       )
       .set('http.middlewares.ccdb-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
       .set('http.routers.ccdb.middlewares', ['ccdb-auth@file'])

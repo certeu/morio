@@ -45,7 +45,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
        */
       .set(
         'http.middlewares.eda-auth.forwardAuth.address',
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/auth`
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api.internal:${utils.getPreset('MORIO_API_PORT')}/auth`
       )
       .set('http.middlewares.eda-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
       /*

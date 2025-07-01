@@ -68,7 +68,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('http.routers.ca.priority', 666)
       .set('http.routers.ca.service', 'ca')
       .set('http.services.ca.loadBalancer.servers', {
-        url: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${PORT}/`,
+        url: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca.internal:${PORT}/`,
       })
       .set('http.routers.ca.tls', true)
       .set('http.routers.stepca.entryPoints', 'stepca')
@@ -77,7 +77,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('http.routers.stepca.service', 'ca')
       .set('http.routers.stepca.tls', true)
       .set('http.services.stepca.loadBalancer.servers', {
-        url: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${PORT}/`,
+        url: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca.internal:${PORT}/`,
       }),
     /*
      * Step-CA server configuration

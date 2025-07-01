@@ -40,7 +40,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             cache: {
               loadBalancer: {
                 servers: [{
-                  address: `morio-cache:${utils.getPreset('MORIO_CACHE_PORT')}`,
+                  address: `morio-cache:${utils.getPreset('MORIO_CACHE_PORT')}.internal`,
                 }],
               },
             },
