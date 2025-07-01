@@ -41,7 +41,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
     tap: {
       clientId: 'morio-tap',
       brokers: [
-        `${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
+        `${utils.getBrokerFqdns()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
       ],
       ssl: {
         rejectUnauthorized: false,
