@@ -33,12 +33,9 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * CA runs on all broker nodes.
+     * CA runs on all nodes.
      */
-    wanted: () => {
-      if (utils.isEphemeral()) return false
-      return utils.isBrokerNode() ? true : false
-    },
+    wanted: () => (utils.isEphemeral() ? false : true),
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

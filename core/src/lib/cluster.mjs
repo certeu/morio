@@ -383,7 +383,6 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
      */
     if (utils.getUptime() > 90) log.warn(`Received an invalid heartbeat response`)
   }
-
   /*
    * Just because the request didn't error doesn't mean all is ok
    */
@@ -411,12 +410,18 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
     else if (data.action === 'INVITE') inviteClusterNode(fqdn)
     else if (data.action === 'LEADER_CHANGE') log.todo('Implement LEADER_CHANGE')
     else log.todo(`Unsupported action in heartbeat response: ${data.action}`)
-  } else if (Array.isArray(data?.nodes)) {
-    for (const uuid in data.nodes) {
-      /*
-       * If it's a valid hearbeat, add the node info to the state
-       */
-      if (uuid !== utils.getNodeUuid()) utils.setClusterNode(uuid, data.nodes[uuid])
+  } else {
+    /*
+     * All good, store some data in state
+     */
+    if (data.cluster_leader) utils.setLeader(data.cluster_leader)
+    if (typeof data.nodes === 'object') {
+      for (const uuid in data.nodes) {
+        /*
+         * If it's a valid hearbeat, add the node info to the state
+         */
+        utils.setClusterNode(uuid, data.nodes[uuid])
+      }
     }
   }
 
@@ -528,7 +533,7 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
         /*
          * We hereby humbly accept our leading role
          */
-        utils.setLeader(utils.getNodeUuid())
+        utils.setLeader({ uuid: utils.getNodeUuid() })
         utils.setLeaderSerial(utils.getNodeSerial())
         log.info(`We are now leading this cluster`)
       } else {

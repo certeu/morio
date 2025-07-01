@@ -853,13 +853,15 @@ utils.setLeader = ({ serial = false, uuid = false }) => {
       utils.setLeaderUuid(utils.getNodeUuid())
       utils.setLeading(true)
     }
-  } else if (uuid) {
+  }
+  if (uuid) {
     utils.setLeaderUuid(uuid)
     if (String(uuid) === utils.getNodeUuid()) {
       utils.setLeaderSerial(utils.getNodeSerial())
       utils.setLeading(true)
     }
   }
+
   return utils
 }
 

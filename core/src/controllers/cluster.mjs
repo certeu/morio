@@ -89,7 +89,7 @@ Controller.prototype.heartbeat = async function (req, res) {
   /*
    * (potentially) take action, but not if we just got on our feet
    * as we'll be leaderless and need a few hearbeats for things to
-   * clink into place.
+   * click into place.
    */
   if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') * 2) {
     if (action === 'START_SYNC') {
@@ -211,6 +211,7 @@ Controller.prototype.join = async function (req, res) {
    * We also need to pre-seed it with the cluster keys or it will generate its own
    */
   const keyData = unsealKeyData(valid.keys.data)
+  utils.setKeys(keyData)
   await ensureCaConfig(keyData)
 
   /*
