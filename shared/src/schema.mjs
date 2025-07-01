@@ -19,7 +19,7 @@ const id = Joi.string().alphanum()
 /*
  * A Javascript timestamp (in ms)
  */
-const jsTime = Joi.number().min(172e10).max(199e10)
+const jsTime = Joi.number().min(172e10).max(999e10)
 
 /*
  * A v4 UUID
