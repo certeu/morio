@@ -65,7 +65,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('tls.stores.default.defaultgeneratedcert.resolver', 'ca')
       .set(
         'tls.stores.default.defaultgeneratedcert.domain.main',
-        utils.isDistributed() ? utils.getClusterFqdn() : utils.getNodeFqdn()
+        (utils.isDistributed() && utils.isBrokerNode()) ? utils.getClusterFqdn() : utils.getNodeFqdn()
       )
       .set('tls.stores.default.defaultgeneratedcert.domain.sans', nodes.join(', '))
       .set(
