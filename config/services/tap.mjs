@@ -34,21 +34,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/tap:/morio/tap/config`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/shared/processors:/morio/tap/processors`,
           ],
-    },
-    /*
-     * Tap configuration file
-     */
-    tap: {
-      clientId: 'morio-tap',
-      brokers: [
-        `${utils.getBrokerFqdns()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
-      ],
-      ssl: {
-        rejectUnauthorized: false,
-        ca: '/tap/config/tls-ca.pem',
-        key: '/tap/config/tls-key.pem',
-        cert: '/tap/config/tls-cert.pem',
-      },
-    },
+    }
   }
 }
