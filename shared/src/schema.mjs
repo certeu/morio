@@ -64,7 +64,7 @@ const env = Joi.object({
   connector: Joi.object().optional(),
   console: Joi.object().optional(),
   db: Joi.object().optional(),
-  eda Joi.object().optional(),
+  eda: Joi.object().optional(),
   proxy: Joi.object().optional(),
   tap: Joi.object().optional(),
   ui: Joi.object().optional(),
