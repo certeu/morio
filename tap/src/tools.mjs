@@ -178,8 +178,8 @@ function notification(data) {
  * CACHE RELATED TOOLS
  *
  */
-function logCacheErrors(err, result) {
-  return err ? tools.note(`ValKey pipeline exec error`, err) : null
+function logCacheErrors(result, info) {
+  if (result !== null) tools.note(`ValKey pipeline error`, { result, info })
 }
 
 /**
@@ -207,7 +207,7 @@ async function cacheAudit(data, overrides = {}) {
   /*
    * Prepare ValKey commands
    */
-  const ops = valkey.multi()
+  const ops = valkey.pipeline()
   /*
    * Cache audit event
    */
@@ -226,7 +226,7 @@ async function cacheAudit(data, overrides = {}) {
   /*
    * Execure ValKey commands
    */
-  ops.exec(logCacheErrors)
+  ops.exec((result) => logCacheErrors(result, { in: 'cacheAudit', overrides, data }))
 }
 
 /**
@@ -248,10 +248,10 @@ async function cacheEvent(data, overrides = {}) {
    * Run the valkey commands
    */
   valkey
-    .multi()
+    .pipeline()
     .lpush('events', asString({ ...data, timestamp: when(data) }))
     .ltrim('events', 0, cap)
-    .exec(logCacheErrors)
+    .exec((result) => logCacheErrors(result, { in: 'cacheAudit', overrides, data }))
 }
 
 /**
@@ -283,7 +283,7 @@ async function cacheHealthcheck(data, overrides = {}) {
   /*
    * Prepare ValKey commands
    */
-  const ops = valkey.multi()
+  const ops = valkey.pipeline()
 
   /*
    * Cache healthcheck event
@@ -300,7 +300,7 @@ async function cacheHealthcheck(data, overrides = {}) {
   /*
    * Execure ValKey commands
    */
-  ops.exec(logCacheErrors)
+  ops.exec((result) => logCacheErrors(result, { in: 'cacheHealthcheck', overrides, data }))
 }
 
 /**
@@ -339,7 +339,7 @@ async function cacheLogline(logset, logData, data, overrides = {}) {
   /*
    * Prepare ValKey commands
    */
-  const ops = valkey.multi()
+  const ops = valkey.pipeline()
 
   /*
    * Cache the log line itself
@@ -377,7 +377,7 @@ async function cacheLogline(logset, logData, data, overrides = {}) {
   /*
    * Execute ValKey commands
    */
-  ops.exec(logCacheErrors)
+  ops.exec((result) => logCacheErrors(result, { in: 'cachelog', logSet, logData, overrides, data }))
 }
 
 /**
@@ -418,7 +418,7 @@ async function cacheMetricset(metricset, metrics, data, overrides = {}) {
   /*
    * Prepare ValKey commands
    */
-  const ops = valkey.multi()
+  const ops = valkey.pipeline()
 
   /*
    * Cache the metricset itself
@@ -455,7 +455,7 @@ async function cacheMetricset(metricset, metrics, data, overrides = {}) {
   /*
    * Execure ValKey commands
    */
-  ops.exec(logCacheErrors)
+  ops.exec((result) => logCacheErrors(result, { in: 'cacheMetrics', metricset, metrics, data }))
 }
 
 /**
