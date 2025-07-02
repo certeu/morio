@@ -110,7 +110,7 @@ async function ensureLocalPrerequisites() {
         .map((s) => hash(s + 'tap'))
         .join('')
         .slice(10, 42),
-      host: localCache ? 'morio-cache' : utils.getCacheNode(),
+      host: localCache ? 'morio-cache.internal' : utils.getCacheNode(),
       port: localCache ? 6379 : 6661,
       tls: localCache
         ? false
