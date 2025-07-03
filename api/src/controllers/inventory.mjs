@@ -1,4 +1,5 @@
 import { utils } from '../lib/utils.mjs'
+import { hash } from '#shared/crypto'
 import yaml from 'js-yaml'
 import {
   Pkg,
@@ -898,6 +899,19 @@ Controller.prototype.ansibleInventory = async function (
   const inventory = await new Host().getAnsibleInventory(withSecrets)
 
   if (!inventory) return utils.sendErrorReponse(res, 'morio.api.db.failure', req.url)
+
+  // Peope can request to include a hash
+  if (typeof req.query.with_hash !== 'undefined') {
+    if (format === 'json') {
+      const hashVal = await hash(JSON.stringify(inventory))
+
+      return res.send({ hash: hashVal, inventory })
+    }
+    const inv = yaml.dump(inventory)
+    const hashVal = await hash(inv)
+
+    return res.send({ hash: hashVal, inventory: inv })
+  }
 
   return format === 'json'
     ? res.send(inventory)
