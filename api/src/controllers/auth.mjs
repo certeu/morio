@@ -495,7 +495,7 @@ Controller.prototype.getCustomToken = async function (req, res) {
       role: 'eda',
       node: utils.getNodeUuid(),
       cluster: utils.getClusterUuid(),
-      eda: req.body,
+      ...req.body,
     },
     key: utils.getKeys().private,
     passphrase: utils.getKeys().unseal,
