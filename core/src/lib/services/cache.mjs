@@ -64,7 +64,7 @@ async function ensureLocalPrerequisites() {
       .map((s) => hash(s + 'tap'))
       .join('')
       .slice(10, 42)
-  )} +@read +@write +@string +@list +@set +@hash +@sortedset +info ~* &*
+  )} +@read +@write +@string +@list +@set +@hash +@sortedset +info +ping ~* &*
 user api on #${hash(secrets.map((s) => hash(s + 'api')).join(''))} +@read ~* &*
 user default on #${hash(keys.seal.salt)} ~* &* +@all`
   await writeFile(`/etc/morio/valkey/users.acl`, acl, log)
