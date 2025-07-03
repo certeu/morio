@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Endpoint for cross-cluster database authentication
 - [api] Added endpoints for the management of inventory assets
 - [api] Added support for remapping OIDC label names
+- [api] Add inventory groups and their vars to the ansible inventory
 - [cache] Cache service is now available at the cluster level
 - [cache] Enable ACL and authentication for cross-cluster access
 - [core] Added ability to deploy Morio as a subordinate CA
@@ -56,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Ensure broker is up prior to instantiating Kafka client
 - [client] Fix incorrect version number returned when using flags
 - [core] Deploy tap processors into shared config and make them accessible
+- [watcher] Do not generate broker checks on a flanking node
 
 ## [0.8.1] - 2025-03-12
 

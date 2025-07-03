@@ -1,7 +1,7 @@
 /*
  * Defaults for internal monitoring
  * Currently merely hosts the default schedule
- * yet still saves us a log of typing
+ * yet still saves us a lot of typing
  */
 const imd = { schedule: '@every 30s' }
 
@@ -17,7 +17,7 @@ const ssl = { ssl: { certificate_authorities: ['/usr/share/heartbeat/tls/tls-ca.
 export function monitors(utils) {
   const cluster = utils.getClusterUuid()
 
-  return {
+  const any = {
     /*
      * API Service
      */
@@ -33,7 +33,99 @@ export function monitors(utils) {
       },
       id: `morio.${cluster}.internal.api`,
     },
+    /*
+     * CA Service
+     */
+    ca: {
+      ...imd,
+      ...ssl,
+      type: 'http',
+      name: `Morio CA API on ${utils.getNodeFqdn()}`,
+      urls: [
+        `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/health#MORIO_IGNORE_CERTIFICATE_EXPIRY`,
+      ],
+      check: {
+        request: { method: 'GET' },
+        response: {
+          status: [200],
+          json: [{ expression: 'status == "ok"' }],
+        },
+      },
+      id: `morio.${cluster}.internal.ca`,
+    },
+    /*
+     * Core Service
+     */
+    core: {
+      ...imd,
+      type: 'http',
+      name: `Morio Core Service: API on ${utils.getNodeFqdn()}`,
+      urls: [
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}core:${utils.getPreset('MORIO_CORE_PORT')}/status`,
+      ],
+      check: {
+        response: {
+          status: [200],
+        },
+      },
+      id: `morio.${cluster}.internal.core`,
+    },
+    /*
+     * Proxy Service
+     */
+    proxy: {
+      ...imd,
+      ...ssl,
+      type: 'http',
+      name: `Morio Proxy Service: HTTPS on ${utils.getNodeFqdn()}`,
+      urls: [`https://${utils.getNodeFqdn()}/chartmark.svg`],
+      check: {
+        response: {
+          status: [200],
+        },
+      },
+      id: `morio.${cluster}.internal.proxy`,
+    },
+    /*
+     * UI Service
+     */
+    ui: utils.getFlag('DISABLE_SERVICE_UI', false) ? undefined : {
+      ...imd,
+      type: 'http',
+      name: `Morio DB Service: API on ${utils.getNodeFqdn()}`,
+      urls: [
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz?noleader`,
+      ],
+      check: {
+        response: {
+          status: [200],
+          body: ['node ok'],
+        },
+      },
+      id: `morio.${cluster}.internal.ui`,
+    },
+    /*
+     * Watcher Service
+     */
+    watcher: {
+      ...imd,
+      type: 'http',
+      name: `Morio Watcher Service: HTTP metrics on ${utils.getNodeFqdn()}`,
+      urls: [
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}watcher:${utils.getPreset('MORIO_WATCHER_HTTP_PORT')}/`,
+      ],
+      check: {
+        response: {
+          status: [200],
+          json: [{ expression: 'beat == "heartbeat"' }],
+        },
+      },
+      id: `morio.${cluster}.internal.watcher`,
+    },
 
+  }
+
+  const broker = {
     /*
      * Broker Service
      */
@@ -77,33 +169,6 @@ export function monitors(utils) {
       },
       id: `morio.${cluster}.internal.broker-proxy`,
     },
-
-    /*
-     * CA Service
-     */
-    ca: {
-      ...imd,
-      ...ssl,
-      type: 'http',
-      name: `Morio CA API on ${utils.getNodeFqdn()}`,
-      urls: [
-        `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/health#MORIO_IGNORE_CERTIFICATE_EXPIRY`,
-      ],
-      check: {
-        request: { method: 'GET' },
-        response: {
-          status: [200],
-          json: [{ expression: 'status == "ok"' }],
-        },
-      },
-      id: `morio.${cluster}.internal.ca`,
-    },
-
-    /*
-     * Connector Service
-     */
-    // FIXME
-
     /*
      * Console Service
      */
@@ -121,25 +186,6 @@ export function monitors(utils) {
       },
       id: `morio.${cluster}.internal.console`,
     },
-
-    /*
-     * Core Service
-     */
-    core: {
-      ...imd,
-      type: 'http',
-      name: `Morio Core Service: API on ${utils.getNodeFqdn()}`,
-      urls: [
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}core:${utils.getPreset('MORIO_CORE_PORT')}/status`,
-      ],
-      check: {
-        response: {
-          status: [200],
-        },
-      },
-      id: `morio.${cluster}.internal.core`,
-    },
-
     /*
      * DB Service
      */
@@ -158,60 +204,9 @@ export function monitors(utils) {
       },
       id: `morio.${cluster}.internal.db`,
     },
-
-    /*
-     * Proxy Service
-     */
-    proxy: {
-      ...imd,
-      ...ssl,
-      type: 'http',
-      name: `Morio Proxy Service: HTTPS on ${utils.getNodeFqdn()}`,
-      urls: [`https://${utils.getNodeFqdn()}/chartmark.svg`],
-      check: {
-        response: {
-          status: [200],
-        },
-      },
-      id: `morio.${cluster}.internal.proxy`,
-    },
-
-    /*
-     * UI Service
-     */
-    ui: {
-      ...imd,
-      type: 'http',
-      name: `Morio DB Service: API on ${utils.getNodeFqdn()}`,
-      urls: [
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz?noleader`,
-      ],
-      check: {
-        response: {
-          status: [200],
-          body: ['node ok'],
-        },
-      },
-      id: `morio.${cluster}.internal.ui`,
-    },
-
-    /*
-     * Watcher Service
-     */
-    watcher: {
-      ...imd,
-      type: 'http',
-      name: `Morio Watcher Service: HTTP metrics on ${utils.getNodeFqdn()}`,
-      urls: [
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}watcher:${utils.getPreset('MORIO_WATCHER_HTTP_PORT')}/`,
-      ],
-      check: {
-        response: {
-          status: [200],
-          json: [{ expression: 'beat == "heartbeat"' }],
-        },
-      },
-      id: `morio.${cluster}.internal.watcher`,
-    },
   }
+
+  return utils.isFlankingNode()
+    ? any
+    : { ...any, ...broker }
 }
