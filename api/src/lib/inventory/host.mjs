@@ -6,6 +6,7 @@ import { clean, asTime, fromJson } from '../account.mjs'
 import { randomString } from '#shared/crypto'
 import ipaddr from 'ipaddr.js'
 import { asScalarOrJson } from '#shared/utils'
+import { Group } from './group.mjs'
 
 /**
  * readMany fallback using read()
@@ -352,6 +353,22 @@ Host.prototype.getAnsibleInventory = async function (withSecrets = false) {
     modules[mvar.mod][mvar.id] = unwrapVar(mvar.id, mvar.val)
   }
 
+  // Load groups
+  const [groupStatus, groupResult] = await utils.db.read(`SELECT * FROM inventory_groups`)
+  const grouplist = groupStatus === 200 ? resultsAsList(groupResult) : false
+  const groups = {}
+  for (const group of grouplist) {
+    groups[group.id] = { ...group, vars: {} }
+    groups[group.id].members = await new Group().loadGroupHostMembers(group.id)
+  }
+
+  // Load group vars
+  const [groupvarStatus, groupvarResult] = await utils.db.read(`SELECT * FROM inventory_groupvars`)
+  const groupvars = groupvarStatus === 200 ? resultsAsList(groupvarResult) : false
+  for (const groupvar of groupvars) {
+    groups[groupvar.group_id].vars[groupvar.key] = groupvar.val
+  }
+
   // Now add them to the inventory
   for (const host of hosts) {
     inventory[host.id] = {
@@ -381,14 +398,28 @@ Host.prototype.getAnsibleInventory = async function (withSecrets = false) {
   }
 
   // Structure as ansible inventory
-  const ansinv = { all: { hosts: {} } }
-  for (const [host] of Object.entries(inventory)) ansinv.all.hosts[host.morio_host_fqdn] = host
+  const ansinv = { all: { hosts: {}, children: {} } }
+  for (const host of Object.values(inventory)) ansinv.all.hosts[host.morio_host_fqdn] = host
 
   // Add groups based on morio modules
   for (const mod of hostmods) {
     const group = `morio_module_${mod.mod}`
-    if (typeof ansinv[group] === 'undefined') ansinv[group] = {}
-    ansinv[group][inventory[mod.host].morio_host_fqdn] = inventory[mod.host]
+    if (typeof ansinv.all.children[group] === 'undefined')
+      ansinv.all.children[group] = { hosts: {} }
+    ansinv.all.children[group].hosts[inventory[mod.host].morio_host_fqdn] = inventory[mod.host]
+    ansinv.all.children[group].vars = modules[mod.mod]
+  }
+
+  // Add groups based on inventory groups
+  for (const group of Object.values(groups)) {
+    if (typeof ansinv.all.children[group.id] === 'undefined')
+      ansinv.all.children[group.id] = {
+        hosts: {},
+        vars: groups[group.id]?.vars || {},
+      }
+    for (const host of group.members) {
+      ansinv.all.children[group.id].hosts[inventory[host].morio_host_fqdn] = inventory[host]
+    }
   }
 
   return ansinv
