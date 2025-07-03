@@ -57,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Skip connection test to local node in validation
 - [api] Ensure broker is up prior to instantiating Kafka client
 - [client] Fix incorrect version number returned when using flags
+- [config] Incorrect volume mapping causes database state to get lost when restarting
 - [core] Deploy tap processors into shared config and make them accessible
 - [watcher] Do not generate broker checks on a flanking node
 
