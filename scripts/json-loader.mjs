@@ -8,12 +8,12 @@
  * This way, we just ignore this file in eslint and voila.
  */
 // Load various package.json files
-import root from '../package.json' assert { type: 'json' }
-import api from '../api/package.json' assert { type: 'json' }
-import config from '../config/package.json' assert { type: 'json' }
-import core from '../core/package.json' assert { type: 'json' }
-import shared from '../shared/package.json' assert { type: 'json' }
-import tap from '../tap/package.json' assert { type: 'json' }
-import ui from '../ui/package.json' assert { type: 'json' }
+import root from '../package.json' with { type: 'json' }
+import api from '../api/package.json' with { type: 'json' }
+import config from '../config/package.json' with { type: 'json' }
+import core from '../core/package.json' with { type: 'json' }
+import shared from '../shared/package.json' with { type: 'json' }
+import tap from '../tap/package.json' with { type: 'json' }
+import ui from '../ui/package.json' with { type: 'json' }
 
 export { root, api, config, core, shared, tap, ui }
