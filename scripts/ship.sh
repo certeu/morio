@@ -36,40 +36,109 @@ function ensureReleaseChannel {
   fi
 }
 
+# Function to build and publish a specific image
+function buildAndPublishImage {
+  local image_name=$1
+
+  case $image_name in
+    "core")
+      echo "👷 Building @itsmorio/morio-core:${MORIO_VERSION_TAG} container"
+      npm run build:core $RELEASE_CHANNEL
+      docker push itsmorio/core:${MORIO_VERSION_TAG}${TAG_SUFFIX}
+      docker push itsmorio/core:${RELEASE_CHANNEL_TAG}
+      if [ "$RELEASE_CHANNEL" = "testing" ]; then
+        docker push itsmorio/core:${MORIO_VERSION_TAG}-testing
+      fi
+      ;;
+    "api")
+      echo "👷 Building itsmorio/api:${MORIO_VERSION_TAG} container"
+      npm run build:api $RELEASE_CHANNEL
+      docker push itsmorio/api:${MORIO_VERSION_TAG}${TAG_SUFFIX}
+      docker push itsmorio/api:${RELEASE_CHANNEL_TAG}
+      if [ "$RELEASE_CHANNEL" = "testing" ]; then
+        docker push itsmorio/api:${MORIO_VERSION_TAG}-testing
+      fi
+      ;;
+    "tap")
+      echo "👷 Building itsmorio/tap:${MORIO_VERSION_TAG} container"
+      npm run build:tap $RELEASE_CHANNEL
+      docker push itsmorio/tap:${MORIO_VERSION_TAG}${TAG_SUFFIX}
+      docker push itsmorio/tap:${RELEASE_CHANNEL_TAG}
+      if [ "$RELEASE_CHANNEL" = "testing" ]; then
+        docker push itsmorio/tap:${MORIO_VERSION_TAG}-testing
+      fi
+      ;;
+    "ui")
+      echo "👷 Building itsmorio/ui:${MORIO_VERSION_TAG} container"
+      npm run build:ui $RELEASE_CHANNEL
+      docker push itsmorio/ui:${MORIO_VERSION_TAG}${TAG_SUFFIX}
+      docker push itsmorio/ui:${RELEASE_CHANNEL_TAG}
+      if [ "$RELEASE_CHANNEL" = "testing" ]; then
+        docker push itsmorio/ui:${MORIO_VERSION_TAG}-testing
+      fi
+      ;;
+    *)
+      echo "Error: Unknown image '$image_name'"
+      echo "Available images: core, api, tap, ui"
+      exit 1
+      ;;
+  esac
+}
+
+# Function to build and publish all images
+function buildAndPublishAll {
+  # Build core container image
+  echo "👷 Building @itsmorio/morio-core:${MORIO_VERSION_TAG} container"
+  npm run build:core $RELEASE_CHANNEL
+
+  # Build api container image
+  echo "👷 Building itsmorio/api:${MORIO_VERSION_TAG} container"
+  npm run build:api $RELEASE_CHANNEL
+
+  # Build tap container image
+  echo "👷 Building itsmorio/tap:${MORIO_VERSION_TAG} container"
+  npm run build:tap $RELEASE_CHANNEL
+
+  # Build ui container image
+  echo "👷 Building itsmorio/ui:${MORIO_VERSION_TAG} container"
+  npm run build:ui $RELEASE_CHANNEL
+
+  echo "✅ Publishing images..."
+  docker push itsmorio/core:${MORIO_VERSION_TAG}${TAG_SUFFIX}
+  docker push itsmorio/core:${RELEASE_CHANNEL_TAG}
+  docker push itsmorio/api:${MORIO_VERSION_TAG}${TAG_SUFFIX}
+  docker push itsmorio/api:${RELEASE_CHANNEL_TAG}
+  docker push itsmorio/tap:${MORIO_VERSION_TAG}${TAG_SUFFIX}
+  docker push itsmorio/tap:${RELEASE_CHANNEL_TAG}
+  docker push itsmorio/ui:${MORIO_VERSION_TAG}${TAG_SUFFIX}
+  docker push itsmorio/ui:${RELEASE_CHANNEL_TAG}
+  # Testing requires an extra tag
+  if [ "$RELEASE_CHANNEL" = "testing" ]; then
+    docker push itsmorio/core:${MORIO_VERSION_TAG}-testing
+    docker push itsmorio/api:${MORIO_VERSION_TAG}-testing
+    docker push itsmorio/tap:${MORIO_VERSION_TAG}-testing
+    docker push itsmorio/ui:${MORIO_VERSION_TAG}-testing
+  fi
+}
+
 # Make sure we have a version tag and release channel
 ensureVersionTag
 ensureReleaseChannel
 
-# Build core container image
-echo "👷 Building @itsmorio/morio-core:${MORIO_VERSION_TAG} container"
-npm run build:core $RELEASE_CHANNEL
-
-# Build api container image
-echo "👷 Building itsmorio/api:${MORIO_VERSION_TAG} container"
-npm run build:api $RELEASE_CHANNEL
-
-# Build tap container image
-echo "👷 Building itsmorio/tap:${MORIO_VERSION_TAG} container"
-npm run build:tap $RELEASE_CHANNEL
-
-# Build ui container image
-echo "👷 Building itsmorio/ui:${MORIO_VERSION_TAG} container"
-npm run build:ui $RELEASE_CHANNEL
-
-echo "✅ Publishing images..."
-docker push itsmorio/core:${MORIO_VERSION_TAG}${TAG_SUFFIX}
-docker push itsmorio/core:${RELEASE_CHANNEL_TAG}
-docker push itsmorio/api:${MORIO_VERSION_TAG}${TAG_SUFFIX}
-docker push itsmorio/api:${RELEASE_CHANNEL_TAG}
-docker push itsmorio/tap:${MORIO_VERSION_TAG}${TAG_SUFFIX}
-docker push itsmorio/tap:${RELEASE_CHANNEL_TAG}
-docker push itsmorio/ui:${MORIO_VERSION_TAG}${TAG_SUFFIX}
-docker push itsmorio/ui:${RELEASE_CHANNEL_TAG}
-# Testing requires an extra tag
-if [ "$RELEASE_CHANNEL" = "testing" ]; then
-  docker push itsmorio/core:${MORIO_VERSION_TAG}-testing
-  docker push itsmorio/api:${MORIO_VERSION_TAG}-testing
-  docker push itsmorio/tap:${MORIO_VERSION_TAG}-testing
-  docker push itsmorio/ui:${MORIO_VERSION_TAG}-testing
+# Check if a specific image was requested
+if [ $# -eq 0 ]; then
+  # No arguments - build all images
+  buildAndPublishAll
+elif [ $# -eq 1 ]; then
+  # One argument - build specific image
+  echo "✅ Building and publishing specific image: $1"
+  buildAndPublishImage $1
+else
+  # Too many arguments
+  echo "Error: Too many arguments"
+  echo "Usage: $0 [image_name]"
+  echo "Available images: core, api, tap, ui"
+  exit 1
 fi
 
+echo "✅ Done!"
