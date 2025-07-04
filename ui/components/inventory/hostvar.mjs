@@ -174,13 +174,11 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
-  const [id, setId] = useState(0)
   const [key, setKey] = useState('')
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
   const [host, setHost] = useState('')
   const [hosts, setHosts] = useState([])
-  const [isAvailable, setIsAvailable] = useState(false)
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
@@ -190,21 +188,10 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
       runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => entry.id)))
   }, [api, key])
 
-  // Effects
-  useEffect(() => {
-    setId(generateId())
-    const checkHostvarAvailability = async () => {
-      const result = await api.isHostvarAvailable(id)
-      if (result[1] === 404) setIsAvailable(true)
-      else setIsAvailable(false)
-    }
-    if (id) checkHostvarAvailability()
-  }, [id, api])
-
   // Handler method to create a new hostvar
   const createHostvar = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createHostvar(id, key, val, info, host)
+    const result = await api.createHostvar(key, val, info, host)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Hostvar created', true, true])
@@ -216,8 +203,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
     <div>
       <h3>Create a new hostvar</h3>
       <p>
-        Give your new hostvar a id, key, val, an optional info and host. The hostvar id will become
-        its unique ID.
+        Give your new hostvar a key, val, an optional info and host.
       </p>
       <SelectInput
         label="Inventory Host"
@@ -242,7 +228,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(id && isAvailable)}
+          disabled={!(key && val && host)}
           onClick={createHostvar}
         >
           Create Host Variable

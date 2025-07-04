@@ -24,28 +24,22 @@ export function Hostvar(id = false) {
  * Create a hostvar
  *
  * @param {object} params  - All params as an object
- * @param {string} id - The Hostvar id
  * @param {string} key - The Hostvar key
  * @param {string} val - The Hostvar val
  * @param {string} info - The Hostvar info
  * @param {string} host - The Host name
  * @return {Hostvar} this - The Hostvar instance
  */
-Hostvar.prototype.create = async function (id, key, val, info, host) {
-  if (!id) {
-    return false
-  }
-
+Hostvar.prototype.create = async function (key, val, info, host) {
   const sql = `
     INSERT INTO inventory_hostvars(
-      id, key, val, info, host
+      key, val, info, host
     ) VALUES (
-      :id, :key, :val, :info, :host
+      :key, :val, :info, :host
     )
   `
 
   const params = {
-    id,
     key,
     val,
     info,
@@ -57,7 +51,7 @@ Hostvar.prototype.create = async function (id, key, val, info, host) {
     const created =
       Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
 
-    return !!created
+    if (created) return await this.read(result[1].results[0].last_insert_id)
   } catch (err) {
     return false
   }

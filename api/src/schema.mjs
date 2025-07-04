@@ -331,7 +331,6 @@ export const schema = {
   }),
   // Inventory - Hostvars
   'req.inventory.createHostvar': Joi.object({
-    id: Joi.number().required(),
     key: Joi.string(),
     val: Joi.string(),
     info: Joi.string(),

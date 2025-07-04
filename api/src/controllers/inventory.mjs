@@ -1681,10 +1681,10 @@ Controller.prototype.createHostvar = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const created = await new Hostvar().create(valid.id, valid.key, valid.val, valid.info, valid.host)
+  const created = await new Hostvar().create(valid.key, valid.val, valid.info, valid.host)
 
   return created
-    ? res.status(201).send(valid)
+    ? res.status(201).send(created)
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 

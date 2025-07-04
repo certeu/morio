@@ -1707,11 +1707,11 @@ MorioClient.prototype.createModvar = async function (id, val, info, mod) {
  * @param {string} info - The host variable description
  * @return {object} - The result
  */
-MorioClient.prototype.createHostvar = async function (id, key, val, info, host) {
+MorioClient.prototype.createHostvar = async function (key, val, info, host) {
   return await this.call(`${morioConfig.api}/inventory/hostvar`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ id, key, val, info, host }),
+    body: JSON.stringify({ key, val, info, host }),
   })
 }
 
