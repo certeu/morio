@@ -902,15 +902,15 @@ Controller.prototype.ansibleInventory = async function (
 
   // Peope can request to include a hash
   if (typeof req.query.with_hash !== 'undefined') {
-    if (format === 'json') {
-      const hashVal = await hash(JSON.stringify(inventory))
+    /*
+     * To make the hash consistent between json/yaml
+     * we always use the JSON hash
+     */
+    const hashVal = await hash(JSON.stringify(inventory))
 
-      return res.send({ hash: hashVal, inventory })
-    }
-    const inv = yaml.dump(inventory)
-    const hashVal = await hash(inv)
-
-    return res.send({ hash: hashVal, inventory: inv })
+    return format === 'json'
+      ? res.send({ hash: hashVal, inventory })
+      : res.send({ hash: hashVal, inventory: yaml.dump(inventory) })
   }
 
   return format === 'json'
