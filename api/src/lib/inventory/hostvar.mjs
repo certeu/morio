@@ -33,23 +33,24 @@ export function Hostvar(id = false) {
  */
 Hostvar.prototype.create = async function (key, val, info, host, upsert = false) {
   const unset = await this.isComboAvailable(host, key)
-  log.todo({ unset, upsert: upsert ? true : false })
-  if (!unset && !upsert) return 'morio.api.upsert.required'
+  if (!unset[0] && !upsert) return 'morio.api.upsert.required'
 
-  const sql = `
-    INSERT INTO inventory_hostvars(
-      key, val, info, host
-    ) VALUES (
-      :key, :val, :info, :host
-    )
-  `
+  const sql =
+    !unset[0] && unset[1] && upsert
+      ? `UPDATE inventory_hostvars SET val=:val, info=:info WHERE id=:id`
+      : `INSERT INTO inventory_hostvars(key, val, info, host) VALUES (:key, :val, :info, :host)`
   const params = { key, val, info, host }
+  if (!unset[0] && unset[1] && upsert) {
+    params.id = unset[1]
+    delete params.key
+    delete params.host
+  }
   try {
     const result = await utils.db.write(sql, params)
     const created =
       Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
 
-    if (created) return await this.read(result[1].results[0].last_insert_id)
+    if (created) return await this.read(params.id || result[1].results[0].last_insert_id)
   } catch (err) {
     return false
   }
@@ -264,10 +265,10 @@ Hostvar.prototype.isComboAvailable = async function (host, key) {
   )
   if (status === 200) {
     const hits = resultsAsList(result)
-    return hits.length === 0
+    return [hits.length === 0, hits[0]?.id]
   }
 
-  return false
+  return [false, false]
 }
 
 /*
