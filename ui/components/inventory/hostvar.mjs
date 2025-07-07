@@ -185,18 +185,23 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
 
   useEffect(() => {
     if (hosts.length < 1)
-      runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => entry.id)))
+      runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => ({ id: entry.id, fqdn: entry.fqdn }))))
   }, [api, key])
 
   // Handler method to create a new hostvar
   const createHostvar = async () => {
     setLoadingStatus([true, 'Contacting API'])
     const result = await api.createHostvar(key, val, info, host)
+    console.log(result)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Hostvar created', true, true])
       if (setRefresh) setRefresh(refresh + 1)
-    } else setLoadingStatus([true, 'Failed to create hostvar', true, false])
+    }
+    if (result[1] === 409 && result[0].title) {
+      setLoadingStatus([true, <div>{result[0].title}. See: <a href={result[0].type} className="text-error-content underline">Error Reference</a></div>, true, false])
+    }
+    else setLoadingStatus([true, 'Failed to create hostvar', true, false])
   }
 
   return (
@@ -210,7 +215,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
         labelDflt="Choose a host to assign this var to"
         help={inlineHelp('inventory/hostvars#host')}
         update={setHost}
-        list={hosts.map((host) => ({ val: host, label: host }))}
+        list={hosts.map((host) => ({ val: host.id, label: host.fqdn }))}
       />
       <StringInput
         label="Hostvar key"
