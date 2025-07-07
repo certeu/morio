@@ -14,6 +14,7 @@ import {
   Group,
   Groupvar,
 } from '../lib/inventory/index.mjs'
+import { errors } from '../errors.mjs'
 
 /**
  * This inventory controller handles API access to the inventory.
@@ -1670,8 +1671,9 @@ Controller.prototype.listModvars = async function (req, res) {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
+ * @param {boolean} upsert - True when we should overwrite an existing host/key combo
  */
-Controller.prototype.createHostvar = async function (req, res) {
+Controller.prototype.createHostvar = async function (req, res, upsert = false) {
   /*
    * Validate input
    */
@@ -1681,7 +1683,19 @@ Controller.prototype.createHostvar = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const created = await new Hostvar().create(valid.key, valid.val, valid.info, valid.host)
+  /*
+   * (attempt to) Create record
+   */
+  const created = await new Hostvar().create(valid.key, valid.val, valid.info, valid.host, upsert)
+
+  /*
+   * Check for errors
+   */
+  if (typeof created === 'string' && errors[created])
+    return utils.sendErrorResponse(res, created, req.url, {
+      host: valid.host,
+      key: valid.key,
+    })
 
   return created
     ? res.status(201).send(created)

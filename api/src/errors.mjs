@@ -377,4 +377,13 @@ export const errors = {
     detail:
       'The request failed with an internal server error that we do not know how to recover from.',
   },
+  /*
+   * Error for when an upsert would work, but an insert not because it would overwrite data
+   */
+  'morio.api.upsert.required': {
+    status: 409,
+    title: 'Upsert required',
+    detail:
+      'The request failed because creating this record would overwrite data. Use an upsert (PUT) endpoint if this is what you want.',
+  },
 }

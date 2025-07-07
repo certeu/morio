@@ -28,9 +28,14 @@ export function Hostvar(id = false) {
  * @param {string} val - The Hostvar val
  * @param {string} info - The Hostvar info
  * @param {string} host - The Host name
+ * @param {boolean} upsert - Whether or not to overwrite an existing hostvar
  * @return {Hostvar} this - The Hostvar instance
  */
-Hostvar.prototype.create = async function (key, val, info, host) {
+Hostvar.prototype.create = async function (key, val, info, host, upsert = false) {
+  const unset = await this.isComboAvailable(host, key)
+  log.todo({ unset, upsert: upsert ? true : false })
+  if (!unset && !upsert) return 'morio.api.upsert.required'
+
   const sql = `
     INSERT INTO inventory_hostvars(
       key, val, info, host
@@ -38,14 +43,7 @@ Hostvar.prototype.create = async function (key, val, info, host) {
       :key, :val, :info, :host
     )
   `
-
-  const params = {
-    key,
-    val,
-    info,
-    host,
-  }
-
+  const params = { key, val, info, host }
   try {
     const result = await utils.db.write(sql, params)
     const created =
@@ -242,6 +240,28 @@ Hostvar.prototype.isAvailable = async function (id) {
   const [status, result] = await utils.db.read(`SELECT id FROM inventory_hostvars where id=:id`, {
     id,
   })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
+ * Helper method to see if a Host/var combo is available
+ *
+ * @param {string} id - The id Hostvar
+ * @return {object} available - true if it is available, false if not
+ */
+Hostvar.prototype.isComboAvailable = async function (host, key) {
+  const [status, result] = await utils.db.read(
+    `SELECT id FROM inventory_hostvars where host=:host and key=:key`,
+    {
+      host,
+      key,
+    }
+  )
   if (status === 200) {
     const hits = resultsAsList(result)
     return hits.length === 0

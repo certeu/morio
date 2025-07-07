@@ -286,7 +286,16 @@ export function routes(app) {
   /*
    * Create a hostvar
    */
-  app.post(`/inventory/hostvar`, rbac.operator, inventory.createHostvar)
+  app.post(`/inventory/hostvar`, rbac.operator, (req, res) =>
+    inventory.createHostvar(req, res, false)
+  )
+
+  /*
+   * Upsert a hostvar
+   */
+  app.put(`/inventory/hostvar`, rbac.operator, (req, res) =>
+    inventory.createHostvar(req, res, true)
+  )
 
   /*
    * Read a Host variable
