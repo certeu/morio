@@ -315,6 +315,58 @@ MorioClient.prototype.removeApikey = async function (id) {
 }
 
 /**
+ * Gets OIDC clients for the current account
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getOidcClients = async function () {
+  return await this.call(`${morioConfig.api}/oidc/clients`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
+ * Create an OIDC client
+ *
+ * @param {object} data - The data to submit
+ * @return {object} - The result
+ */
+MorioClient.prototype.createOidcClient = async function (data) {
+  return await this.call(`${morioConfig.api}/oidc/client`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Updates an OIDC client
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.updateOidcClient = async function (id, data) {
+  return await this.call(`${morioConfig.api}/oidc/clients/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Removes an OIDC client
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeOidcClient = async function (id) {
+  return await this.call(`${morioConfig.api}/oidc/clients/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  })
+}
+
+
+/**
  * Activate a (local) morio account
  *
  * @param {object} data - The data to submit
@@ -1964,6 +2016,22 @@ MorioClient.prototype.wipeSubca = async function () {
   return await this.call(`${morioConfig.api}/setup`, {
     headers: this.jsonHeaders,
     method: 'DELETE',
+  })
+}
+
+/**
+ * Grants OIDC consent
+ *
+ * This endpoint does require authentication as it comes after login in the OIDC flow
+ * @param {string} certificate - The certificate to validate
+ * @param {string} serial - The subca serial
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.grantOidcConsent = async function (uid, scopes) {
+  return await this.call(`${morioConfig.api}/oidc/complete`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ uid, scopes })
   })
 }
 

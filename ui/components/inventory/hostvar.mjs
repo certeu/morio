@@ -17,7 +17,6 @@ import { StringInput, TextInput, SelectInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { InventoryHostname } from './host.mjs'
-import { generateId } from './utils.mjs'
 
 /**
  * This component renders a table with all Host vars and allows removal
@@ -186,6 +185,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
   useEffect(() => {
     if (hosts.length < 1)
       runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => ({ id: entry.id, fqdn: entry.fqdn }))))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [api, key])
 
   // Handler method to create a new hostvar
@@ -199,7 +199,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
       if (setRefresh) setRefresh(refresh + 1)
     }
     if (result[1] === 409 && result[0].title) {
-      setLoadingStatus([true, <div>{result[0].title}. See: <a href={result[0].type} className="text-error-content underline">Error Reference</a></div>, true, false])
+      setLoadingStatus([true, <div key={1}>{result[0].title}. See: <a href={result[0].type} className="text-error-content underline">Error Reference</a></div>, true, false])
     }
     else setLoadingStatus([true, 'Failed to create hostvar', true, false])
   }
@@ -309,6 +309,7 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
   useEffect(() => {
     if (hosts.length < 1)
       runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => entry.id)))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [api, key])
 
   // Context
@@ -335,6 +336,7 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
       }
       loadHostvar()
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [hostvars])
 
   const count = normalizedHostvars.length

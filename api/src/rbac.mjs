@@ -11,17 +11,19 @@ export const hiddenRoles = allHiddenRoles
  * Helper method to get the current user ID from headers
  *
  * @param {object} req - The request object from express
+ * @param {bool} noProvider - Set this to true to return the naked username (no provider)
  * @return {string} user - The current user as provider.username
  */
-export function currentUser(req) {
+export function currentUser(req, noProvider = false) {
   const provider = currentProvider(req)
   const user = req.headers['x-morio-user']
   /*
    * Is the user and provider something that makes sense?
    */
-  return !provider || !user || typeof user !== 'string' || user.length < 3 || user.length > 255
-    ? false
-    : `${provider}.${user}`
+  if (!provider || !user || typeof user !== 'string' || user.length < 3 || user.length > 255)
+    return false
+
+  return noProvider ? user : `${provider}.${user}`
 }
 
 /**
@@ -43,6 +45,13 @@ export function currentProvider(req) {
    * Only allow providers that are currently configured
    */
   return providers.includes(provider) ? provider : false
+}
+
+/**
+ * Helper method to get the current user+provider (aka usepro)
+ */
+export function currentAccount(req) {
+  return `${currentUser(req, true)}@${currentProvider(req)}`
 }
 
 /**

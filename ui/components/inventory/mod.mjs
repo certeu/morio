@@ -300,6 +300,7 @@ export const BulkModUpdate = ({ mods, refresh, setRefresh }) => {
       }
       loadMod()
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [mods])
 
   const count = normalizedMods.length

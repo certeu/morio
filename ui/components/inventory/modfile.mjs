@@ -183,6 +183,7 @@ export const NewModfile = ({ refresh, setRefresh }) => {
   useEffect(() => {
     if (mods.length < 1)
       runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [api, folder])
 
   // Effects
@@ -321,6 +322,7 @@ export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
   useEffect(() => {
     if (mods.length < 1)
       runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [api, folder])
 
   // Context
@@ -349,6 +351,7 @@ export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
       }
       loadModfile()
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [modfiles])
 
   const count = normalizedModfiles.length

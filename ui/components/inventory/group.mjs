@@ -397,6 +397,8 @@ export const BulkGroupUpdate = ({ groups, refresh, setRefresh }) => {
       }
       loadGroup()
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [groups])
 
   // Helper method to bulk-update descriptions

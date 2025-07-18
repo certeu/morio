@@ -284,6 +284,7 @@ export const ManageIps = ({ hosts, ips, refresh, setRefresh }) => {
       setSelectedIps(ipsForHost)
       setLoadingStatus(false)
     })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [selectedHost])
 
   const toggleIp = (ipStr) => {
@@ -326,7 +327,7 @@ export const ManageIps = ({ hosts, ips, refresh, setRefresh }) => {
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
-            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+            className={`cursor-pointer p-2 rounded-lg mb-2 border
           ${
             selectedHost?.id === host.id
               ? 'bg-primary text-primary-content border-primary'
@@ -425,6 +426,7 @@ export const ManageMacs = ({ hosts, macs, refresh, setRefresh }) => {
       setSelectedMacs(macsForHost)
       setLoadingStatus(false)
     })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [selectedHost])
 
   const toggleMac = (macStr) => {
@@ -467,7 +469,7 @@ export const ManageMacs = ({ hosts, macs, refresh, setRefresh }) => {
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
-            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+            className={`cursor-pointer p-2 rounded-lg mb-2 border
           ${
             selectedHost?.id === host.id
               ? 'bg-primary text-primary-content border-primary'
@@ -566,6 +568,7 @@ export const ManageOss = ({ hosts, oss, refresh, setRefresh }) => {
       setSelectedOss(ossForHost)
       setLoadingStatus(false)
     })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [selectedHost])
 
   const toggleOs = (osStr) => {
@@ -608,7 +611,7 @@ export const ManageOss = ({ hosts, oss, refresh, setRefresh }) => {
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
-            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+            className={`cursor-pointer p-2 rounded-lg mb-2 border
           ${
             selectedHost?.id === host.id
               ? 'bg-primary text-primary-content border-primary'
@@ -707,6 +710,7 @@ export const ManagePkgs = ({ hosts, pkgs, refresh, setRefresh }) => {
       setSelectedPkgs(pkgsForHost)
       setLoadingStatus(false)
     })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [selectedHost])
 
   const togglePkg = (pkgStr) => {
@@ -749,7 +753,7 @@ export const ManagePkgs = ({ hosts, pkgs, refresh, setRefresh }) => {
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
-            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+            className={`cursor-pointer p-2 rounded-lg mb-2 border
           ${
             selectedHost?.id === host.id
               ? 'bg-primary text-primary-content border-primary'
@@ -848,6 +852,7 @@ export const ManageMods = ({ hosts, mods, refresh, setRefresh }) => {
       setSelectedMods(modsForHost)
       setLoadingStatus(false)
     })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [selectedHost])
 
   const toggleMod = (modStr) => {
@@ -890,7 +895,7 @@ export const ManageMods = ({ hosts, mods, refresh, setRefresh }) => {
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
-            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+            className={`cursor-pointer p-2 rounded-lg mb-2 border
           ${
             selectedHost?.id === host.id
               ? 'bg-primary text-primary-content border-primary'
@@ -1152,6 +1157,7 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
       }
       loadHost()
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [hosts])
 
   // Helper method to bulk-update descriptions

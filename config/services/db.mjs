@@ -279,11 +279,45 @@ export const resolveServiceConfiguration = ({ utils }) => {
         FOREIGN KEY (host) REFERENCES inventory_hosts(id),
         FOREIGN KEY (cid) REFERENCES client_commands(id)
       )`,
+      oidc_provider_clients: `CREATE table oidc_provider_clients (
+        id TEXT NOT NULL PRIMARY KEY,
+        redirect_uris TEXT,
+        name TEXT NOT NULL,
+        by TEXT NOT NULL,
+        created_by TEXT,
+        created_at DATETIME,
+        updated_by TEXT,
+        updated_at DATETIME
+      )`,
+      oidc_provider_accesstokens: `CREATE table oidc_provider_accesstokens (
+        id TEXT NOT NULL PRIMARY KEY,
+        data TEXT,
+        expires INTEGER
+      )`,
+      oidc_provider_authorizationcodes: `CREATE table oidc_provider_authorizationcodes (
+        id TEXT NOT NULL PRIMARY KEY,
+        data TEXT,
+        expires INTEGER
+      )`,
+      oidc_provider_grants: `CREATE table oidc_provider_grants (
+        id TEXT NOT NULL PRIMARY KEY,
+        data TEXT,
+        expires INTEGER
+      )`,
+      oidc_provider_interactions: `CREATE table oidc_provider_interactions (
+        id TEXT NOT NULL PRIMARY KEY,
+        data TEXT,
+        expires INTEGER
+      )`,
+      oidc_provider_sessions: `CREATE table oidc_provider_sessions (
+        id TEXT NOT NULL PRIMARY KEY,
+        data TEXT,
+        expires INTEGER
+      )`,
+      oidc_provider_uid_session: `CREATE table oidc_provider_uid_session (
+        uid TEXT NOT NULL PRIMARY KEY,
+        session TEXT NOT NULL
+      )`,
     },
-    //data: [
-    // FIXME: This is in the ansibleinv branch
-    //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_TICK', '30s') ON CONFLICT DO UPDATE SET val='30s'`,
-    //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_DEBUG', 'false') ON CONFLICT DO UPDATE SET val='false'`,
-    //],
   }
 }

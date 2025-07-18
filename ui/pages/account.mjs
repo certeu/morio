@@ -10,6 +10,7 @@ import {
   RenewTokenButton,
   NewApiKeyButton,
   ShowTokenButton,
+  AccountOidcClients,
 } from 'components/account.mjs'
 
 const AccountPage = (props) => {
@@ -21,7 +22,7 @@ const AccountPage = (props) => {
         <div className="max-w-4xl">
           {account ? (
             <>
-              <Tabs tabs="Account Data, API Keys">
+              <Tabs tabs="Account Data, API Keys, OIDC Clients">
                 <Tab key="account">
                   <AccountOverview />
                   <div className="grid grid-cols-3 gap-4 items-center my-6">
@@ -35,6 +36,9 @@ const AccountPage = (props) => {
                   <div className="mx-auto my-6">
                     <NewApiKeyButton />
                   </div>
+                </Tab>
+                <Tab key="oidcclients">
+                  <AccountOidcClients />
                 </Tab>
               </Tabs>
             </>

@@ -27,6 +27,7 @@ export default function InventoryGroupPage({ id = false }) {
         setRefresh(0)
       })
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
 
   useEffect(() => {

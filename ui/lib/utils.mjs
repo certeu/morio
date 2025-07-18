@@ -183,6 +183,22 @@ export const formatNumber = (num, suffix = '') => {
 }
 
 /*
+ * Get query parameters from the URL
+ *
+ * @param {string} name - Name of the parameter to retrieve
+ * @return {string} value - Value of the parameter
+ */
+export function getQueryParams(name = false) {
+  if (typeof window === 'undefined') return undefined
+  const all = new URLSearchParams(window.location.search) // eslint-disable-line
+  if (name) return all.get(name)
+  const params = {}
+  for (const [key, value] of all.entries()) params[key] = value
+
+  return params
+}
+
+/*
  * Common icon size for navigation items
  */
 export const iconSize = 'h-8 w-8'

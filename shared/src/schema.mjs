@@ -289,6 +289,13 @@ const settings = Joi.object({
   tap: Joi.object().optional(),
   subca: Joi.object().optional(),
   env,
+  api: Joi.object({
+    cors: Joi.object({
+      methods: Joi.array().items(Joi.string()),
+      headers: Joi.array().items(Joi.string()),
+      origins: Joi.array().items(Joi.string()),
+    })
+  }).optional()
 }).required()
 
 /*

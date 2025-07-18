@@ -179,6 +179,7 @@ export const NewModvar = ({ refresh, setRefresh }) => {
   useEffect(() => {
     if (mods.length < 1)
       runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [api, val])
 
   // Effects
@@ -309,6 +310,7 @@ export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
   useEffect(() => {
     if (mods.length < 1)
       runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [api, val])
 
   // Context
@@ -333,6 +335,7 @@ export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
       }
       loadModvar()
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [modvars])
 
   const count = normalizedModvars.length

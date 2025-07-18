@@ -9,6 +9,7 @@ import { routes as core } from '#routes/core'
 import { routes as docs } from '#routes/docs'
 import { routes as dconf } from '#routes/dconf'
 import { routes as inventory } from '#routes/inventory'
+import { routes as oidc } from '#routes/oidc'
 import { routes as kv } from '#routes/kv'
 
 export const routes = {
@@ -23,5 +24,6 @@ export const routes = {
   dconf,
   docs,
   inventory,
+  oidc,
   kv,
 }
