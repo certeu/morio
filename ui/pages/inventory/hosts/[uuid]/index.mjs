@@ -25,6 +25,7 @@ export default function InventoryHostPage({ uuid = false }) {
         setRefresh(0)
       })
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
 
   useEffect(() => {

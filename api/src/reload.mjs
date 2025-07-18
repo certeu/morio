@@ -3,6 +3,7 @@ import { encryptionMethods, hash } from '#shared/crypto'
 import { log, utils } from './lib/utils.mjs'
 import process from 'node:process'
 import { createProducer } from './lib/kafka.mjs'
+import { createOidcProvider } from './lib/oidc-provider.mjs'
 // DB & KV clients
 import { createDbClient } from '#shared/db'
 import { createKvClient } from '#shared/kv'
@@ -13,7 +14,7 @@ import { createCacheClient } from './lib/valkey.mjs'
  *
  * @return {bool} true when everything is ok, false if not (API won't start)
  */
-export async function reloadConfiguration() {
+export async function reloadConfiguration(app) {
   /*
    * Load data from core
    */
@@ -96,6 +97,12 @@ export async function reloadConfiguration() {
     utils.decrypt = decrypt
     utils.isEncrypted = isEncrypted
   }
+
+  /*
+   * If set up, add the OIDC provider.
+   * On a hot-reload we'll already have done this so only do it if needed.
+   */
+  if (!utils.oidcProvider) utils.oidcProvider = await createOidcProvider(app)
 
   /*
    * Make sure we have a kafka producer

@@ -1,4 +1,4 @@
-import { utils } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
@@ -11,6 +11,10 @@ import { Buffer } from 'node:buffer'
  * List of allowListed URLs that do not require authentication
  */
 const allowedUrisBase = [
+  `/oidc/.well-known/openid-configuration`,
+  `/oidc/jwks`,
+  `/oidc/me`,
+  `/oidc/token`,
   `/activate-account`,
   `/activate-mfa`,
   `/ca/certificates`,
@@ -49,7 +53,15 @@ const allowedUris = [...allowedUrisBase, ...allowedUrisBase.map((url) => url + '
  * List of allowListed URL patterns do not require authentication
  * Each is/can be a regex
  */
-const allowedUriPatterns = [/^\/downloads/, /^\/docs/, /^\/coverage/, /^\/callback\/oidc\/.*/]
+const allowedUriPatterns = [
+  /^\/downloads/,
+  /^\/docs/,
+  /^\/coverage/,
+  /^\/callback\/oidc\/.*/,
+  /^\/oidc\/auth.*/,
+  /^\/oidc\/interaction\/.*/,
+  /^\/interaction\/.*/,
+]
 
 /**
  * This auth controller handles authentication in Morio
@@ -518,7 +530,7 @@ Controller.prototype.getCustomToken = async function (req, res) {
  *
  * @param {object} token - The token to verify
  */
-const verifyToken = (token) => {
+export const verifyToken = (token) => {
   const publicKey = utils.getKeys()?.public
 
   return publicKey
@@ -527,11 +539,12 @@ const verifyToken = (token) => {
           token,
           publicKey.trim(),
           {
-            audience: 'morio',
-            issuer: 'morio',
-            subject: 'morio',
+            cluster: utils.getClusterUuid(),
           },
-          (err, payload) => resolve(err ? false : payload)
+          (err, payload) => {
+            if (err) log.warn(err)
+            return resolve(err ? false : payload)
+          }
         )
       )
     : false

@@ -34,7 +34,7 @@ export function hash(string) {
  *
  * @param {string} encryptedKey - The encrypted (private) key to decrypt
  * @param {string} passphrase - The passphrase to use
- * @param {boolean} [asPem = true] - Set this to false to return the Forge key object
+ * @param {boolean} [asPem = false] - Set this to false to return the Forge key object
  * @return {string} key - The decrypted private key (as PEM if asked)
  */
 export function decryptPrivateKeyPem(encryptedKey, passphrase, asPem=false) {
@@ -382,9 +382,11 @@ function encryptPrivateKey(key, pwd) {
   )
 }
 
-export async function keypairAsJwk(pair) {
+export async function keypairAsJwk(keys, priv=false) {
   const keystore = jose.JWK.createKeyStore()
-  const jwk = await keystore.add(pair.public, 'pem')
+  let jwk = false
+  if (priv) jwk = await keystore.add(keys.private, 'pem')
+  else jwk = await keystore.add(keys.public, 'pem')
 
   return jwk
 }

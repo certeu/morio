@@ -386,4 +386,13 @@ export const errors = {
     detail:
       'The request failed because creating this record would overwrite data. Use an upsert (PUT) endpoint if this is what you want.',
   },
+  /*
+   * Error during the OIDC flow
+   */
+  'morio.api.oidc.failed': {
+    status: 400,
+    title: 'OIDC Flow Failure',
+    detail:
+      'We were unable to complete the OIDC flow. This typically indicates an issue in the OIDC client configuration.',
+  },
 }

@@ -1,5 +1,5 @@
 // Dependencies
-import { shortDate } from 'lib/utils.mjs'
+import { shortDate, varify } from 'lib/utils.mjs'
 // Hooks
 import { useState, useContext, useEffect } from 'react'
 import { useAccount } from 'hooks/use-account.mjs'
@@ -10,6 +10,8 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Components
 import { Highlight } from 'components/highlight.mjs'
 import {
+  OidcIcon,
+  PlusIcon,
   OkIcon,
   CloseIcon,
   ResetIcon,
@@ -485,3 +487,289 @@ export const EditApikey = ({ data, refresh }) => {
     </div>
   )
 }
+
+export const AccountOidcClients = () => {
+  const [clients, setClients] = useState()
+  const [refresher, setRefresher] = useState(0)
+  const { api } = useApi()
+  const { pushModal } = useContext(ModalContext)
+
+  useEffect(() => {
+    const getOidcClients = async () => {
+      const result = await api.getOidcClients()
+      if (result[1] === 200 && result[0]?.oidc_clients) setClients(result[0].oidc_clients)
+    }
+    getOidcClients()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [refresher])
+
+  const refresh = () => setRefresher(refresher + 1)
+
+  if (!clients || clients.length < 1) return null
+
+  return (
+    <>
+      <table className="mdx table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>By</th>
+            <th>Owner</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody className="nostripes">
+          {Object.keys(clients).sort().map(id => {
+            const data = clients[id]
+            return (
+              <tr
+                key={data.key}
+                className="hover:cursor-pointer hover:bg-primary hover:bg-opacity-20"
+                onClick={() =>
+                  pushModal(
+                    <ModalWrapper keepOpenOnClick>
+                      <EditOidcClient data={data} refresh={refresh} />
+                    </ModalWrapper>
+                  )
+                }
+              >
+                <td>
+                  <code>{data.id}</code>
+                </td>
+                <td>
+                  <b>{data.name}</b>
+                </td>
+                <td>
+                  <b>{data.by}</b>
+                </td>
+                <td>
+                  <b>{data.createdBy}</b>
+                </td>
+                <td>
+                  <span>
+                    <b>
+                      <TimeAgo iso={data.created_at} />
+                      <br />
+                      <small>
+                        <DateAndTime iso={data.created_at} />
+                      </small>
+                    </b>
+                  </span>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+      <p className='text-right'>
+        <NewOidcClientButton refresh={refresh} />
+      </p>
+    </>
+  )
+}
+
+/**
+ * React component to add an OIDC client. Typically loaded in a modal.
+ */
+export const AddOidcClient = ({ refresh }) => {
+  const [id, setId] = useState('')
+  const [name, setName] = useState('')
+  const [by, setBy] = useState('')
+  const [uris, setUris] = useState([''])
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+  const { api } = useApi()
+  const { clearModal } = useContext(ModalContext)
+
+  const createOidcClient = async () => {
+    setLoadingStatus([true, 'Creating OIDC client'])
+    const result = await api.createOidcClient({ id, name, by, uris })
+
+    if (result[1] === 200) {
+      setLoadingStatus([true, 'OIDC client created', true, true])
+      if (typeof refresh === 'function') refresh()
+      clearModal()
+    } else
+      return setLoadingStatus([
+        true,
+        result[0].error ? result[0].error : `Unable to create OIDC client`,
+        true,
+        false,
+      ])
+  }
+
+  return (
+    <>
+      <h2>Create a new OIDC client</h2>
+      <StringInput
+        label="Client ID"
+        labelBL="A unique ID to identity the client"
+        placeholder='pizza'
+        current={id}
+        update={(val) => setId(varify(val))}
+        valid={(val) => (val.length > 2 ? true : false)}
+      />
+      <ClientInputs {...{ uris, setUris, name, setName, by, setBy }} />
+      <button
+        className="btn btn-primary w-full mt-4"
+        onClick={createOidcClient}
+        disabled={name.length < 2}
+      >
+        Create OIDC Client
+      </button>
+    </>
+  )
+}
+
+const ClientInputs = ({ uris, setUris, name, setName, by, setBy }) => {
+  /*
+   * Update method for the uris array
+   */
+  const updateUri = (val, i) => {
+    const newUris = [...uris]
+    newUris[i] = val
+    setUris(newUris)
+  }
+
+  /*
+   * Removes a uri from the uris array
+   */
+  const removeUri = (i) => {
+    const newUris = uris.slice(0, i).concat(uris.slice(i + 1))
+    setUris(newUris)
+  }
+
+  /*
+   * Adds a URI to the uris array
+   */
+  const addUri = () => {
+    const newUris = [...uris, '']
+    setUris(newUris)
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-2">
+        <StringInput
+          label="Name"
+          labelBL="Application name for the consent screen"
+          placeholder='Pizza Vending Machine'
+          current={name}
+          update={setName}
+          valid={(val) => (val.length > 2 ? true : false)}
+        />
+        <StringInput
+          label="By"
+          labelBL="Developer/Company name for the consent screen"
+          placeholder='Boxo Co'
+          current={by}
+          update={setBy}
+          valid={(val) => (val.length > 2 ? true : false)}
+        />
+      </div>
+      {uris.map((uri, i) => (
+        <div className="flex flex-row gap-2 items-start" key={i}>
+          <StringInput
+            placeholder="https://pizza.morio.it/oidc/callback"
+            label={`Callback URL #${i}`}
+            labelBL="An allowed callback URL for this client"
+            valid={() => true}
+            current={uris[i]}
+            update={(val) => updateUri(val, i)}
+          />
+          <button className="btn btn-error btn-outline mt-9" onClick={() => removeUri(i)}>
+            <TrashIcon />
+          </button>
+        </div>
+      ))}
+      <p className="text-right">
+        <button className="btn btn-success btn-sm" onClick={() => addUri()}>
+          <PlusIcon className="w-4 h-4" stroke={4} /> Add Callback URL
+        </button>
+      </p>
+    </>
+  )
+
+}
+export const NewOidcClientButton = ({ refresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  return (
+    <button
+      className="btn btn-primary"
+      onClick={() =>
+        pushModal(
+          <ModalWrapper keepOpenOnClick>
+            <AddOidcClient refresh={refresh} />
+          </ModalWrapper>
+        )
+      }
+    >
+      <OidcIcon />
+      <span className="pl-4"> New OIDC Client</span>
+    </button>
+  )
+}
+
+export const EditOidcClient = ({ data, refresh }) => {
+  const { api } = useApi()
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+  const { clearModal } = useContext(ModalContext)
+  const [name, setName] = useState(data.name)
+  const [by, setBy] = useState(data.by)
+  const [uris, setUris] = useState(data.redirect_uris)
+
+  const update = async () => {
+    setLoadingStatus([true, 'Updating OIDC Client'])
+    const result = await api.updateOidcClient(data.id, { name, by, uris })
+    if (result[1] === 200) {
+      refresh()
+      setLoadingStatus([true, `OIDC client updated`, true, true])
+      clearModal()
+    } else
+      return setLoadingStatus([
+        true,
+        result[0].error ? result[0].error : `Unable to update OIDC client`,
+        true,
+        false,
+      ])
+  }
+  const remove = async () => {
+    setLoadingStatus([true, 'Removing OIDC Client'])
+    const result = await api.removeOidcClient(data.id)
+    if (result[1] === 204) {
+      refresh()
+      setLoadingStatus([true, `OIDC client removed`, true, true])
+      clearModal()
+    } else
+      return setLoadingStatus([
+        true,
+        result[0].error ? result[0].error : `Unable to remove OIDC client`,
+        true,
+        false,
+      ])
+  }
+
+  return (
+    <div className="max-w-2xl">
+      <h2>OIDC Client {data.id}</h2>
+      <ClientInputs {...{ uris, setUris, name, setName, by, setBy }} />
+      <div className="grid grid-cols-2 gap-2">
+        <button className="btn btn-error btn-outline" onClick={remove}>
+          <div className="flex flex-row gap-2 items-center justify-between w-full">
+            <TrashIcon />
+            Remove OIDC Client
+          </div>
+        </button>
+        <button className="btn btn-primary" onClick={update}>
+          <div className="flex flex-row gap-2 items-center justify-between w-full">
+            <OkIcon stroke={3}/>
+            Update OIDC Client
+          </div>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+
