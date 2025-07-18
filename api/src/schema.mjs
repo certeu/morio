@@ -487,6 +487,19 @@ export const schema = {
   'req.rotate.mrt': Joi.object({ mrt }),
   // Subca validation
   'req.subca': subca,
+  // OIDC clients
+  'req.oidc.client.create': Joi.object({
+    id: Joi.string().required(),
+    name: Joi.string().required(),
+    by: Joi.string().required(),
+    uris: Joi.array().items(Joi.string()).required(),
+  }),
+  'req.oidc.client.update': Joi.object({
+    id: Joi.string().required(),
+    name: Joi.string().optional(),
+    by: Joi.string().optional(),
+    uris: Joi.array().items(Joi.string()).optional(),
+  }),
 
   /*
    * Responses

@@ -25,7 +25,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
   const traefik = {
     api: generateTraefikConfig(utils, {
       service: 'api',
-      prefixes: [utils.getPreset('MORIO_API_PREFIX')],
+      prefixes: [utils.getPreset('MORIO_API_PREFIX'), '/oidc/', '/interaction/'],
       priority: 666,
     })
       /*
@@ -65,6 +65,21 @@ export const resolveServiceConfiguration = ({ utils }) => {
         'api-service-header@file',
         'api-auth@file',
       ])
+  }
+  const cors = utils.getSettings('api.cors', false)
+  if (cors && Array.isArray(cors.origins) && cors.origins.length > 0) {
+    const lead = 'http.middlewares.api-cors-headers.headers'
+    traefik.api.set(`${lead}.accessControlAllowMethods`, cors.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
+    traefik.api.set(`${lead}.accessControlAllowHeaders`, cors.headers || ['*'])
+    traefik.api.set(`${lead}.accessControlAllowOriginList`, cors.origins || ['*'])
+    traefik.api.set(`${lead}.accessControlMAxAge`, 86400) // Cache preflight for 24 hours
+    traefik.api.set(`${lead}.addVaryHeader`, true)
+    traefik.api.set('http.routers.api.middlewares', [
+      'api-prefix@file',
+      'api-service-header@file',
+      'api-cors-headers@file',
+      'api-auth@file',
+    ])
   }
 
   return {

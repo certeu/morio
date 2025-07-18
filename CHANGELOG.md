@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Added endpoints for the management of inventory assets
 - [api] Added support for remapping OIDC label names
 - [api] Add inventory groups and their vars to the ansible inventory
+- [api] Added support for configuring CORS headers
+- [api] Add support to make Morio an OIDC Provider
 - [cache] Cache service is now available at the cluster level
 - [cache] Enable ACL and authentication for cross-cluster access
 - [core] Added ability to deploy Morio as a subordinate CA

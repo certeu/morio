@@ -157,6 +157,7 @@ export const BulkGroupvarUpdate = ({ groupvars, refresh, setRefresh }) => {
   useEffect(() => {
     if (groups.length < 1)
       runGroupsTableApiCall(api).then((result) => setGroups(result.map((entry) => entry.id)))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [api, key])
 
   // Prefill values if groupvars is a single object
@@ -180,6 +181,7 @@ export const BulkGroupvarUpdate = ({ groupvars, refresh, setRefresh }) => {
       }
       loadGroupvar()
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [groupvars])
 
   const updateGroupvars = async () => {
@@ -305,6 +307,7 @@ export const NewGroupvar = ({ refresh, setRefresh }) => {
   useEffect(() => {
     if (groups.length < 1)
       runGroupsTableApiCall(api).then((result) => setGroups(result.map((entry) => entry.id)))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [api, name])
 
   // Handler method to create a new group
