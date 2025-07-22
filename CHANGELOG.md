@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ui] Improved flags UI in the settings wizard
 - [ui] Do not show OIDC role selection if only 1 role is available
 - [watcher] Upgraded Elastic Heartbeat from 8.16.5 to 8.17.4
+- [watcher] Pre-configured monitors use .internal TLS to avoid proxy issues
 
 ### Fixed
 
