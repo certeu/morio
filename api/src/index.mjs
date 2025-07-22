@@ -3,7 +3,6 @@ import express from 'express'
 import { wrapExpress } from '#shared/utils'
 import { getPreset } from '#config'
 import cookieParser from 'cookie-parser'
-import bodyParser from 'body-parser'
 // Routes
 import { routes } from '#routes/index'
 // Bootstrap configuration
@@ -33,11 +32,6 @@ app.use(guardRoutes)
  * Add support for cookies with a limit to the request body
  */
 app.use(cookieParser())
-
-/*
- * Add support for form bodies (required for OIDC flow)
- */
-app.use(bodyParser.urlencoded())
 
 /*
  * Add custom middleware to load roles from header

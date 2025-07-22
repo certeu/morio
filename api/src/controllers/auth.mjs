@@ -531,6 +531,7 @@ Controller.prototype.getCustomToken = async function (req, res) {
  * @param {object} token - The token to verify
  */
 export const verifyToken = (token) => {
+  if (!token || !typeof token === 'string' || token.length < 24) return false
   const publicKey = utils.getKeys()?.public
 
   return publicKey

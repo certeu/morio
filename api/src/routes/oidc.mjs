@@ -1,6 +1,8 @@
 import { Controller } from '#controllers/oidc'
+import bodyParser from 'body-parser'
 
 const Oidc = new Controller()
+const urlencodedParser = bodyParser.urlencoded()
 
 /**
  * This method adds the OIDC routes to Express
@@ -12,10 +14,10 @@ export function routes(app) {
   app.get('/interaction/:uid', (req, res) => Oidc.init(req, res))
 
   // OIDC login
-  app.post('/interaction/:uid/login', (req, res) => Oidc.login(req, res))
+  app.post('/interaction/:uid/login', urlencodedParser, (req, res) => Oidc.login(req, res))
 
   // OIDC consent
-  app.post('/interaction/:uid/confirm', (req, res) => Oidc.confirm(req, res))
+  app.post('/interaction/:uid/confirm', urlencodedParser, (req, res) => Oidc.confirm(req, res))
 
   // List OIDC clients (for the account)
   app.get('/oidc/clients', (req, res) => Oidc.getClients(req, res))
