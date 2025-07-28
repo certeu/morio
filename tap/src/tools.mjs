@@ -377,7 +377,7 @@ async function cacheLogline(logset, logData, data, overrides = {}) {
   /*
    * Execute ValKey commands
    */
-  ops.exec((result) => logCacheErrors(result, { in: 'cachelog', logSet, logData, overrides, data }))
+  ops.exec((result) => logCacheErrors(result, { in: 'cachelog', logset, logData, overrides, data }))
 }
 
 /**
