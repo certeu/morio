@@ -174,9 +174,11 @@ Controller.prototype.authenticate = async function (req, res) {
     /*
      * Node-Red needs to be shielded from all but operator and up roles
      * Since this is not an API, rather than return JSON, we redirect to an error page
+     * However, imcoming webhooks are allowed for all users
      */
     if (service === 'eda') {
-      if (isRoleAvailable(payload.role, 'operator')) allow = true
+      if (uri.slice(0, 14) === '/eda/webhooks/' || isRoleAvailable(payload.role, 'operator'))
+        allow = true
       else return res.redirect(redirectPath(req, '/http-errors/rbac/'))
     } else if (service === 'api') allow = true
 
