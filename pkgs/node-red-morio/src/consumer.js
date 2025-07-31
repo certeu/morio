@@ -27,7 +27,7 @@ module.exports = function (RED) {
      * Store settings and other things we need for use in prototype
      */
     this.settings = {
-      consumer: { groupId: n.groupId || 'no_group_id' },
+      consumer: { groupId: n.groupid || 'no_group_id' },
       topic: topic.topic,
     }
 
