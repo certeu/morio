@@ -44,14 +44,20 @@ Controller.prototype.login = async function (req, res) {
     const { prompt } = await utils.oidcProvider.interactionDetails(req, res)
     if (prompt.name === 'login') {
       const account = await verifyToken(req.body.token)
-      const result = {
-        login: {
-          accountId: `${account.user}@${account.provider}:${account.role}`,
-        },
+      if (account.user && account.provider && account.role) {
+        await utils.kv.set(
+          `.internal/morio/oidc-provider/users/${account.user}@${account.provider}:${account.role}`,
+          account
+        )
+        const result = {
+          login: {
+            accountId: `${account.user}@${account.provider}:${account.role}`,
+          },
+        }
+        return await utils.oidcProvider.interactionFinished(req, res, result, {
+          mergeWithLastSubmission: false,
+        })
       }
-      return await utils.oidcProvider.interactionFinished(req, res, result, {
-        mergeWithLastSubmission: false,
-      })
     }
   } catch (err) {
     log.error(err)

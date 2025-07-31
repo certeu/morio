@@ -15,6 +15,8 @@ const allowedUrisBase = [
   `/oidc/jwks`,
   `/oidc/me`,
   `/oidc/token`,
+  `/oidc/session/end`,
+  `/oidc/session/end/confirm`,
   `/activate-account`,
   `/activate-mfa`,
   `/ca/certificates`,
@@ -91,7 +93,6 @@ Controller.prototype.authenticate = async function (req, res) {
    */
   const uri = req.headers['x-forwarded-uri']
   if (!uri) return utils.sendErrorResponse(res, 'morio.api.rbac.denied', req.url)
-
   /*
    * Is the URL blocked?
    *

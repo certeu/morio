@@ -1,7 +1,6 @@
 import { Provider } from 'oidc-provider'
 import { keypairAsJwk, decryptPrivateKeyPem } from '#shared/crypto'
 import { log, utils } from './utils.mjs'
-import { availableRoles } from '../rbac.mjs'
 
 /*
  * This is the OIDC Provider Configuration
@@ -61,6 +60,7 @@ const configuration = {
       'cluster',
       'available_roles',
       'highest_role',
+      'labels',
     ],
   },
   // Allow claims in code response
@@ -123,42 +123,24 @@ export async function createOidcProvider(app) {
 }
 
 async function findAccount(ctx, id) {
+  const result = await utils.kv.get(`.internal/morio/oidc-provider/users/${id}`, {})
+  const account = result?.[0] || {}
   // Return account data and claims
   return {
     accountId: id,
     claims: () => ({
       sub: id.toString(),
-      ...unwrapAccountId(id),
+      user: account.user,
+      role: account.role,
+      provider: account.provider,
+      available_roles: account.available_roles,
+      highest_role: account.highest_role,
+      labels: account.labels,
       node: utils.getNodeUuid(),
       cluster: utils.getClusterUuid(),
       token_type: 'oidc',
     }),
   }
-}
-
-const unwrapAccountId = (id) => {
-  const data = {}
-  const a = id.split('@')
-
-  if (a.length === 2) {
-    data.user = a[0]
-    const b = a[1].split(':')
-    if (b.length === 2) {
-      data.provider = b[0]
-      data.role = b[1]
-    } else throw new Error(`Neither provider nor role can have a : in them: ${id}`)
-  } else {
-    const b = a.pop().split(':')
-    data.user = a.join('@')
-    if (b.length === 2) {
-      data.provider = b[0]
-      data.role = b[1]
-    } else throw new Error(`Neither provider nor role can have a dot in them: ${id}`)
-  }
-  data.available_roles = availableRoles(data.role)
-  data.highest_role = availableRoles(data.role).pop()
-
-  return data
 }
 
 function clientBasedCORS() {
