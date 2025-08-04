@@ -57,6 +57,20 @@ export const resolveServiceConfiguration = ({ utils }) => {
         'eda-auth@file',
       ])
   }
+  const cors = utils.getSettings('eda.cors', false)
+  if (cors && Array.isArray(cors.origins) && cors.origins.length > 0) {
+    const lead = 'http.middlewares.eda-cors-headers.headers'
+    traefik.eda.set(`${lead}.accessControlAllowMethods`, cors.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
+    traefik.eda.set(`${lead}.accessControlAllowHeaders`, cors.headers || ['*'])
+    traefik.eda.set(`${lead}.accessControlAllowOriginList`, cors.origins || ['*'])
+    traefik.eda.set(`${lead}.accessControlMAxAge`, 86400) // Cache preflight for 24 hours
+    traefik.eda.set(`${lead}.addVaryHeader`, true)
+    traefik.eda.set('http.routers.eda.middlewares', [
+      'eda-service-header@file',
+      'eda-cors-headers@file',
+      'eda-auth@file',
+    ])
+  }
 
   return {
     /**

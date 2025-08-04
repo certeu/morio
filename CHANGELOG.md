@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- [eda] Add handling of CORS headers
+
 ## [0.9.0] - 2025-08-01
 
 ### Added
