@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Parse groupvar inventory vars as JSON
 - [eda] Add handling of CORS headers
+- [ui] Fix incorrect error message when creating hostvar
 
 ## [0.9.0] - 2025-08-01
 

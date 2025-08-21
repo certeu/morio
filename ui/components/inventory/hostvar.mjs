@@ -192,13 +192,12 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
   const createHostvar = async () => {
     setLoadingStatus([true, 'Contacting API'])
     const result = await api.createHostvar(key, val, info, host)
-    console.log(result)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Hostvar created', true, true])
       if (setRefresh) setRefresh(refresh + 1)
     }
-    if (result[1] === 409 && result[0].title) {
+    else if (result[1] === 409 && result[0].title) {
       setLoadingStatus([true, <div key={1}>{result[0].title}. See: <a href={result[0].type} className="text-error-content underline">Error Reference</a></div>, true, false])
     }
     else setLoadingStatus([true, 'Failed to create hostvar', true, false])
