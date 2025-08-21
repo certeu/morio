@@ -366,7 +366,7 @@ Host.prototype.getAnsibleInventory = async function (withSecrets = false) {
   const [groupvarStatus, groupvarResult] = await utils.db.read(`SELECT * FROM inventory_groupvars`)
   const groupvars = groupvarStatus === 200 ? resultsAsList(groupvarResult) : false
   for (const groupvar of groupvars) {
-    groups[groupvar.group_id].vars[groupvar.key] = groupvar.val
+    groups[groupvar.group_id].vars[groupvar.key] = unwrapVar(groupvar.key, groupvar.val)
   }
 
   // Now add them to the inventory
