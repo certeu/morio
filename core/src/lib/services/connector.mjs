@@ -17,8 +17,8 @@ export const service = {
     wanted: async () => {
       const sinks = utils.getSettings('connector.sinks', false)
       // Without sinks, this service should not be started
-      if (sinks === false || Object.values(sinks).filter((sink) => !sink.disabled).length < 1)
-        return false
+      if (!sinks) return false
+      if ((Object.values(sinks) || []).filter((sink) => !sink.disabled).length < 1) return false
 
       /*
        * We need a connector service, but where do we run it?
