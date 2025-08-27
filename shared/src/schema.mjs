@@ -295,7 +295,14 @@ const settings = Joi.object({
       headers: Joi.array().items(Joi.string()),
       origins: Joi.array().items(Joi.string()),
     })
-  }).optional()
+  }).optional(),
+  eda: Joi.object({
+    cors: Joi.object({
+      methods: Joi.array().items(Joi.string()),
+      headers: Joi.array().items(Joi.string()),
+      origins: Joi.array().items(Joi.string()),
+    })
+  }).optional(),
 }).required()
 
 /*
