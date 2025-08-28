@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [core] Core will now throw an error when settings cannot be loaded
 - [core] Canary container images now run from source and include debug tools
+- [core] Do not log when certificates are not up for renewal
 
 ### Fixed
 

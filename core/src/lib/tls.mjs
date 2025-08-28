@@ -183,10 +183,8 @@ export async function ensureServiceCertificate(service, internal = false, chain 
    */
   if (json && missing < 1) {
     const days = Math.floor((new Date(json.expires).getTime() - Date.now()) / (1000 * 3600 * 24))
-    if (days > 66) {
-      log.debug(`[${service} TLS certificate will expire in ${days} days. Not renewing.`)
-      return true
-    } else log.info(`[${service}] TLS certificate will expire in ${days}. Renewing now.`)
+    if (days > 66) return true
+    else log.info(`[${service}] TLS certificate will expire in ${days}. Renewing now.`)
   }
 
   /*
