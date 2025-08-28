@@ -1,5 +1,5 @@
 // Required for config file management
-import { readJsonFile, readDirectory, writeJsonFile } from '#shared/fs'
+import { readFile, readJsonFile, readDirectory, writeJsonFile } from '#shared/fs'
 // Avoid objects pointing to the same memory
 import { cloneAsPojo } from '#shared/utils'
 // Required to generated X.509 certificates
@@ -261,6 +261,24 @@ async function loadSettingsFromDisk(updateState = true) {
    * Now read the settings file
    */
   const settings = await readJsonFile(`/etc/morio/settings.${serial}.json`)
+
+  /*
+   * If the settings file holds invalid JSON, we better be loud about it
+   */
+  if (!settings) {
+    const raw = await readFile(`/etc/morio/settings.${serial}.json`)
+    if (!raw) log.fatal(`Unable to load settings from disk: Failed to load settings.${serial}.json`)
+    else {
+      // We have a file, perhaps it's not valid JSON?
+      try {
+        JSON.parse(raw)
+      } catch (err) {
+        log.fatal(err, `Unable to load settings from disk. Please ensure they are valid JSON.`)
+      }
+    }
+    // Bail out
+    throw 'Unable to load settings. Cannot continue.'
+  }
 
   return { settings, node, serial }
 }

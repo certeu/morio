@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.1] - 2025-08-21
 
+### Changed
+
+- [core] Core will now throw an error when settings cannot be loaded
+
 ### Fixed
 
 - [api] Parse groupvar inventory vars as JSON
 - [core] Split connector wanted check to avoid attempting to access property of what is possibly undefined
+- [core] Ensure core is attached to the correct Docker network prior to starting services
 - [eda] Add handling of CORS headers
 - [ui] Fix incorrect error message when creating hostvar
 

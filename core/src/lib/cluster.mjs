@@ -596,6 +596,34 @@ export async function ensureMorioCluster() {
   utils.setCoreReady(false)
 
   /*
+   * Ensure we're attached to the correct network
+   */
+  await ensureCoreNetwork()
+
+  /*
+   * Morio is always (ready to be) a cluster.
+   * This needs to run, regardless of how many nodes we have.
+   * Unless of course, we're running in ephemeral mode
+   * in which case we can just set the cluster status accordingly
+   */
+  if (!utils.isEphemeral()) await ensureMorioClusterConsensus()
+  else utils.setClusterStatus(1, statusColorFromCode(1))
+
+  /*
+   * Is the cluster healthy?
+   */
+  utils.setCoreReady(true)
+}
+
+/**
+ * Ensure Morio core is attached to the morionet network
+ *
+ * This is called from the beforeall lifecycle hook prior
+ * to starting the CA service, as core won't be able to communicate
+ * with it unless it itself is on the right network.
+ */
+export async function ensureCoreNetwork() {
+  /*
    * Ensure the network exists, and we're attached to it.
    */
   try {
@@ -615,25 +643,11 @@ export async function ensureMorioCluster() {
                 `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core_${utils.getNodeSerial()}.internal`,
               ]),
         ],
-      } // Endpoint config
+      }
     )
   } catch (err) {
     log.error(err, 'Failed to ensure morio network configuration')
   }
-
-  /*
-   * Morio is always (ready to be) a cluster.
-   * This needs to run, regardless of how many nodes we have.
-   * Unless of course, we're running in ephemeral mode
-   * in which case we can just set the cluster status accordingly
-   */
-  if (!utils.isEphemeral()) await ensureMorioClusterConsensus()
-  else utils.setClusterStatus(1, statusColorFromCode(1))
-
-  /*
-   * Is the cluster healthy?
-   */
-  utils.setCoreReady(true)
 }
 
 /*
