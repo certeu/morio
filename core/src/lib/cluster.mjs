@@ -55,7 +55,8 @@ async function updateNodeState() {
    */
   const promises = []
   for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder) {
-    if (await runHook('wanted', service)) promises.push(runHook('heartbeat', service))
+    if (await runHook('wanted', service, { heartbeat: true }))
+      promises.push(runHook('heartbeat', service))
   }
   /*
    * Do the same for core as the final service

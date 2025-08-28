@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Parse groupvar inventory vars as JSON
 - [core] Split connector wanted check to avoid attempting to access property of what is possibly undefined
 - [core] Ensure core is attached to the correct Docker network prior to starting services
+- [core] Do not regenerate connector config on every heartbeat
 - [eda] Add handling of CORS headers
 - [ui] Fix incorrect error message when creating hostvar
 

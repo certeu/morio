@@ -14,7 +14,7 @@ export const service = {
     /**
      * Lifecycle hook to determine whether the container is wanted
      */
-    wanted: async () => {
+    wanted: async (hookParams = {}) => {
       const sinks = utils.getSettings('connector.sinks', false)
       // Without sinks, this service should not be started
       if (!sinks) return false
@@ -26,8 +26,11 @@ export const service = {
        */
       const cNodes = utils.getSettings('flanking_services.connector.nodes', [])
       if (cNodes.includes(utils.getNodeFqdn())) {
-        // Always update pipeline config until we have a way to diff them
-        await ensurePipelines()
+        /*
+         * We always update pipeline config until we have a way to diff them
+         * although not if this is merely a heartbeat check
+         */
+        if (!hookParams.heartbeat) await ensurePipelines()
         return true
       }
       /*
@@ -41,12 +44,19 @@ export const service = {
        */
       if (utils.getFlankingCount() > 0) {
         if (utils.isFlankingNode()) {
-          // Always update pipeline config until we have a way to diff them
-          await ensurePipelines()
+          /*
+           * We always update pipeline config until we have a way to diff them
+           * although not if this is merely a heartbeat check
+           */
+          if (!hookParams.heartbeat) await ensurePipelines()
           return true
         }
       } else {
-        // Always update pipeline config until we have a way to diff them
+        /*
+         * We always update pipeline config until we have a way to diff them
+         * although not if this is merely a heartbeat check
+         */
+        if (!hookParams.heartbeat) await ensurePipelines()
         await ensurePipelines()
         return true
       }
