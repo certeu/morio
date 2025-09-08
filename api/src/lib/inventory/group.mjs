@@ -437,20 +437,17 @@ Group.prototype.loadGroupMembers = async function (id) {
       WHERE gg.group_id = :id
 
       UNION ALL
-      -- Recursive case: get members of member groups
-      SELECT
-        CASE
-          WHEN gh.member_id IS NOT NULL THEN gh.member_id
-          ELSE gg.member_id
-        END AS id,
-        CASE
-          WHEN gh.member_id IS NOT NULL THEN 'host'
-          ELSE 'group'
-        END AS member_type,
-        agm.depth + 1 AS depth
+      -- Recursive case: get host members of member groups
+      SELECT gh.member_id AS id, 'host' AS member_type, agm.depth + 1 AS depth
       FROM all_group_members agm
-      LEFT JOIN inventory_group_host gh ON gh.group_id = agm.id
-      LEFT JOIN inventory_group_group gg ON gg.group_id = agm.id
+      JOIN inventory_group_host gh ON gh.group_id = agm.id
+      WHERE agm.member_type = 'group' AND agm.depth < :maxDepth
+
+      UNION ALL
+      -- Recursive case: get group members of member groups
+      SELECT gg.member_id AS id, 'group' AS member_type, agm.depth + 1 AS depth
+      FROM all_group_members agm
+      JOIN inventory_group_group gg ON gg.group_id = agm.id
       WHERE agm.member_type = 'group' AND agm.depth < :maxDepth
     )
     -- Get all hosts from the recursive query

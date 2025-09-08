@@ -359,7 +359,9 @@ Host.prototype.getAnsibleInventory = async function (withSecrets = false) {
   const groups = {}
   for (const group of grouplist) {
     groups[group.id] = { ...group, vars: {} }
-    groups[group.id].members = await new Group().loadGroupHostMembers(group.id)
+    groups[group.id].members = (await new Group().loadGroupMembers(group.id)).map(
+      (found) => found.id
+    )
   }
 
   // Load group vars
