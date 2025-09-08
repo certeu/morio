@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2025-09-08
+
+### Fixed
+
+- [api] Inventory group members now include hosts from nested groups
+
 ## [0.9.1] - 2025-08-21
 
 ### Changed
