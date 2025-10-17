@@ -1,4 +1,3 @@
-import { settings } from '../settings.mjs'
 import crypto from 'crypto'
 import querystring from 'querystring'
 import pino from 'pino'
@@ -70,8 +69,6 @@ export const tools = {
     event,
     notification,
   },
-  settings,
-  getSettings: (path, dflt) => get(settings, path, dflt),
   shortUuid: (uuid) => (typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'),
   node,
 }
@@ -563,3 +560,4 @@ function asString(input) {
   if (typeof input === 'object') return JSON.stringify(input)
   return `${input}`
 }
+

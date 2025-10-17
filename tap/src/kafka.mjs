@@ -35,6 +35,12 @@ export async function subscribe() {
   tools.node = node
 
   /*
+   * Make settings easier to work with
+   */
+  tools.settings = config.tap
+  tools.getSettings = (path, dflt) => get(tools.settings, path, dflt)
+
+  /*
    * Invoke dispatch method on each message
    * and pass along the tools object
    */
@@ -128,7 +134,7 @@ async function createProducer(client, clientId, topics) {
  */
 async function exitGracefully() {
   log.info('Exiting; Closing Kafka connection...')
-  clearInterval(tools.counter)
+  //clearInterval(tools.counter)
   try {
     await tools.consumer.disconnect()
     await tools.producer.disconnect()

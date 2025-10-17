@@ -19,6 +19,7 @@ import { Buffer } from 'node:buffer'
  * Re-export crypto.randomUUID, which generates v4 UUIDs
  */
 export const uuid = randomUUID
+
 /**
  * Hashes a string
  *

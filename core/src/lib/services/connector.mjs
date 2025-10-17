@@ -134,6 +134,9 @@ async function ensurePipelines() {
    */
   const config = utils.getMorioServiceConfig('connector', false)
 
+  // Don't bother if config is not available for some reason
+  //if (!config?.vector) return
+
   /*
    * Populate sources, sinks, and transforms
    */

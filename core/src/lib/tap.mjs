@@ -9,7 +9,7 @@ import { utils } from './utils.mjs'
  * @return {bool} wanted - True if wanted, false if not
  */
 export function isTapWanted() {
-  const processors = utils.getSettings('tap', {})
+  const globs = utils.getSettings('preseed.processors', [])
 
-  return Object.keys(processors).length > 0
+  return !Array.isArray(globs) || globs.length < 1 ? false : true
 }

@@ -688,12 +688,8 @@ export async function loadStreamProcessors(settings, log) {
       const [pattern, repo] = entry.slice(4).split('@')
       if (settings.preseed?.git?.[repo]) {
         const { files } = await globFilesFromRepo(pattern, repo, '/etc/morio/shared')
-        /*
-         * By sorting the list of files, we can ensure that the main
-         * file is always loaded before any modules it uses.
-         */
         for (const sourceFile of files.sort()) {
-          const targetFile = findPreseedTarget(sourceFile, 'processors')
+          const targetFile = findPreseedTarget(sourceFile)
           if (targetFile && sourceFile.slice(-4) === '.mjs') {
             const copy = await copyPreseedFile(
               {
@@ -703,44 +699,48 @@ export async function loadStreamProcessors(settings, log) {
               },
               2112
             ) // 2112 is the user id of the user inside the tap container
-            if (copy) {
-              log.debug(`Seeding stream processing file: ${targetFile} in ${targetFolder}`)
+            if (copy) log.debug(`Seeding stream processing file: ${targetFile} in ${targetFolder}`)
+            else log.warn(`Failed to seed stream processing file: ${targetFile} in ${targetFolder}`)
+            if (path.basename(sourceFile) === 'index.mjs') {
               /*
                * We need to dynamically load the stream processor's settings too
-               * For this, we will dynamically import the file and check for the
-               * named 'info' export which can hold a 'settings' key
+               * For this, we will dynamically import any 'index.mjs' file and check
+               * the default export for a 'settings' key
                */
-              const chunks = targetFile.split('/')
-              const processor = chunks[0]
-              const mod =
-                chunks.length === 3 && chunks[1] === 'modules' && chunks[2].slice(-4) === '.mjs'
-                  ? chunks[2].slice(0, -4)
-                  : false
-              const load = await import(sourceFile)
-              /*
-               * Is it a stream processor module?
-               * And if so, does it expose any settings?
-               */
-              if (mod && mod !== 'index' && load.info?.settings) {
-                setIfUnset(settings, ['tap', processor, 'modules', mod], {})
-                settings.tap[processor].modules[mod] = ensureStreamProcessorSettings(
-                  load.info?.settings,
-                  settings.tap[processor].modules[mod]
-                )
-              } else {
-                /*
-                 * Or is it a stream processor itself?
-                 * (these should always have settings)
-                 */
-                setIfUnset(settings, ['tap', processor], {})
-                settings.tap[processor] = ensureStreamProcessorSettings(
-                  load.info?.settings,
-                  settings.tap[processor]
-                )
-                // Enabled is implied  unless explicitly disabled
-                setIfUnset(settings, ['tap', processor, 'enabled'], true)
+              let load = false
+              try {
+                load = (await import(sourceFile))?.default || []
               }
-            } else log.warn(`Failed to seed stream processing file: ${targetFile}`)
+              catch(err) {
+                log.warn(err, `Failed to import stream processor: ${sourceFile}`)
+              }
+              if (!Array.isArray(load)) load = [load]
+              for (const i in load) {
+                const l = load[i]
+                /*
+                 * Is it a stream processor module?
+                 * And if so, does it expose any settings?
+                 */
+                if (
+                  l &&
+                  l.id &&
+                  typeof l.id === 'string' &&
+                  l.processor &&
+                  typeof l.processor === 'function' &&
+                  l.settings &&
+                  typeof l.settings === 'object'
+                ) {
+                  const key = ['tap', 'processors', l.id]
+                  set(
+                    settings,
+                    key,
+                    ensureStreamProcessorSettings(l.settings, get(settings, key, {})),
+                  )
+                  set(settings, ['tap', 'imports', l.id], { file: targetFile, index: i })
+                }
+                else log.warn(`Not a valid stream processor import: ${sourceFile}`)
+              }
+            }
           }
         }
       }
@@ -752,14 +752,17 @@ export async function loadStreamProcessors(settings, log) {
 
 function ensureStreamProcessorSettings(seededSettings = {}, morioSettings) {
   for (const [key, val] of Object.entries(seededSettings)) {
-    if (['enabled', 'topics'].includes(key) && typeof val !== 'undefined') {
-      // These two fields take a simple value
-      setIfUnset(morioSettings, key, val)
+    if (['enabled', 'topics', 'modules', 'datasets'].includes(key) && typeof val !== 'undefined') {
+      // These fields take a simple value
+      set(morioSettings, key, val)
     } else if (typeof val.dflt !== 'undefined') {
       // These take a UI config object, with the default value stored in the `dflt` key
-      setIfUnset(morioSettings, key, val.dflt)
+      set(morioSettings, key, val.dflt)
     }
   }
+
+  // Enable if it is not explicitly configured
+  if (typeof morioSettings.enabled === 'undefined') morioSettings.enabled = true
 
   return morioSettings
 }
@@ -863,7 +866,9 @@ async function copyPreseedFile({ sourceFile, targetFile, targetFolder }, chownId
   return true
 }
 
-function findPreseedTarget(file, root) {
+function findPreseedTarget(file, root=false) {
+  if (root === false) return file.split('/').slice(5).join('/')
+
   const start = reverseString(file).indexOf(`/${reverseString(root)}/`)
   if (start === -1) return false
   else return file.slice(-1 * start)
