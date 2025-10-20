@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [api] Inventory group members now include hosts from nested groups
+- [api] When removing an inventory host, also remove data links
 
 ## [0.9.1] - 2025-08-21
 
