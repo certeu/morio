@@ -497,11 +497,15 @@ Host.prototype.getStats = async function () {
 Host.prototype.delete = async function (id = false) {
   const result = await deleteRecord('inventory_hosts', id)
 
-  // Also remove IPs, MACs, and OS beloonging to this host
-  for (const table of ['inventory_ips', 'inventory_macs', 'inventory_oss']) {
+  // Also remove IPs, MACs, OS, pkg, and mods belonging to this host
+  for (const table of [
+    'inventory_host_ip',
+    'inventory_host_mac',
+    'inventory_host_os',
+    'inventory_host_pkg',
+    'inventory_host_mod',
+  ])
     await utils.db.write(`DELETE FROM ${table} WHERE host = :id`, { id })
-  }
-  await utils.db.write(`DELETE FROM inventory_oss WHERE id = :id`, { id })
 
   return result
 }
