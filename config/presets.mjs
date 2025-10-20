@@ -420,6 +420,9 @@ To change this, set \`tokens.presets.MORIO_TAP_LOG_LEVEL\` in your Morio
 settings.`
 presets.MORIO_TAP_LOG_LEVEL = 'trace'
 
+predocs.MORIO_TAP_UID = 'User ID (UID) of the user running the Tap service'
+presets.MORIO_TAP_UID = 2112
+
 /*
  * UI presets
  */

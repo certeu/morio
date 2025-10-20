@@ -26,7 +26,7 @@ export const service = {
          * We need a tap service, but where do we run it?
          * Do we have a specific tap node in the settings?
          */
-        const tNodes = utils.getSettings('flanking_services.connector.tap', [])
+        const tNodes = utils.getSettings('flanking_services.connector.nodes', [])
         if (tNodes.includes(utils.getNodeFqdn())) {
           ensureLocalPrerequisites()
           return true

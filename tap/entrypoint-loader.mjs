@@ -1,3 +1,4 @@
+import { createHash } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { glob } from 'glob'
@@ -30,6 +31,11 @@ export async function globDir(folderPath, pattern = '*/index.mjs') {
   return list
 }
 
+export function hash(string) {
+  // This is a non-security use of a hash, so md5 is fine
+  return createHash('md5').update(string).digest('hex')
+}
+
 async function loadProcessorFiles(directory, pattern) {
   const folder = new URL(directory, import.meta.url)
 
@@ -44,17 +50,64 @@ function asTopicList(input) {
   return []
 }
 
-async function ensureProcessorLoader() {
-  const files = await loadProcessorFiles('./processors')
-  const imports = {}
+function asModuleList(input) {
+  if (input && typeof input === 'string' && input !== '*') return [input]
+  if (Array.isArray(input)) return input
+  if (typeof input === 'object') return Object.values(input)
+
+  return '*'
+}
+
+async function ensureDynamicStreamProcessorCode() {
   const topics = new Set()
-  for (const file of files) {
-    const processor = path.basename(path.dirname(file))
-    if (config.tap?.[processor]?.enabled) {
-      const subs = asTopicList(config.tap?.[processor]?.topics || [])
-      for (const topic of subs) topics.add(topic)
-      imports[processor] = [processor, subs]
+  const lut = {} // look-up table
+  const imports = {}
+  const processors = {}
+  // The config.tap.imports key holds all the files we should import
+  let i = 0
+  for (const [id, proc] of Object.entries(config.tap?.imports || {})) {
+    if (config.tap?.processors?.[id]?.enabled) {
+      i++
+      const importedAs = hash(proc.file)
+      const subs = asTopicList(config.tap?.processors?.[id]?.topics || [])
+      const mods = asModuleList(config.tap?.processors?.[id]?.modules || [])
+      for (const topic of subs) {
+        topics.add(topic)
+        if (mods.length > 0) {
+          if (typeof lut[topic] === 'undefined') lut[topic] = {}
+          for (const mod of mods) {
+            if (typeof lut[topic][mod] === 'undefined') lut[topic][mod] = {}
+            if (config.tap.processors[id].datasets) {
+              for (const dset of config.tap.processors[id].datasets) {
+                if (typeof lut[topic][mod][dset] === 'undefined') lut[topic][mod][dset] = []
+                lut[topic][mod][dset].push(id)
+              }
+            } else {
+              if (typeof lut[topic][mod]['*'] === 'undefined') lut[topic][mod]['*'] = []
+              lut[topic][mod]['*'].push(id)
+            }
+          }
+        } else {
+          if (typeof lut[topic] === 'undefined') lut[topic] = {}
+          if (typeof lut[topic]['*'] === 'undefined') lut[topic]['*'] = {}
+          if (typeof lut[topic]['*']['*'] === 'undefined') lut[topic]['*']['*'] = []
+          lut[topic]['*']['*'].push(id)
+        }
+      }
+      if (typeof imports[importedAs] === 'undefined') imports[importedAs] = { file: proc.file, processors: [] }
+      imports[importedAs].processors.push(id)
+      processors[id] = {
+        importedAs,
+        topics: subs,
+        modules: mods,
+        config: config.tap.processors[id],
+        id,
+        i,
+        ...proc,
+      }
+      console.log(`Adding stream processor: ${id}`)
     }
+    else console.log(`Skipping disabled stream processor: ${id}`)
   }
 
   /*
@@ -67,95 +120,68 @@ import { log } from './src/tools.mjs'
 // Stream processors`
 
   /*
-   * Holds allProcessors code
+   * Generate export code for all processors
    */
-  let ah = `${nl}${nl}/*${nl} * Simple object with all stream processors${nl} */${nl}export const allProcessors = {`
-
-  const hpts = {}
-  for (const folder of Object.keys(imports).sort()) {
-    imp += `${nl}import ${folder} from './processors/${folder}/index.mjs'`
-    for (const topic of imports[folder][1]) {
-      if (typeof hpts[topic] === 'undefined') hpts[topic] = new Set()
-      hpts[topic].add(folder)
+  let all = `${nl}${nl}/*${nl} * Simple object with all imports${nl} */${nl}export const code = {`
+  for (const md5 of Object.keys(imports)) {
+    imp += `${nl}import _${md5} from './processors/${imports[md5].file}'`
+    for (const id of imports[md5].processors) {
+      if (typeof processors[id].index === 'undefined') {
+        // Export is an object describing the stream processor
+        all += `${nl}  "${id}":  _${md5}, `
+      } else {
+        // Export is an array of objects describing stream processors
+        all += `${nl}  "${id}":  _${md5}[${processors[id].index}], `
+      }
     }
-    ah += `${nl}  ${folder}, `
   }
-
-  ah += `${nl}}${nl}`
+  all += `${nl}}${nl}`
 
   /*
-   * Holds processorsPerTopic code
+   * Generate export code from the lookup table
    */
-  let hpt = `${nl}/*${nl} * Same stream processors but grouped by topic${nl} */${nl}export const processorsPerTopic = {`
-  for (const [topic, processors] of Object.entries(hpts)) {
-    hpt += `${nl}  ${topic}: [`
-    for (const h of [...processors]) {
-      if (Array.isArray(h)) {
-        for (const hh of h) hpt += `${nl}    allProcessors.${hh},`
-      } else hpt += `${nl}    allProcessors.${h},`
+  const lutData = {}
+  for (const topic of Object.keys(lut)) {
+    if (typeof lutData[topic] === 'undefined') lutData[topic] = {}
+    for (const module of Object.keys(lut[topic])) {
+      if (typeof lutData[topic][module] === 'undefined') lutData[topic][module] = {}
+      for (const [dataset, d] of Object.entries(lut[topic][module])) {
+        if (typeof lutData[topic][module][dataset] === 'undefined') lutData[topic][module][dataset] = []
+        lutData[topic][module][dataset].push(typeof d.index === 'undefined'
+          ? `${d.importedAs}`
+          : `${d.importedAs}[${d.index}]`
+        )
+      }
     }
-    hpt += `${nl}  ],`
   }
-  hpt += `${nl}}`
+  let lutCode = `${nl}${nl}/*${nl} * Object with all stream processors per topic/module/dataset${nl} */${nl}`
+  lutCode += `export const lut = {${nl}`
+  for (const topic of Object.keys(lut)) {
+    lutCode += `  ${topic}: {${nl}`
+    for (const module of Object.keys(lut[topic])) {
+      lutCode += `    "${module}": {${nl}`
+      for (const [dataset, d] of Object.entries(lut[topic][module])) {
+        const h = d.map(handler => `code["${handler}"]`)
+        lutCode += `      "${dataset}": [${nl}        ${h.join(",\n        ")}${nl}      ],${nl}`
+      }
+      lutCode += `    },${nl}`
+    }
+    lutCode += `  },${nl}`
+  }
+  lutCode += `}${nl}`
 
   /*
    * Now bring it all together and write to disk
    */
-  const code = `${imp}${ah}${hpt}${nl}
+  const code = `${imp}${all}${lutCode}${nl}
 export const topics = ${JSON.stringify([...topics])}
-export const processorList = []
-for (const topic in processorsPerTopic) {
-  for (const proc of processorsPerTopic[topic])
-  processorList.push(proc.name)
-}
 `
   await fs.writeFile('./loader.mjs', code)
 }
-
-async function ensureModuleLoaders() {
-  const files = await loadProcessorFiles('./processors', '*/modules/*.mjs')
-  const imports = {}
-  for (const file of files) {
-    /*
-     * We glob all files in one pass,
-     * but we need to manage them per processor
-     */
-    const processor = path.basename(path.dirname(path.dirname(file)))
-    if (typeof imports[processor] === 'undefined') imports[processor] = {}
-    const filename = path.basename(file)
-    if (filename.slice(-4) === '.mjs') {
-      const module = filename.slice(0, -4)
-      if (module !== 'index') {
-        const importName = module.replaceAll('-', '_')
-        imports[processor][module] = {
-          imp: `import ${importName} from './${filename}'`,
-          exp: `  "${module}": ${importName},`,
-        }
-      }
-    }
-  }
-
-  /*
-   * Now write out the index.mjs loader files
-   */
-  for (const processor in imports) {
-    const code = `${banner}
-${Object.values(imports[processor])
-  .map((h) => h.imp)
-  .join(nl)}${nl}
-export default {${nl}${Object.values(imports[processor])
-      .map((h) => h.exp)
-      .join(nl)}${nl}}${nl}`
-    await fs.writeFile(`./processors/${processor}/modules/index.mjs`, code)
-  }
-}
-
 /*
  * Get to work
  */
-if (config.tap) {
-  ensureProcessorLoader()
-  ensureModuleLoaders()
-} else {
-  console.log(`No config with tap settings found on disk. Tap service cannot start.`)
-}
+if (config.tap?.imports) ensureDynamicStreamProcessorCode()
+else console.log(`No config with tap settings found on disk. Tap service cannot start.`)
+
+

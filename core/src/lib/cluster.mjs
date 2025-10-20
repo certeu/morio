@@ -79,7 +79,7 @@ function consolidateClusterStatus() {
   const status = utils.getStatus()?.nodes?.[utils.getNodeFqdn()]
   let code = 0
   for (const service of [...serviceOrder]) {
-    if (typeof status[service] !== 'undefined' && status[service] !== 0) {
+    if (status && typeof status[service] !== 'undefined' && status[service] !== 0) {
       if (code === 0) code = serviceCodes[service]
       log.warn(`[${service}] Service has status code ${status[service]}`)
     }
