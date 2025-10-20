@@ -1,43 +1,40 @@
 import { lut as processors, topics } from '../loader.mjs'
-//import { count } from './counters.mjs'
 
 /*
  * This dispatch method received all Kafka messages
  * and routes them through the (stream) processors
  * that have subscribed to them
  */
-export function dispatch(topic, message, tools) {
-  /*
-   * Count every message
-   */
-  // FIXME count.message(topic)
-
+export function dispatch({ topic, message }, tools) {
   /*
    * Extract message data from raw RedPanda message
    */
-  const { data } = parseMessageData(message)
+  const parsedMessage = parseMessageData(message)
+
+  /*
+   * Return early if there's no data
+   */
+  if (!parsedMessage.data) return
 
   /*
    * Attempt to determine the module and dataset
    */
-  const module = getModuleName(data)
-  const dataset = getDatasetName(topic, data)
+  const module = getModuleName(parsedMessage.data)
+  const dataset = getDatasetName(topic, parsedMessage.data)
 
   /*
    * Dispatch to stream processors subscribed to this topic/module/dataset
    */
-  for (const proc of getProcessors(topic, module, dataset)) {
-    if (typeof proc.processor === 'function') {
-      /*
-       * Count every processed message
-       */
-      // FIXME count.processor(processor.id)
-
-      /*
-       * Hand over to stream processor method
-       */
-      processor(data, tools, processor.settings || {}, { topic, module, dataset })
-    }
+  for (const processor of getProcessors(topic, module, dataset)) {
+    processor.handler({
+      tools,
+      settings: processor.settings || {},
+      topic,
+      module,
+      dataset,
+      processor,
+      ...parsedMessage,
+    })
   }
 }
 
@@ -54,7 +51,7 @@ function parseMessageData(message) {
   try {
     data.data = JSON.parse(message.value)
   } catch (err) {
-    tools.log.warn(`Failed to parse message value as JSON: ${message.value}`)
+    tools.note(`Failed to parse message value as JSON`, message)
     data.data = message?.value ? message.value : null
   }
 
@@ -129,8 +126,13 @@ function getDatasetName(topic=false, data={}) {
  * @return {Array} processors - The stream processors to run
  */
 function getProcessors(topic=false, module='*', dataset='*') {
-  if (!topic) return []
-  return processors[topic]?.[module]?.[dataset] || []
+  const matches = []
+  matches.push(...(processors[topic]?.[module]?.[dataset] || []))
+  matches.push(...(processors[topic]?.[module]?.['*'] || []))
+  matches.push(...(processors[topic]?.['*']?.[dataset] || []))
+  matches.push(...(processors[topic]?.['*']?.['*'] || []))
+
+  return matches.filter(m => typeof m.handler === 'function')
 }
 
 

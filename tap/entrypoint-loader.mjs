@@ -126,7 +126,13 @@ import { log } from './src/tools.mjs'
   for (const md5 of Object.keys(imports)) {
     imp += `${nl}import _${md5} from './processors/${imports[md5].file}'`
     for (const id of imports[md5].processors) {
-      all += `${nl}  "${id}":  _${md5}[${processors[id].index}], `
+      if (typeof processors[id].index === 'undefined') {
+        // Export is an object describing the stream processor
+        all += `${nl}  "${id}":  _${md5}, `
+      } else {
+        // Export is an array of objects describing stream processors
+        all += `${nl}  "${id}":  _${md5}[${processors[id].index}], `
+      }
     }
   }
   all += `${nl}}${nl}`
@@ -141,7 +147,10 @@ import { log } from './src/tools.mjs'
       if (typeof lutData[topic][module] === 'undefined') lutData[topic][module] = {}
       for (const [dataset, d] of Object.entries(lut[topic][module])) {
         if (typeof lutData[topic][module][dataset] === 'undefined') lutData[topic][module][dataset] = []
-        lutData[topic][module][dataset].push(`${d.importedAs}[${d.index}]`)
+        lutData[topic][module][dataset].push(typeof d.index === 'undefined'
+          ? `${d.importedAs}`
+          : `${d.importedAs}[${d.index}]`
+        )
       }
     }
   }

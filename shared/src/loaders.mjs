@@ -714,29 +714,55 @@ export async function loadStreamProcessors(settings, log) {
               catch(err) {
                 log.warn(err, `Failed to import stream processor: ${sourceFile}`)
               }
-              if (!Array.isArray(load)) load = [load]
-              for (const i in load) {
-                const l = load[i]
+              if (Array.isArray(load)) {
+                // Multiple stream processors in one export
+                for (const i in load) {
+                  const l = load[i]
+                  /*
+                   * Is it a stream processor module?
+                   * And if so, does it expose any settings?
+                   */
+                  if (
+                    l &&
+                    l.id &&
+                    typeof l.id === 'string' &&
+                    l.processor &&
+                    typeof l.processor === 'function' &&
+                    l.settings &&
+                    typeof l.settings === 'object'
+                  ) {
+                    const key = ['tap', 'processors', l.id]
+                    set(
+                      settings,
+                      key,
+                      ensureStreamProcessorSettings(l.settings, get(settings, key, {})),
+                    )
+                    set(settings, ['tap', 'imports', l.id], { file: targetFile, index: Number(i) })
+                  }
+                  else log.warn(`Not a valid stream processor import: ${sourceFile}`)
+                }
+              } else {
+                // Single stream processor
                 /*
                  * Is it a stream processor module?
                  * And if so, does it expose any settings?
                  */
                 if (
-                  l &&
-                  l.id &&
-                  typeof l.id === 'string' &&
-                  l.processor &&
-                  typeof l.processor === 'function' &&
-                  l.settings &&
-                  typeof l.settings === 'object'
+                  load &&
+                  load.id &&
+                  typeof load.id === 'string' &&
+                  load.processor &&
+                  typeof load.processor === 'function' &&
+                  load.settings &&
+                  typeof load.settings === 'object'
                 ) {
-                  const key = ['tap', 'processors', l.id]
+                  const key = ['tap', 'processors', load.id]
                   set(
                     settings,
                     key,
-                    ensureStreamProcessorSettings(l.settings, get(settings, key, {})),
+                    ensureStreamProcessorSettings(load.settings, get(settings, key, {})),
                   )
-                  set(settings, ['tap', 'imports', l.id], { file: targetFile, index: i })
+                  set(settings, ['tap', 'imports', load.id], { file: targetFile })
                 }
                 else log.warn(`Not a valid stream processor import: ${sourceFile}`)
               }
