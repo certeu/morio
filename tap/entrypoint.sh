@@ -33,4 +33,4 @@ export KAFKAJS_NO_PARTITIONER_WARNING=1
 # memory leaks, which is especially pertinent since tap will
 # run code outside our control.
 #
-pm2-runtime --name tap --namespace morio --log-type json --max-memory-bytes 250000000 ./dist/index.mjs
+pm2-runtime --name tap --namespace morio --log-type json --max-memory-bytes 250000000 ./src/index.mjs
