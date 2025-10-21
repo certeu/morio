@@ -183,18 +183,17 @@ function logCacheErrors(result, info) {
  * Cache an audit event
  *
  * @param {object} data - The data to cache
- * @param {object} overrides - Override default settings
+ * @param {object} settings - The processor settings
  */
-async function cacheAudit(data, overrides = {}) {
+async function cacheAudit(data, settings = {}) {
   /*
-   * These limits can be set in the settings
-   * which should be passed in as overrides
+   * These come from the settings
    */
   const {
     cap = 150, // Set to zero to disable
     hostCap = 25, // Set to zero to disable
     userCap = 25, // Set to zero to disable
-  } = overrides
+  } = settings
 
   /*
    * Cache only stores strings, so stringify the data
@@ -223,23 +222,22 @@ async function cacheAudit(data, overrides = {}) {
   /*
    * Execure ValKey commands
    */
-  ops.exec((result) => logCacheErrors(result, { in: 'cacheAudit', overrides, data }))
+  ops.exec((result) => logCacheErrors(result, { in: 'cacheAudit', settings, data }))
 }
 
 /**
  * Cache an event
  *
  * @param {object} data - The data to cache
- * @param {object} overrides - Override default settings
+ * @param {object} settings - The processor settings
  */
-async function cacheEvent(data, overrides = {}) {
+async function cacheEvent(data, settings = {}) {
   /*
-   * These limits can be set in the settings
-   * which should be passed in as overrides
+   * These are set in settings
    */
   const {
     cap = 150, // Set to zero to disable
-  } = overrides
+  } = settings
 
   /*
    * Run the valkey commands
@@ -248,24 +246,23 @@ async function cacheEvent(data, overrides = {}) {
     .pipeline()
     .lpush('events', asString({ ...data, timestamp: when(data) }))
     .ltrim('events', 0, cap)
-    .exec((result) => logCacheErrors(result, { in: 'cacheAudit', overrides, data }))
+    .exec((result) => logCacheErrors(result, { in: 'cacheAudit', settings, data }))
 }
 
 /**
  * Cache a healthcheck event
  *
  * @param {object} data - The data to cache
- * @param {object} overrides - Override default settings
+ * @param {object} settings - The processor settings
  */
-async function cacheHealthcheck(data, overrides = {}) {
+async function cacheHealthcheck(data, settings = {}) {
   /*
    * These limits can be set in the settings
-   * which should be passed in as overrides
    */
   const {
     cap = 150, // Set to zero to disable
     hostCap = 25, // Set to zero to disable
-  } = overrides
+  } = settings
 
   /*
    * Create cache key
@@ -297,41 +294,39 @@ async function cacheHealthcheck(data, overrides = {}) {
   /*
    * Execure ValKey commands
    */
-  ops.exec((result) => logCacheErrors(result, { in: 'cacheHealthcheck', overrides, data }))
+  ops.exec((result) => logCacheErrors(result, { in: 'cacheHealthcheck', settings, data }))
 }
 
 /**
  * Cache a log line
  *
- * @param {object} logset - An identifier that tells us what type of log it is
- * @param {object} logData - The log message
- * @param {obhject} data - The full data from kafka
- * @param {object} overrides - The processor configuration and any other overrides
+ * @param {object} log - The log message/data
+ * @param {object} params - The full params passed to the processor
  */
-async function cacheLogline(logset, logData, data, overrides = {}) {
+async function cacheLogline(log, params, customset) {
   /*
-   * These can be set in the settings
-   * which should be passed in as overrides
+   * Extract what we need  from params
    */
   const {
-    cache = true,
-    host = tools.extract.host(data),
-    module = tools.extract.module(data),
+    module = "*",
+    hostId = "unknown-host",
+    settings = {},
+  } = params
+  const dataset = (customset) ? customset : (params.dataset || "*")
+  const {
     cap = 50,
-    ttl = 1,
-  } = overrides
-
-  if (!cache) return
+    ttl = 4,
+  } = settings
 
   /*
    * Cache only stores strings, so stringify the data
    */
-  const d = asString(logData)
+  const d = asString(log)
 
   /*
    * Create cache key
    */
-  const key = createKey('log', host, module, logset)
+  const key = createKey('log', hostId, module, dataset)
 
   /*
    * Prepare ValKey commands
@@ -339,42 +334,14 @@ async function cacheLogline(logset, logData, data, overrides = {}) {
   const ops = valkey.pipeline()
 
   /*
-   * Cache the log line itself
+   * Cache the log line
    */
   ops.lpush(key, d).ltrim(key, 0, cap)
-  /*
-   * Keep track of hosts for which we have logs
-   * We also have to handle more complex expiry here
-   */
-  ops
-    .zadd('logs', when(data), host)
-    .zremrangebyscore('logs', '-inf', now() / 1000 - ttl * 3600)
-    .expire('logs', ttl * 1.5 * 3600)
-
-  /*
-   * Keep track of log files collected for this host
-   * We also have to handle more complex expiry here
-   */
-  const lkey = createKey('logs', host)
-  const logs = JSON.parse(await valkey.hget(lkey, module))
-  ops
-    .hset(
-      lkey,
-      module,
-      asString(
-        logs === null
-          ? // First log we see for this host, start new list
-            [logset]
-          : // Add to list of logs for this host, making sure to avoid duplicates
-            [...new Set([...logs, logset])]
-      )
-    )
-    .expire(lkey, ttl * 3600)
 
   /*
    * Execute ValKey commands
    */
-  ops.exec((result) => logCacheErrors(result, { in: 'cachelog', logset, logData, overrides, data }))
+  ops.exec((result) => logCacheErrors(result, { in: 'cachelog', dataset, log, settings, data: params.data }))
 }
 
 /**
@@ -382,35 +349,35 @@ async function cacheLogline(logset, logData, data, overrides = {}) {
  *
  * @param {object} metricset - An identifier that tells us what type of metrics these are
  * @param {object} metrics - The metrics data
- * @param {obhject} data - The full data from kafka
- * @param {object} overrides - The processor configuration and any other overrides
+ * @param {obhject} params - The full params passed to the processor
  */
-async function cacheMetricset(metricset, metrics, data, overrides = {}) {
+async function cacheMetricset(metrics, params, customset=false) {
   /*
-   * These can be set in the settings
-   * which should be passed in as overrides
+   * Extract what we need  from params
    */
   const {
+    module = "*",
+    hostId = "unknown-host",
+    settings = {},
+  } = params
+  const dataset = (customset) ? customset : (params.dataset || "*")
+  const {
     cache = true,
-    host = tools.extract.host(data),
-    module = tools.extract.module(data),
     cap = 150,
     ttl = 1,
-  } = overrides
-
-  if (!cache) return
+  } = settings
 
   /*
-   * Don't bother if we do not have the data
+   * Don't bother if we do not have the metrics
    */
-  if (!metricset || !metrics) {
-    return tools.cache.note('Cannot cache metrics, lacking data', { metricset, metrics })
+  if (!metrics) {
+    return tools.cache.note('Cannot cache metrics, lacking data', { dataset, metrics })
   }
 
   /*
    * Create cache key
    */
-  const key = createKey('metric', host, module, metricset)
+  const key = createKey('metric', hostId, module, dataset)
 
   /*
    * Prepare ValKey commands
@@ -418,33 +385,31 @@ async function cacheMetricset(metricset, metrics, data, overrides = {}) {
   const ops = valkey.pipeline()
 
   /*
-   * Cache the metricset itself
+   * Cache the dataset itself
    */
-  ops.lpush(key, asString({ ...metrics, timestamp: when(data) })).ltrim(key, 0, cap)
+  ops.lpush(key, asString({ ...metrics, timestamp: when(params.data) })).ltrim(key, 0, cap)
   /*
    * Keep track of hosts for which we have metrics
    * We also have to handle more complex expiry here
-   */
   ops
-    .zadd('metrics', when(data), host)
+    .zadd('metrics', when(data), hostId)
     .zremrangebyscore('metrics', '-inf', now() / 1000 - ttl * 3600)
 
   /*
-   * Keep track of metricsets collected for this host
+   * Keep track of datasets collected for this host
    * We also have to handle more complex expiry here
-   */
-  const lkey = createKey('metrics', host)
-  const metricsets = JSON.parse(await valkey.hget(lkey, module))
+  const lkey = createKey('metrics', hostId)
+  const datasets = JSON.parse(await valkey.hget(lkey, module))
   ops
     .hset(
       lkey,
       module,
       asString(
-        metricsets === null
-          ? // First metricset we see for this host, start new list
-            [metricset]
-          : // Add to list of metricsets for this host, making sure to avoid duplicates
-            [...new Set([...metricsets, metricset])]
+        datasets === null
+          ? // First dataset we see for this host, start new list
+            [dataset]
+          : // Add to list of datasets for this host, making sure to avoid duplicates
+            [...new Set([...datasets, dataset])]
       )
     )
     .expire(lkey, ttl * 3600)
@@ -452,7 +417,7 @@ async function cacheMetricset(metricset, metrics, data, overrides = {}) {
   /*
    * Execure ValKey commands
    */
-  ops.exec((result) => logCacheErrors(result, { in: 'cacheMetrics', metricset, metrics, data }))
+  ops.exec((result) => logCacheErrors(result, { in: 'cacheMetrics', dataset, metrics, data: params.data }))
 }
 
 /**
@@ -465,9 +430,9 @@ async function cacheMetricset(metricset, metrics, data, overrides = {}) {
  *
  * @param {string} title - The note title
  * @param {obbject} datat - Any note data
- * @param {object} overrides - The processor configuration and any other overrides
+ * @param {object} settings - The processor settings
  */
-function cacheNote(title = 'No note title', data = {}, overrides = {}) {
+function cacheNote(title = 'No note title', data = {}, settings = {}) {
   /*
    * Don't bother when data is malformed
    */
@@ -475,9 +440,8 @@ function cacheNote(title = 'No note title', data = {}, overrides = {}) {
 
   /*
    * These can be set in the settings
-   * which should be passed in as overrides
    */
-  const { cap = 150 } = overrides
+  const { cap = 150 } = settings
 
   /*
    * Run the valkey commands
@@ -560,4 +524,3 @@ function asString(input) {
   if (typeof input === 'object') return JSON.stringify(input)
   return `${input}`
 }
-

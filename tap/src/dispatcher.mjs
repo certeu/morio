@@ -34,6 +34,7 @@ export function dispatch({ topic, message }, tools) {
       dataset,
       processor,
       ...parsedMessage,
+      hostId: tools.extract.host(parsedMessage.data),
     })
   }
 }

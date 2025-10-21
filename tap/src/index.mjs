@@ -45,7 +45,7 @@ export async function subscribe() {
   tools.config = config // Tap configuration
   tools.node = node // Morio node info
   tools.settings = config.tap // Morio settings
-  tools.getSettings = (path, dflt) => tools.get(tools.settings, path, dflt) // Morio settings getter
+  tools.getSettings = (path, dflt) => tools.get(tools.config, path, dflt) // Morio settings getter
 
   /*
    * Invoke dispatch method on each message
