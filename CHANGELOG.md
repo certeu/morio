@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.3] - 2025-10-20
+
+### Added
+
+- [core] Added reseed helper binary inside container
+
+### Changed
+
+- [tap] Run tap from source to facilitate debugging
+
 ## [0.9.2] - 2025-09-08
 
 ### Fixed
