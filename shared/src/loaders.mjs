@@ -718,16 +718,12 @@ export async function loadStreamProcessors(settings, log) {
                 // Multiple stream processors in one export
                 for (const i in load) {
                   const l = load[i]
-                  /*
-                   * Is it a stream processor module?
-                   * And if so, does it expose any settings?
-                   */
                   if (
                     l &&
                     l.id &&
                     typeof l.id === 'string' &&
-                    l.processor &&
-                    typeof l.processor === 'function' &&
+                    l.handler &&
+                    typeof l.handler === 'function' &&
                     l.settings &&
                     typeof l.settings === 'object'
                   ) {
@@ -739,20 +735,16 @@ export async function loadStreamProcessors(settings, log) {
                     )
                     set(settings, ['tap', 'imports', l.id], { file: targetFile, index: Number(i) })
                   }
-                  else log.warn(`Not a valid stream processor import: ${sourceFile}`)
+                  else log.warn(`Not a valid stream processor import (index ${i}): ${sourceFile}`)
                 }
               } else {
                 // Single stream processor
-                /*
-                 * Is it a stream processor module?
-                 * And if so, does it expose any settings?
-                 */
                 if (
                   load &&
                   load.id &&
                   typeof load.id === 'string' &&
-                  load.processor &&
-                  typeof load.processor === 'function' &&
+                  load.handler &&
+                  typeof load.handler === 'function' &&
                   load.settings &&
                   typeof load.settings === 'object'
                 ) {
