@@ -491,6 +491,9 @@ function produceStructuredMessage(msgType, msgData) {
     morio: {},
   }
   msg.morio[msgType] = { context, data, time, title, type, hash: createHash(type + context) }
+  for (const key of ['md_title', 'msg', 'md_msg']) {
+    if (typeof msgData[key] !== 'undefined') msg.morio[msgType][key] = msgData[key]
+  }
 
   return tools.producer.send({
     topic: msgType + 's',

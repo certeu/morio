@@ -83,7 +83,10 @@ function getDatasetName(topic=false, data={}) {
   if (data.labels?.['morio.dataset']) return data.labels['morio.dataset']
 
   // Audit data from auditbeat
-  if (topic === 'audit' && data.event?.action) return data.event.action
+  if (topic === 'audit') {
+    if (data.auditd?.message_type) return data.auditd.message_type
+    if (data.event?.action) return data.event.action
+  }
 
   // Metrics data from metricbeat
   if (topic === 'metrics' && data.metricset?.name) return data.metricset.name
