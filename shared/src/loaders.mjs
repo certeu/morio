@@ -6,7 +6,7 @@ import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
-import { rm, mkdir, readFile, writeFile, globDir } from './fs.mjs'
+import { rm, mkdir, readFile, readJsonFile, writeFile, writeJsonFile, globDir } from './fs.mjs'
 import { asScalarOrJson, cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
 import merge from 'lodash/merge.js'
 import unset from 'lodash/unset.js'
@@ -668,6 +668,13 @@ export async function loadStreamProcessors(settings, log) {
   const targetFolder = '/etc/morio/shared/processors'
 
   /*
+   * We keep the tap settings that are dynamically loaded out
+   * of the config to allow people to store their config in git
+   * and use a future serial
+   */
+  const tapSettings = {}
+
+  /*
    * Clear processors folder
    */
   const current = await globDir(targetFolder, `**`)
@@ -727,13 +734,13 @@ export async function loadStreamProcessors(settings, log) {
                     l.settings &&
                     typeof l.settings === 'object'
                   ) {
-                    const key = ['tap', 'processors', l.id]
+                    const key = ['processors', l.id]
                     set(
-                      settings,
+                      tapSettings,
                       key,
                       ensureStreamProcessorSettings(l.settings, get(settings, key, {})),
                     )
-                    set(settings, ['tap', 'imports', l.id], { file: targetFile, index: Number(i) })
+                    set(tapSettings, ['imports', l.id], { file: targetFile, index: Number(i) })
                   }
                   else log.warn(`Not a valid stream processor import (index ${i}): ${sourceFile}`)
                 }
@@ -750,13 +757,13 @@ export async function loadStreamProcessors(settings, log) {
                 ) {
                   const key = ['tap', 'processors', load.id]
                   set(
-                    settings,
+                    tapSettings,
                     key,
                     ensureStreamProcessorSettings(load.settings, get(settings, key, {})),
                   )
-                  set(settings, ['tap', 'imports', load.id], { file: targetFile })
+                  set(tapSettings, ['tap', 'imports', load.id], { file: targetFile })
                 }
-                else log.warn(`Not a valid stream processor import: ${sourceFile}`)
+                else log.warn(load, `Not a valid stream processor import: ${sourceFile}`)
               }
             }
           }
@@ -764,6 +771,25 @@ export async function loadStreamProcessors(settings, log) {
       }
     }
   }
+
+  /*
+   * Also update hte settings object
+   */
+  set(settings, ['tap', 'processors'], tapSettings.processors)
+  set(settings, ['tap', 'imports'], tapSettings.imports)
+
+  /*
+   * Write dynamic tap overlay to disk
+   */
+  writeJsonFile(
+    '/etc/morio/overlay.tap.json',
+    {
+      set: {
+        "tap.processors": tapSettings.processors,
+        "tap.imports": tapSettings.imports,
+      }
+    }
+  )
 
   return settings
 }
@@ -898,6 +924,16 @@ function applyOverlays(settings, overlays, log) {
   for (const overlay of overlays) {
     i++
     log.debug(`Applying overlay ${i}/${count}`)
+    settings = applyOverlay(settings, overlay)
+  }
+
+  return settings
+}
+
+export async function applyOverlayFiles(files, settings, log) {
+  for (const file of files) {
+    const overlay = await readJsonFile(file)
+    log.debug(`Applying disk-based settings overlay: ${file}`)
     settings = applyOverlay(settings, overlay)
   }
 

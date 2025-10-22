@@ -12,10 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [core] Added reseed helper binary inside container
+- [core] Support loading disk-based overlays
+- [core] Load dynamic tap config from disk overlay rather writing them to disk in the settings file
 
 ### Changed
 
 - [tap] Run tap from source to facilitate debugging
+- [tap] Added the msg, md_msg, and md_title fields to events
+- [tap] Use the auditd.message_type as dataset if it is available
 
 ## [0.9.2] - 2025-09-08
 
