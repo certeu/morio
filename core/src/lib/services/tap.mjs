@@ -28,7 +28,8 @@ export const service = {
          */
         const tNodes = utils.getSettings('flanking_services.tap.nodes', [])
         if (tNodes.includes(utils.getNodeFqdn())) {
-          ensureLocalPrerequisites()
+          // FIXME: This should not run here, right?
+          // ensureLocalPrerequisites()
           return true
         }
         /*
@@ -42,11 +43,13 @@ export const service = {
          */
         if (utils.getFlankingCount() > 0) {
           if (utils.isFlankingNode()) {
-            ensureLocalPrerequisites()
+            // FIXME: This should not run here, right?
+            // ensureLocalPrerequisites()
             return true
           }
         } else {
-          ensureLocalPrerequisites()
+          // FIXME: This should not run here, right?
+          // ensureLocalPrerequisites()
           return true
         }
       }
