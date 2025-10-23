@@ -748,7 +748,7 @@ const reseedHandler = async function (newSettings = false) {
   /*
    * Ensure preseeded stream processors are in place
    */
-  settings = await ensureStreamProcessors(settings)
+  await ensureStreamProcessors(settings)
 
   return settings
 }
@@ -768,8 +768,8 @@ export async function ensureClientModules(settings) {
  *
  * @param {object} settings - The settings to use (could be different from the running settings)
  */
-export function ensureChartProcessors(settings) {
-  loadChartProcessors(settings, log)
+export async function ensureChartProcessors(settings) {
+  return await loadChartProcessors(settings, log)
 }
 
 /**
@@ -783,7 +783,5 @@ export async function ensureStreamProcessors(settings) {
    * This will not only load stream processors, but also
    * merge their (default) settings into the settings object
    */
-  settings = await loadStreamProcessors(settings, log)
-
-  return settings
+  return await loadStreamProcessors(settings, log)
 }
