@@ -949,7 +949,7 @@ export async function applyOverlayFiles(settings, log) {
   if (!files) return settings
 
   for (const file of files) {
-    const overlay = await readJsonFile(file)
+    const overlay = await readJsonFile(`/etc/morio/${file}`)
     log.debug(`Applying disk-based settings overlay: ${file}`)
     settings = applyOverlay(settings, overlay)
   }
