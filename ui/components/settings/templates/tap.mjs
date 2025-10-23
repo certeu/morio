@@ -15,7 +15,7 @@ export const tap = ({ mSettings = {}, update, dconf = false }) => {
    * dconf.tap should hold the dynamic tap configuration
    * If not return early
    */
-  if (!dconf?.tap || typeof dconf.tap !== 'object' || Object.keys(dconf.tap).length < 1) {
+  if (!dconf?.tap?.processors || typeof dconf.tap?.processors !== 'object' || Object.keys(dconf.tap.processors).length < 1) {
     return {
       title,
       about: `Once you add one or more stream processors, you will be able to configure them here.
@@ -39,8 +39,8 @@ so you can bring your own logic and have the Tap service handle the stream for y
 Note that stream processors do not ship with Morio, but need to be loaded dynamically.
 Currently, the following stream processorts are loaded:
 
-${Object.keys(dconf.tap)
-  .map((name) => `- ${dconf.tap[name].title || name}`)
+${Object.keys(dconf.tap.processors)
+  .map((name) => `- ${dconf.tap.processors[name].title || name}`)
   .join('\n')}
 
 Refer to [the stream processing guide](https://morio.it/docs/guides/stream-processing?FIXME-write-this-guide) to get started.`,
@@ -51,7 +51,7 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
   /*
    * Iterate over the tap handlers to add the children
    */
-  for (const [name, conf] of Object.entries(dconf.tap)) {
+  for (const [name, conf] of Object.entries(dconf.tap.processors)) {
     const title = conf.title ? conf.title : name
     const docs = conf.about ? (
       conf.about
@@ -89,13 +89,13 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
 }
 
 function dynamicForm({ conf, dkey, mSettings, update, name }) {
-  if (!conf.settings) return null
+  if (typeof conf !== 'object') return null
 
   // Start the form
   const form = ['### Settings']
 
   // First, inject the enabled setting
-  if (typeof conf.settings?.enabled === 'undefined') {
+  if (typeof conf.enabled === 'undefined') {
     const val = {
       title: `Enable the ${name} stream processor`,
       dflt: true,
@@ -117,19 +117,19 @@ function dynamicForm({ conf, dkey, mSettings, update, name }) {
   }
 
   // Next, inject the topics setting in case it's a simple array
-  if (typeof conf.settings?.topics === 'undefined' || Array.isArray(conf.settings?.topics)) {
+  if (typeof conf?.topics === 'undefined' || Array.isArray(conf?.topics)) {
     const val = {
       title: 'List of topics to subscribe to',
-      dflt: conf.settings?.topics || [],
+      dflt: conf?.topics || [],
       type: 'labels',
     }
     form.push(...dynamicFormSetting('topics', val, dkey, mSettings, update))
     // Do not show this twice
-    if (conf.settings.topics) delete conf.settings.topics
+    if (conf.topics) delete conf.topics
   }
 
   // Now add the rest of the settings
-  for (const [key, val] of Object.entries(conf.settings)) {
+  for (const [key, val] of Object.entries(conf)) {
     form.push(...dynamicFormSetting(key, val, dkey, mSettings, update))
   }
 

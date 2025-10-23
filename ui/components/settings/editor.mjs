@@ -52,6 +52,12 @@ export const PrimedSettingsEditor = (props) => {
   const { runningSettings } = props
 
   /*
+   * Keep these settings out of the UI as they are settings that control the UI
+   */
+  if (runningSettings.tap?.processors) delete runningSettings.tap.processors
+  if (runningSettings.tap?.imports) delete runningSettings.tap.imports
+
+  /*
    * React state
    */
   /* eslint-disable-next-line no-unused-vars */

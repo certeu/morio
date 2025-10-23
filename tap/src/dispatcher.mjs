@@ -84,8 +84,8 @@ function getDatasetName(topic=false, data={}) {
 
   // Audit data from auditbeat
   if (topic === 'audit') {
-    if (data.auditd?.message_type) return data.auditd.message_type
     if (data.event?.action) return data.event.action
+    if (data.auditd?.message_type) return data.auditd.message_type
   }
 
   // Metrics data from metricbeat

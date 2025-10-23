@@ -7,47 +7,104 @@
 import { log } from './src/tools.mjs'
 
 // Stream processors
-import audit from './processors/audit/index.mjs'
-import checks from './processors/checks/index.mjs'
-import events from './processors/events/index.mjs'
-import logs from './processors/logs/index.mjs'
-import metrics from './processors/metrics/index.mjs'
+import _f5201f05a56c03bc5a5f15181baa7de2 from './processors/processors/moriohub/audit/linux-system/index.mjs'
+import _d1ab8cd2d46c5801dd23b08bd86b69f8 from './processors/processors/moriohub/checks/index.mjs'
+import _b514f6cf6be99b0c0f8e9fdb891a3b28 from './processors/processors/moriohub/events/index.mjs'
+import _61d3921781e9bd15c9e2ae7c1120577b from './processors/processors/moriohub/logs/linux-system/index.mjs'
+import _cc62f94b14d14700de6435d04484bc52 from './processors/processors/moriohub/metrics/linux-system/index.mjs'
 
 /*
- * Simple object with all stream processors
+ * Simple object with all imports
  */
-export const allProcessors = {
-  audit, 
-  checks, 
-  events, 
-  logs, 
-  metrics, 
+export const code = {
+  "moriohub_audit_linux-system_added-group-account-to":  _f5201f05a56c03bc5a5f15181baa7de2[0], 
+  "moriohub_audit_linux-system_changed-audit-configuration":  _f5201f05a56c03bc5a5f15181baa7de2[1], 
+  "moriohub_audit_linux-system_delete-group-account-from":  _f5201f05a56c03bc5a5f15181baa7de2[2], 
+  "moriohub_audit_linux-system_ran-command":  _f5201f05a56c03bc5a5f15181baa7de2[3], 
+  "moriohub_audit_linux-system_started-session":  _f5201f05a56c03bc5a5f15181baa7de2[4], 
+  "moriohub_audit_linux-system_ended-session":  _f5201f05a56c03bc5a5f15181baa7de2[5], 
+  "moriohub_checks":  _d1ab8cd2d46c5801dd23b08bd86b69f8, 
+  "moriohub_events":  _b514f6cf6be99b0c0f8e9fdb891a3b28, 
+  "moriohub_logs_linux-system":  _61d3921781e9bd15c9e2ae7c1120577b, 
+  "moriohub_metrics_linux-system_diskio":  _cc62f94b14d14700de6435d04484bc52[0], 
+  "moriohub_metrics_linux-system_load":  _cc62f94b14d14700de6435d04484bc52[1], 
+  "moriohub_metrics_linux-system_memory":  _cc62f94b14d14700de6435d04484bc52[2], 
+  "moriohub_metrics_linux-system_network_summary":  _cc62f94b14d14700de6435d04484bc52[3], 
+  "moriohub_metrics_linux-system_process_summary":  _cc62f94b14d14700de6435d04484bc52[4], 
+  "moriohub_metrics_linux-system_socket_summary":  _cc62f94b14d14700de6435d04484bc52[5], 
 }
+
 
 /*
- * Same stream processors but grouped by topic
+ * Object with all stream processors per topic/module/dataset
  */
-export const processorsPerTopic = {
-  audit: [
-    allProcessors.audit,
-  ],
-  checks: [
-    allProcessors.checks,
-  ],
-  events: [
-    allProcessors.events,
-  ],
-  logs: [
-    allProcessors.logs,
-  ],
-  metrics: [
-    allProcessors.metrics,
-  ],
+export const lut = {
+  audit: {
+    "linux-system": {
+      "added-group-account-to": [
+        code["moriohub_audit_linux-system_added-group-account-to"]
+      ],
+      "changed-audit-configuration": [
+        code["moriohub_audit_linux-system_changed-audit-configuration"]
+      ],
+      "delete-group-account-from": [
+        code["moriohub_audit_linux-system_delete-group-account-from"]
+      ],
+      "ran-command": [
+        code["moriohub_audit_linux-system_ran-command"]
+      ],
+      "started-session": [
+        code["moriohub_audit_linux-system_started-session"]
+      ],
+      "ended-session": [
+        code["moriohub_audit_linux-system_ended-session"]
+      ],
+    },
+  },
+  checks: {
+    "*": {
+      "*": [
+        code["moriohub_checks"]
+      ],
+    },
+  },
+  events: {
+    "*": {
+      "*": [
+        code["moriohub_events"]
+      ],
+    },
+  },
+  logs: {
+    "linux-system": {
+      "*": [
+        code["moriohub_logs_linux-system"]
+      ],
+    },
+  },
+  metrics: {
+    "linux-system": {
+      "diskio": [
+        code["moriohub_metrics_linux-system_diskio"]
+      ],
+      "load": [
+        code["moriohub_metrics_linux-system_load"]
+      ],
+      "memory": [
+        code["moriohub_metrics_linux-system_memory"]
+      ],
+      "network_summary": [
+        code["moriohub_metrics_linux-system_network_summary"]
+      ],
+      "process_summary": [
+        code["moriohub_metrics_linux-system_process_summary"]
+      ],
+      "socket_summary": [
+        code["moriohub_metrics_linux-system_socket_summary"]
+      ],
+    },
+  },
 }
 
-export const topics = ["metrics","logs","events","checks","audit"]
-export const processorList = []
-for (const topic in processorsPerTopic) {
-  for (const proc of processorsPerTopic[topic])
-  processorList.push(proc.name)
-}
+
+export const topics = ["audit","checks","events","logs","metrics"]

@@ -238,17 +238,6 @@ async function getSubcaSerial() {
   return await getConfigFileSerial('subca')
 }
 
-/*
- * Find overlays on disk
- */
-async function getSettingsOverlays() {
-  const overlays = ((await readDirectory(`/etc/morio`)) || [])
-    .filter((file) => new RegExp(`overlay.[a-z]+.json`).test(file))
-    .sort()
-
-  return overlays.length > 0 ? overlays : false
-}
-
 /**
  * Loads the most recent Morio settings file from disk
  */
@@ -295,8 +284,7 @@ async function loadSettingsFromDisk(updateState = true) {
   /*
    * If there are any overlays on disk, handle those too
    */
-  const overlays = await getSettingsOverlays()
-  if (overlays) applyOverlayFiles(overlays, log)
+  await applyOverlayFiles(settings, log)
 
   return { settings, node, serial }
 }

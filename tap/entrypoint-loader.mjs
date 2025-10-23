@@ -66,19 +66,19 @@ async function ensureDynamicStreamProcessorCode() {
   // The config.tap.imports key holds all the files we should import
   let i = 0
   for (const [id, proc] of Object.entries(config.tap?.imports || {})) {
-    if (config.tap?.processors?.[id]?.enabled) {
+    if (config.tap?.settings?.[id]?.enabled) {
       i++
       const importedAs = hash(proc.file)
-      const subs = asTopicList(config.tap?.processors?.[id]?.topics || [])
-      const mods = asModuleList(config.tap?.processors?.[id]?.modules || [])
+      const subs = asTopicList(config.tap?.settings?.[id]?.topics || [])
+      const mods = asModuleList(config.tap?.settings?.[id]?.modules || [])
       for (const topic of subs) {
         topics.add(topic)
         if (mods.length > 0) {
           if (typeof lut[topic] === 'undefined') lut[topic] = {}
           for (const mod of mods) {
             if (typeof lut[topic][mod] === 'undefined') lut[topic][mod] = {}
-            if (config.tap.processors[id].datasets) {
-              for (const dset of config.tap.processors[id].datasets) {
+            if (config.tap.settings[id].datasets) {
+              for (const dset of config.tap.settings[id].datasets) {
                 if (typeof lut[topic][mod][dset] === 'undefined') lut[topic][mod][dset] = []
                 lut[topic][mod][dset].push(id)
               }
@@ -100,7 +100,7 @@ async function ensureDynamicStreamProcessorCode() {
         importedAs,
         topics: subs,
         modules: mods,
-        config: config.tap.processors[id],
+        config: config.tap.settings[id],
         id,
         i,
         ...proc,

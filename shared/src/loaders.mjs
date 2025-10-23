@@ -6,7 +6,7 @@ import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
-import { rm, mkdir, readFile, readJsonFile, writeFile, writeJsonFile, globDir } from './fs.mjs'
+import { rm, mkdir, readDirectory, readFile, readJsonFile, writeFile, writeJsonFile, globDir } from './fs.mjs'
 import { asScalarOrJson, cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
 import merge from 'lodash/merge.js'
 import unset from 'lodash/unset.js'
@@ -672,7 +672,11 @@ export async function loadStreamProcessors(settings, log) {
    * of the config to allow people to store their config in git
    * and use a future serial
    */
-  const tapSettings = {}
+  const tapSettings = {
+    processors: {},
+    imports: {},
+    settings: {},
+  }
 
   /*
    * Clear processors folder
@@ -734,13 +738,9 @@ export async function loadStreamProcessors(settings, log) {
                     l.settings &&
                     typeof l.settings === 'object'
                   ) {
-                    const key = ['processors', l.id]
-                    set(
-                      tapSettings,
-                      key,
-                      ensureStreamProcessorSettings(l.settings, get(settings, key, {})),
-                    )
-                    set(tapSettings, ['imports', l.id], { file: targetFile, index: Number(i) })
+                    tapSettings.processors[l.id] = l.settings
+                    tapSettings.imports[l.id] = { file: targetFile, index: Number(i) }
+                    tapSettings.settings[l.id] = reduceStreamProcessorSettings(l.id, l.settings, settings, log)
                   }
                   else log.warn(`Not a valid stream processor import (index ${i}): ${sourceFile}`)
                 }
@@ -755,13 +755,9 @@ export async function loadStreamProcessors(settings, log) {
                   load.settings &&
                   typeof load.settings === 'object'
                 ) {
-                  const key = ['tap', 'processors', load.id]
-                  set(
-                    tapSettings,
-                    key,
-                    ensureStreamProcessorSettings(load.settings, get(settings, key, {})),
-                  )
-                  set(tapSettings, ['tap', 'imports', load.id], { file: targetFile })
+                  tapSettings.processors[load.id] = load.settings
+                  tapSettings.imports[load.id] = { file: targetFile }
+                  tapSettings.settings[load.id] = reduceStreamProcessorSettings(load.id, load.settings, settings, log)
                 }
                 else log.warn(load, `Not a valid stream processor import: ${sourceFile}`)
               }
@@ -773,42 +769,49 @@ export async function loadStreamProcessors(settings, log) {
   }
 
   /*
-   * Also update hte settings object
-   */
-  set(settings, ['tap', 'processors'], tapSettings.processors)
-  set(settings, ['tap', 'imports'], tapSettings.imports)
-
-  /*
    * Write dynamic tap overlay to disk
    */
   writeJsonFile(
     '/etc/morio/overlay.tap.json',
     {
       set: {
-        "tap.processors": tapSettings.processors,
-        "tap.imports": tapSettings.imports,
+        "tap": tapSettings,
       }
     }
   )
 
+  /*
+   * Also update the in-memory settings
+   */
+  set(settings, ['tap', 'processors'], tapSettings.processors)
+  set(settings, ['tap', 'imports'], tapSettings.imports)
+  set(settings, ['tap', 'settings'], tapSettings.settings)
+
+
   return settings
 }
 
-function ensureStreamProcessorSettings(seededSettings = {}, morioSettings) {
-  for (const [key, val] of Object.entries(seededSettings)) {
-    if (['enabled', 'topics', 'modules', 'datasets'].includes(key) && typeof val !== 'undefined') {
-      // These fields take a simple value
-      set(morioSettings, key, val)
-    } else if (typeof val.dflt !== 'undefined') {
-      // These take a UI config object, with the default value stored in the `dflt` key
-      set(morioSettings, key, val.dflt)
+function reduceStreamProcessorSettings(processorId, processorSettings, morioSettings={}, log) {
+  const reducedSettings = {}
+  for (const [key, val] of Object.entries(processorSettings)) {
+    // These fields take an array and should use used as such
+    if (['topics', 'modules', 'datasets'].includes(key) && typeof val !== 'undefined') {
+      reducedSettings[key] = morioSettings.tap?.settings?.[processorId]?.[key] || val
     }
+    // These take a UI config object, with the default value stored in the `dflt` key
+    else if (typeof val.dflt !== 'undefined') {
+      reducedSettings[key] = val.dflt
+      reducedSettings[key] = morioSettings.tap?.settings?.[processorId]?.[key] || val.dflt
+    }
+    else log.warn(`Unable to reduce stream processor config for: ${processorId}`)
+  }
+  // Enable if it is not explicitly configured
+  if (![true, false].includes(processorSettings.enabled)) {
+    if (morioSettings.tap?.settings?.[processorId]?.enabled === false) reducedSettings.enabled = false
+    else reducedSettings.enabled = true
   }
 
-  // Enable if it is not explicitly configured
-  if (typeof morioSettings.enabled === 'undefined') morioSettings.enabled = true
-
-  return morioSettings
+  return reducedSettings
 }
 
 export async function loadChartProcessors(settings, log) {
@@ -930,7 +933,19 @@ function applyOverlays(settings, overlays, log) {
   return settings
 }
 
-export async function applyOverlayFiles(files, settings, log) {
+/*
+ * Find overlays on disk
+ */
+async function getSettingsOverlayFiles() {
+  const overlayFiles = ((await readDirectory(`/etc/morio`)) || [])
+    .filter((file) => new RegExp(`overlay.[a-z]+.json`).test(file))
+    .sort()
+
+  return overlayFiles.length > 0 ? overlayFiles : false
+}
+
+export async function applyOverlayFiles(settings, log) {
+  const files = await getSettingsOverlayFiles()
   for (const file of files) {
     const overlay = await readJsonFile(file)
     log.debug(`Applying disk-based settings overlay: ${file}`)
