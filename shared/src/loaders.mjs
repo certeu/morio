@@ -946,6 +946,8 @@ async function getSettingsOverlayFiles() {
 
 export async function applyOverlayFiles(settings, log) {
   const files = await getSettingsOverlayFiles()
+  if (!files) return settings
+
   for (const file of files) {
     const overlay = await readJsonFile(file)
     log.debug(`Applying disk-based settings overlay: ${file}`)
