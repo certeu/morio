@@ -8,7 +8,13 @@ FROM node:20-slim as builder
 WORKDIR /morio/tap
 
 ## Install all the latest updates
+## We need to bust the cache for this, or we'll get stale images
+ARG CACHEBUST=1
 RUN apt-get update && apt-get upgrade -y
+
+## By installing vi, we allow people to enter the container
+## and debug something by making a change and reloading
+RUN apt install -y vim
 
 ## Set environment variable to indicate this is production code
 ENV NODE_ENV production

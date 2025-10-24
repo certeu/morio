@@ -73,6 +73,7 @@ else
 
   # Now build the container
   tar -ch . | docker build \
+    --build-arg CACHEBUST=$(date +%s) \
     --file Containerfile.$RELEASE_CHANNEL \
     --tag $NAMESPACE/$CONTAINER:$RELEASE_CHANNEL_TAG \
     --tag $NAMESPACE/$CONTAINER:$MORIO_VERSION_TAG$TAG_SUFFIX \
