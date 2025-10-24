@@ -42,6 +42,7 @@ export const tools = {
   valkey,
   create: {
     context: createContext,
+    contextFromParams: (params) => tools.create.context('morio', params.topic, params.module, params.dataset),
     hash: createHash,
     id: createElasticId,
     key: createKey,
@@ -50,6 +51,8 @@ export const tools = {
     by: (data) => data?.msg?.agent?.name || 'unknown-agent',
     check: (data) => data?.url?.full || 'unknown-check',
     host: (data) => data?.host?.id || 'unknown-host',
+    hostid: (data) => tools.extract.host(data),
+    hostname: (data) => data?.host?.name || 'unknown-hostname',
     id: (data) => data?.['@metadata']._id || 'unknown-id',
     metricset: (data) => data?.metricset?.name || 'unknown-metricset',
     module: (data) => data?.labels?.['morio.module'] || 'unknown-module',
@@ -71,6 +74,27 @@ export const tools = {
   },
   shortUuid: (uuid) => (typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'),
   node,
+  link: {
+    raw: {
+      to: (slug) => `https://${node.fqdn}${slug}`,
+      audit: {
+        user: (username) => tools.link.raw.to(`/boards/audit/user/${username}/`),
+      },
+      inventory: {
+        host: (uuid) => tools.link.raw.to(`/inventory/hosts/${uuid}/`),
+      },
+    },
+    md: {
+      to: (slug, txt=false) => `[${txt ? txt : slug}](${tools.link.raw.to(slug)})`,
+      audit: {
+        host: (uuid, txt=false) => tools.link.md.to(`/boards/audit/host/${uuid}/`, txt ? txt : tools.shortUuid(id)),
+        user: (username, txt=false) => tools.link.md.to(`/boards/audit/user/${username}/`, txt ? txt : username),
+      },
+      inventory: {
+        host: (uuid, txt=false) => tools.link.md.to(`/inventory/hosts/${uuid}/`, txt ? txt : tools.shortUuid(uuid)),
+      },
+    }
+  },
 }
 
 /*
