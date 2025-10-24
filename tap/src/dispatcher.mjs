@@ -1,4 +1,5 @@
 import { lut as processors, topics } from '../loader.mjs'
+import { config } from '../config/tap.mjs'
 
 /*
  * This dispatch method received all Kafka messages
@@ -28,7 +29,7 @@ export function dispatch({ topic, message }, tools) {
   for (const processor of getProcessors(topic, module, dataset)) {
     processor.handler({
       tools,
-      settings: processor.settings || {},
+      settings: config.tap.settings?.[processor.id] || {},
       topic,
       module,
       dataset,
