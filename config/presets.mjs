@@ -199,6 +199,7 @@ predocs.MORIO_BROKER_CLIENT_TOPICS = `Broker topics that are writable by the
 Morio client`
 presets.MORIO_BROKER_CLIENT_TOPICS = [
   'alarms', // For alarms
+  'alerts', // For alerts
   'audit', // For audit info/logs (think auditbeat)
   'checks', // For healthchecks
   'events', // For events (typically generated from other sources)
