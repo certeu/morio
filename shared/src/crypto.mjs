@@ -38,12 +38,10 @@ export function hash(string) {
  * @param {boolean} [asPem = false] - Set this to false to return the Forge key object
  * @return {string} key - The decrypted private key (as PEM if asked)
  */
-export function decryptPrivateKeyPem(encryptedKey, passphrase, asPem=false) {
+export function decryptPrivateKeyPem(encryptedKey, passphrase, asPem = false) {
   const key = forge.pki.decryptRsaPrivateKey(encryptedKey, passphrase)
 
-  return asPem
-    ? forge.pki.privateKeyToPem(key)
-    : key
+  return asPem ? forge.pki.privateKeyToPem(key) : key
 }
 
 /**
@@ -53,7 +51,7 @@ export function decryptPrivateKeyPem(encryptedKey, passphrase, asPem=false) {
  * @param {object} keypair - An optional keypair to use (as forge key objects)
  * @return {object} jwt - The JSON web token
  */
-export async function generateCsr(data, keypair=false) {
+export async function generateCsr(data, keypair = false) {
   /*
    * Generate a key pair if none was passed in
    */
@@ -76,34 +74,34 @@ export async function generateCsr(data, keypair=false) {
     // Common Name
     {
       name: 'commonName',
-      value: data.commonName || data.rcn || data.icn || data.cn || data.CN || false
+      value: data.commonName || data.rcn || data.icn || data.cn || data.CN || false,
     },
     // Country
     {
       name: 'countryName',
-      value: data.countryName || data.c || data.C || false
+      value: data.countryName || data.c || data.C || false,
     },
     // State
     {
       shortName: 'ST',
-      value: data.st || data.ST || data.state || false
+      value: data.st || data.ST || data.state || false,
     },
     // Locality
     {
       name: 'localityName',
-      value: data.l || data.L || data.locality || data.localityName || false
+      value: data.l || data.L || data.locality || data.localityName || false,
     },
     // Organisation
     {
       name: 'organizationName',
-      value: data.o || data.O || data.organizationName || false
+      value: data.o || data.O || data.organizationName || false,
     },
     // Organisational Unit
     {
       shortName: 'OU',
-      value: data.ou || data.OU || false
+      value: data.ou || data.OU || false,
     },
-  ].filter(entry => entry.value)
+  ].filter((entry) => entry.value)
 
   // Set subject
   csr.setSubject(subject)
@@ -225,8 +223,9 @@ export async function generateGpgKeyPair(uuid) {
  * @param {string} pem - The PEM-encoded key
  * @return {object} key - The forge key object
  */
-export function pemKeyAsForgeKey (pem) {
-  if (pem.includes('PUBLIC') || pem.includes('BEGIN CERTIFICATE')) return forge.pki.publicKeyFromPem(pem)
+export function pemKeyAsForgeKey(pem) {
+  if (pem.includes('PUBLIC') || pem.includes('BEGIN CERTIFICATE'))
+    return forge.pki.publicKeyFromPem(pem)
   if (pem.includes('PRIVATE')) return forge.pki.privateKeyFromPem(pem)
 
   return false
@@ -238,12 +237,10 @@ export function pemKeyAsForgeKey (pem) {
  * @param {string} certificate - The PEM-encoded certificate
  * @return {object} key - The forge key object
  */
-export function publicKeyFromPemCertificate (certificate, asPem=false) {
+export function publicKeyFromPemCertificate(certificate, asPem = false) {
   const cert = forge.pki.certificateFromPem(certificate)
 
-  return asPem
-    ? forge.pki.publicKeyToPem(cert.publicKey)
-    : cert.publicKey
+  return asPem ? forge.pki.publicKeyToPem(cert.publicKey) : cert.publicKey
 }
 
 /**
@@ -287,7 +284,7 @@ export function generateCaCertificate(subjectAttributes, issuerAttributes, years
 /**
  * Generates a key pair and CA root certificate
  */
-export function generateCaRoot(custom={}) {
+export function generateCaRoot(custom = {}) {
   /*
    * Defaults for root and intermediate certificate subjects
    */
@@ -383,7 +380,7 @@ function encryptPrivateKey(key, pwd) {
   )
 }
 
-export async function keypairAsJwk(keys, priv=false) {
+export async function keypairAsJwk(keys, priv = false) {
   const keystore = jose.JWK.createKeyStore()
   let jwk = false
   if (priv) jwk = await keystore.add(keys.private, 'pem')
@@ -656,4 +653,3 @@ export function unsealKeyData(keydata, utils, log) {
    */
   return decrypt(keydata.data)
 }
-

@@ -86,8 +86,7 @@ export async function testUrl(url, customOptions = {}, onError) {
     if (typeof onError === 'function') {
       try {
         onError({ url, options, err, result })
-      }
-      catch {
+      } catch {
         // Ah well
       }
     }
@@ -136,7 +135,7 @@ async function http(options, onError) {
  * @param {object} options - Any optional Axios options to apply to all requests
  * @return {object] client - The REST client
  */
-export function restClient(api, onError, options={}) {
+export function restClient(api, onError, options = {}) {
   /*
    * Merge default and custom options
    */
@@ -148,7 +147,7 @@ export function restClient(api, onError, options={}) {
     timeout: 1500,
     ...options,
   }
-  if (api.toLowerCase().slice(0,6) === 'https:') {
+  if (api.toLowerCase().slice(0, 6) === 'https:') {
     // Needed for initial Traefik self-signed cert
     defaultOptions.httpsAgent = new https.Agent({ rejectUnauthorized: false })
   }
@@ -157,15 +156,19 @@ export function restClient(api, onError, options={}) {
     ...custom,
     headers: {
       ...defaultOptions.headers,
-      ...(custom.headers || {})
-    }
+      ...(custom.headers || {}),
+    },
   })
 
   return {
-    delete: async (url, options={}) => http(mergeOptions({ ...options, method: 'DELETE', url }), onError),
-    get: async (url, options={}) => http(mergeOptions({ ...options, url }), onError),
-    patch: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'PATCH', data, url }), onError),
-    post: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'POST', data, url }), onError),
-    put: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'PUT', data, url }), onError),
+    delete: async (url, options = {}) =>
+      http(mergeOptions({ ...options, method: 'DELETE', url }), onError),
+    get: async (url, options = {}) => http(mergeOptions({ ...options, url }), onError),
+    patch: async (url, data, options = {}) =>
+      http(mergeOptions({ ...options, method: 'PATCH', data, url }), onError),
+    post: async (url, data, options = {}) =>
+      http(mergeOptions({ ...options, method: 'POST', data, url }), onError),
+    put: async (url, data, options = {}) =>
+      http(mergeOptions({ ...options, method: 'PUT', data, url }), onError),
   }
 }

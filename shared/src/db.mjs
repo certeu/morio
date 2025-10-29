@@ -10,7 +10,7 @@ import { restClient } from './network.mjs'
  * @param {object} log - The logger helper object
  * @return {object} db - The DB helper object
  */
-export async function createDbClient (utils, log) {
+export async function createDbClient(utils, log) {
   const local = utils.isBrokerNode()
 
   /**
@@ -19,12 +19,14 @@ export async function createDbClient (utils, log) {
    * @param {}
    */
   const dbErrorHandler = ({ options, err }) => {
-    log.warn({
-      url: (options.baseURL || '') + options.url,
-      method: options.method,
-      error: err,
-    }, `Database error`)
-
+    log.warn(
+      {
+        url: (options.baseURL || '') + options.url,
+        method: options.method,
+        error: err,
+      },
+      `Database error`
+    )
   }
   if (local) {
     /*
@@ -34,7 +36,10 @@ export async function createDbClient (utils, log) {
     log.debug(`Creating local database client`)
 
     return dbHandlers(
-      restClient(`http://morio-db.internal:${utils.getPreset('MORIO_DB_HTTP_PORT')}`, dbErrorHandler)
+      restClient(
+        `http://morio-db.internal:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+        dbErrorHandler
+      )
     )
   }
 
@@ -61,7 +66,7 @@ export async function createDbClient (utils, log) {
     // This needs to be valid as long as the API uptime
     options: {
       expiresIn: '1y',
-    }
+    },
   })
 
   /*
@@ -79,9 +84,9 @@ export async function createDbClient (utils, log) {
           rejectUnauthorized: false, // Don't let Traefik default cert break Morio
         }),
         headers: {
-          authorization: `Bearer ${jwt}`
-        }
-      },
+          authorization: `Bearer ${jwt}`,
+        },
+      }
     )
   )
 }
@@ -99,12 +104,9 @@ const dbHandlers = (dbClient) => ({
  * @param {object} params - Optional params for a single query
  * @return {array} body - The request body for Rqlite
  */
-function rqliteBody (query, params=false) {
+function rqliteBody(query, params = false) {
   if (Array.isArray(query)) return query
-  if (typeof query === 'string') return params
-    ? [[query, params]]
-    : [[query]]
+  if (typeof query === 'string') return params ? [[query, params]] : [[query]]
 
   return [query]
 }
-

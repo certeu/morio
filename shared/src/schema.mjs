@@ -294,14 +294,14 @@ const settings = Joi.object({
       methods: Joi.array().items(Joi.string()),
       headers: Joi.array().items(Joi.string()),
       origins: Joi.array().items(Joi.string()),
-    })
+    }),
   }).optional(),
   eda: Joi.object({
     cors: Joi.object({
       methods: Joi.array().items(Joi.string()),
       headers: Joi.array().items(Joi.string()),
       origins: Joi.array().items(Joi.string()),
-    })
+    }),
   }).optional(),
 }).required()
 
@@ -313,7 +313,6 @@ const subca = Joi.object({
   certificate: Joi.string(),
   chain: Joi.string(),
 })
-
 
 /**
  * Validates input

@@ -6,8 +6,17 @@ import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
-import { rm, mkdir, readDirectory, readFile, readJsonFile, writeFile, writeJsonFile, globDir } from './fs.mjs'
-import { asScalarOrJson, cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
+import {
+  rm,
+  mkdir,
+  readDirectory,
+  readFile,
+  readJsonFile,
+  writeFile,
+  writeJsonFile,
+  globDir,
+} from './fs.mjs'
+import { asScalarOrJson, cloneAsPojo, get, set, reverseString } from './utils.mjs'
 import merge from 'lodash/merge.js'
 import unset from 'lodash/unset.js'
 
@@ -572,10 +581,7 @@ async function storeClientModules(modules, log, utils) {
      * We completely remove all modules and recreate them
      * because only through preseeding can modules be loaded
      */
-    const result = await utils.db.write([
-      [`DELETE FROM inventory_mods where 1`],
-      ...queries,
-    ])
+    const result = await utils.db.write([[`DELETE FROM inventory_mods where 1`], ...queries])
     if (result[0] === 200 && result[1].results) {
       let failed = 0
       let added = 0
@@ -583,7 +589,8 @@ async function storeClientModules(modules, log, utils) {
         if (!insert.last_insert_id) failed++
         else added++
       }
-      if (failed === 0) log.debug(`[client] All (${added}) client modules & vars added to the database`)
+      if (failed === 0)
+        log.debug(`[client] All (${added}) client modules & vars added to the database`)
       else log.warn(`[client] Failed ${failed} queries when adding modules & vars to the database`)
     } else log.warn(`[client] Database failure while adding modules & vars to the database`)
   }
@@ -606,10 +613,7 @@ async function storeClientModuleFiles(files, log, utils) {
      * We completely remove all module files and recreate them
      * because only through preseeding can module files be loaded
      */
-    const result = await utils.db.write([
-      [ `DELETE FROM inventory_modfiles where 1`],
-      ...queries,
-    ])
+    const result = await utils.db.write([[`DELETE FROM inventory_modfiles where 1`], ...queries])
     if (result[0] === 200 && result[1].results?.[0]) {
       let failed = 0
       let added = 0
@@ -617,7 +621,8 @@ async function storeClientModuleFiles(files, log, utils) {
         if (!insert.last_insert_id) failed++
         else added++
       }
-      if (failed === 0) log.debug(`[client] All (${added}) client module files added to the database`)
+      if (failed === 0)
+        log.debug(`[client] All (${added}) client module files added to the database`)
       else
         log.warn(
           `[client] Failed ${failed} queries when adding client module files to the database`
@@ -636,10 +641,12 @@ async function loadMorioDataFromModule(raw, log, targetFile) {
        * Might be a noop placeholder file, but let's make sure
        * If it is, it should only have empty lines or comments (start with #)
        */
-      if (rendered.split("\n").filter(line => (line.trim().length === 0 || line.trim()[0] === '#')).lenght > 0) {
+      if (
+        rendered.split('\n').filter((line) => line.trim().length === 0 || line.trim()[0] === '#')
+          .lenght > 0
+      ) {
         log.warn(`Failed to parse Moriodata as YAML in ${targetFile}`)
-      }
-      else log.debug(`The config in ${targetFile} is a noop placeholder`)
+      } else log.debug(`The config in ${targetFile} is a noop placeholder`)
 
       return false
     }
@@ -699,6 +706,7 @@ export async function loadStreamProcessors(settings, log) {
       const [pattern, repo] = entry.slice(4).split('@')
       if (settings.preseed?.git?.[repo]) {
         const { files } = await globFilesFromRepo(pattern, repo, '/etc/morio/shared')
+        // Step 1: Copy file in place
         for (const sourceFile of files.sort()) {
           const targetFile = findPreseedTarget(sourceFile)
           if (targetFile && sourceFile.slice(-4) === '.mjs') {
@@ -712,6 +720,12 @@ export async function loadStreamProcessors(settings, log) {
             ) // 2112 is the user id of the user inside the tap container
             if (copy) log.debug(`Seeding stream processing file: ${targetFile} in ${targetFolder}`)
             else log.warn(`Failed to seed stream processing file: ${targetFile} in ${targetFolder}`)
+          }
+        }
+        // Step 2: Import and process
+        for (const sourceFile of files.sort()) {
+          const targetFile = findPreseedTarget(sourceFile)
+          if (targetFile && sourceFile.slice(-4) === '.mjs') {
             if (path.basename(sourceFile) === 'index.mjs') {
               /*
                * We need to dynamically load the stream processor's settings too
@@ -721,8 +735,7 @@ export async function loadStreamProcessors(settings, log) {
               let load = false
               try {
                 load = (await import(sourceFile))?.default || []
-              }
-              catch(err) {
+              } catch (err) {
                 log.warn(err, `Failed to import stream processor: ${sourceFile}`)
               }
               if (Array.isArray(load)) {
@@ -740,9 +753,13 @@ export async function loadStreamProcessors(settings, log) {
                   ) {
                     tapSettings.processors[l.id] = l.settings
                     tapSettings.imports[l.id] = { file: targetFile, index: Number(i) }
-                    tapSettings.settings[l.id] = reduceStreamProcessorSettings(l.id, l.settings, settings, log)
-                  }
-                  else log.warn(`Not a valid stream processor import (index ${i}): ${sourceFile}`)
+                    tapSettings.settings[l.id] = reduceStreamProcessorSettings(
+                      l.id,
+                      l.settings,
+                      settings,
+                      log
+                    )
+                  } else log.warn(`Not a valid stream processor import (index ${i}): ${sourceFile}`)
                 }
               } else {
                 // Single stream processor
@@ -757,9 +774,13 @@ export async function loadStreamProcessors(settings, log) {
                 ) {
                   tapSettings.processors[load.id] = load.settings
                   tapSettings.imports[load.id] = { file: targetFile }
-                  tapSettings.settings[load.id] = reduceStreamProcessorSettings(load.id, load.settings, settings, log)
-                }
-                else log.warn(load, `Not a valid stream processor import: ${sourceFile}`)
+                  tapSettings.settings[load.id] = reduceStreamProcessorSettings(
+                    load.id,
+                    load.settings,
+                    settings,
+                    log
+                  )
+                } else log.warn(load, `Not a valid stream processor import: ${sourceFile}`)
               }
             }
           }
@@ -771,14 +792,11 @@ export async function loadStreamProcessors(settings, log) {
   /*
    * Write dynamic tap overlay to disk
    */
-  writeJsonFile(
-    '/etc/morio/overlay.tap.json',
-    {
-      set: {
-        "tap": tapSettings,
-      }
-    }
-  )
+  writeJsonFile('/etc/morio/overlay.tap.json', {
+    set: {
+      tap: tapSettings,
+    },
+  })
 
   /*
    * Also update the in-memory settings
@@ -787,11 +805,10 @@ export async function loadStreamProcessors(settings, log) {
   set(settings, ['tap', 'imports'], tapSettings.imports)
   set(settings, ['tap', 'settings'], tapSettings.settings)
 
-
   return settings
 }
 
-function reduceStreamProcessorSettings(processorId, processorSettings, morioSettings={}, log) {
+function reduceStreamProcessorSettings(processorId, processorSettings, morioSettings = {}, log) {
   const reducedSettings = {}
   for (const [key, val] of Object.entries(processorSettings)) {
     // These fields take an array and should use used as such
@@ -802,12 +819,12 @@ function reduceStreamProcessorSettings(processorId, processorSettings, morioSett
     else if (typeof val.dflt !== 'undefined') {
       reducedSettings[key] = val.dflt
       reducedSettings[key] = morioSettings.tap?.settings?.[processorId]?.[key] || val.dflt
-    }
-    else log.warn(`Unable to reduce stream processor config for: ${processorId}`)
+    } else log.warn(`Unable to reduce stream processor config for: ${processorId}`)
   }
   // Enable if it is not explicitly configured
   if (![true, false].includes(processorSettings.enabled)) {
-    if (morioSettings.tap?.settings?.[processorId]?.enabled === false) reducedSettings.enabled = false
+    if (morioSettings.tap?.settings?.[processorId]?.enabled === false)
+      reducedSettings.enabled = false
     else reducedSettings.enabled = true
   }
 
@@ -913,7 +930,7 @@ async function copyPreseedFile({ sourceFile, targetFile, targetFolder }, chownId
   return true
 }
 
-function findPreseedTarget(file, root=false) {
+function findPreseedTarget(file, root = false) {
   if (root === false) return file.split('/').slice(5).join('/')
 
   const start = reverseString(file).indexOf(`/${reverseString(root)}/`)
