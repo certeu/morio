@@ -85,17 +85,19 @@ export const tools = {
   },
   log,
   node,
+  produce: {
+    alarm: (data) => produceStructuredMessage('alarm', data),
+    alert: (data) => produceStructuredMessage('alert', data),
+    event: (data) => produceStructuredMessage('event', data),
+    notification: (data) => produceStructuredMessage('notification', data),
+  },
+  shortUuid: (uuid) => (typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'),
+  stringify: asString,
   time: {
     ms2s,
     now,
     when,
   },
-  produce: {
-    alarm,
-    event,
-    notification,
-  },
-  shortUuid: (uuid) => (typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'),
 }
 
 /*
@@ -179,6 +181,13 @@ function when(data) {
  */
 function alarm(data) {
   return produceStructuredMessage('alarm', data)
+}
+
+/*
+ * Creates an alarm
+ */
+function alert(data) {
+  return produceStructuredMessage('alert', data)
 }
 
 /*
@@ -494,7 +503,7 @@ function generateKey(data, spacer) {
 
 /*
  * Helper message to produce a structured message to Kafka
- * This means one of: alarm, event, notify
+ * This means one of: alarm, alert, event, notify
  */
 function produceStructuredMessage(msgType, msgData) {
   if (typeof msgData !== 'object') log.warn(`Invalid ${topic} data`)
@@ -551,6 +560,14 @@ function createElasticId() {
 
 function asString(input) {
   if (typeof input === 'string') return input
-  if (typeof input === 'object') return JSON.stringify(input)
+  if (typeof input === 'object') {
+    try {
+      input = JSON.stringify(input)
+    }
+    catch(err) {
+      input = `Input object cannot be serialized to JSON. Keys: ${Object.keys(input).join()}`
+    }
+  }
+
   return `${input}`
 }
