@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import { createHash, randomBytes, randomUUID } from 'crypto'
 import querystring from 'querystring'
 import pino from 'pino'
 import axios from 'axios'
@@ -43,9 +43,10 @@ export const tools = {
   create: {
     context: createContext,
     contextFromParams: (params) => tools.create.context('morio', params.topic, params.module, params.dataset),
-    hash: createHash,
-    id: createElasticId,
+    elasticId: createElasticId,
+    hash,
     key: createKey,
+    uuid: randomUUID,
   },
   extract: {
     by: (data) => data?.msg?.agent?.name || 'unknown-agent',
@@ -61,19 +62,6 @@ export const tools = {
   format: {
     escape: querystring.escape,
   },
-  log,
-  time: {
-    ms2s,
-    now,
-    when,
-  },
-  produce: {
-    alarm,
-    event,
-    notification,
-  },
-  shortUuid: (uuid) => (typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'),
-  node,
   link: {
     raw: {
       to: (slug) => `https://${node.fqdn}${slug}`,
@@ -95,6 +83,19 @@ export const tools = {
       },
     }
   },
+  log,
+  node,
+  time: {
+    ms2s,
+    now,
+    when,
+  },
+  produce: {
+    alarm,
+    event,
+    notification,
+  },
+  shortUuid: (uuid) => (typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'),
 }
 
 /*
@@ -125,11 +126,11 @@ function createContext(...data) {
  *
  * @param {string} input - The input to hash. A scalar is expected but we will cast to string if you pass a non-scalar.
  */
-function createHash(input) {
+function hash(input) {
   /*
    * Ensure this 'just works' even when passing an object or array
    */
-  return crypto.createHash('sha256').update(asString(input), 'utf-8').digest('hex')
+  return createHash('sha256').update(asString(input), 'utf-8').digest('hex')
 }
 
 /*
@@ -512,9 +513,11 @@ function produceStructuredMessage(msgType, msgData) {
   const msg = {
     host: { id: host },
     tags,
-    morio: {},
+    morio: {
+      uuid: tools.create.uuid()
+    },
   }
-  msg.morio[msgType] = { context, data, time, title, type, hash: createHash(type + context) }
+  msg.morio[msgType] = { context, data, time, title, type, hash: hash(type + context) }
   for (const key of ['md_title', 'msg', 'md_msg']) {
     if (typeof msgData[key] !== 'undefined') msg.morio[msgType][key] = msgData[key]
   }
@@ -543,7 +546,7 @@ function produceStructuredMessage(msgType, msgData) {
  * @return {string} id - The unique id
  */
 function createElasticId() {
-  return crypto.randomBytes(20).toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
+  return randomBytes(20).toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
 }
 
 function asString(input) {

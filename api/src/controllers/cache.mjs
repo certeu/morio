@@ -52,7 +52,7 @@ Controller.prototype.readKey = async function (req, res) {
   const result = await utils.cache.read(valid.key)
 
   if (result.morio_cache_error) {
-    if (result.morio_cache_error === 404) {
+    if (result.morio_cache_error === "no_such_key") {
       return utils.sendErrorResponse(res, 'morio.api.cache.404', req.url)
     }
     if (result.morio_cache_error === 'unsupported_key_type') {

@@ -738,6 +738,16 @@ MorioClient.prototype.getCacheKey = async function (key) {
 }
 
 /**
+ * List cache keys that (optionally) match a pattern
+ *
+ * @param {string} glob - The cache key pattern to apply
+ * @return {object} - The result
+ */
+MorioClient.prototype.listCacheKeys = async function (glob="*") {
+  return await this.call(`${morioConfig.api}/cache/glob/${glob}`)
+}
+
+/**
  * Get a host from the inventory
  *
  * @return {object} - The result

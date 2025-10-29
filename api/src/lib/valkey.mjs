@@ -69,9 +69,16 @@ function Cache(client) {
  * @return {object} result - The result with key, value, and type, or false
  */
 Cache.prototype.listKeys = async function (pattern = '*') {
-  const result = await this.client.keys(pattern)
+  const keys = []
+  let cursor = '0'
 
-  return Array.isArray(result) ? result : false
+  do {
+    const [nextCursor, batch] = await this.client.scan(cursor, 'MATCH', pattern, 'COUNT', 100)
+    cursor = nextCursor
+    keys.push(...batch)
+  } while (cursor !== '0')
+
+  return Array.isArray(keys) ? keys : []
 }
 
 /**

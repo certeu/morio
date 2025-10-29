@@ -23,6 +23,8 @@ FROM node:20-slim as runner
 WORKDIR /morio/ui
 
 ## Install all the latest updates
+## We need to bust the cache for this, or we'll get stale images
+ARG CACHEBUST=1
 RUN apt-get update && apt-get upgrade -y
 
 ## Set environment variable to indicate this is production code

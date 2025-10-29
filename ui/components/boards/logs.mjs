@@ -1,7 +1,7 @@
 // Dependencies
 import { formatBytes, timeAgo, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
-import { linkClasses } from 'components/link.mjs'
+import { Link, linkClasses } from 'components/link.mjs'
 // Hooks
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -17,31 +17,33 @@ import { KeyVal } from 'components/keyval.mjs'
 import { Popout } from 'components/popout.mjs'
 import { ToggleLiveButton } from 'components/boards/shared.mjs'
 import { Table } from 'components/table.mjs'
+import { Details } from 'components/details.mjs'
 
 /**
  * This compnent renders a table with the host for which we have cached logs
  */
-export const LogsTable = ({ cacheKey = 'logs' }) => {
+export const LogsTable = ({ glob = 'log|*' }) => {
   // State
   const [cache, setCache] = useState(false)
   const [inventory, setInventory] = useState({})
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
+  const [groupBy, setGroupBy] = useState('host')
 
   // Hooks
   const { api } = useApi()
 
   // Effects
   useEffect(() => {
-    runLogsTableApiCall(api, cacheKey).then((result) => {
+    runLogsTableApiCall(api, glob).then((result) => {
       if (result.cache) setCache(result.cache)
       if (result.inventory) setInventory(result.inventory)
     })
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
 
-  // Tell people  we are still lading
+  // Tell people  we are still loading
   if (cache === false)
     return (
       <>
@@ -50,83 +52,106 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
       </>
     )
 
-  // Don't bother if there's nothing in the caceh
+  // Don't bother if there's nothing in the cache
   if (cache.length < 1)
     return (
       <>
-        <Loading />
-        <p>Nothing in the cache to show you here.</p>
+        <p>No cache keys found.</p>
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
       </>
     )
 
-  // Only keep what is in the cache, but use the inventory data
-  const hosts = {}
-  for (const i in cache) {
-    /*
-     * This is a zset with scores
-     * So we ignore all odd indexes
-     */
-    if (i % 2 == 0) {
-      const id = cache[i]
-      if (inventory[id]) hosts[id] = inventory[id]
-      else hosts[id] = unknownHost(id)
-    }
-  }
-  let sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
-
-  const handleReorder = (field) => {
-    if (order === field) {
-      setDesc(!desc) // Toggle sorting direction if same field is clicked
-    } else {
-      setOrder(field) // Change sorting field
-      setDesc(false) // Default to ascending when switching fields
-    }
-
-    // Reapply sorting
-    sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
-  }
+  // Group keys according to groupBy
+  const matches = groupCacheKeys(cache, groupBy, inventory)
 
   return (
-    <>
-      <Table>
-        <thead>
-          <tr>
-            {['host', 'name', 'cores', 'memory', 'last_seen'].map((field) => (
-              <th key={field}>
-                <button
-                  className={`btn btn-link capitalize text-left px-0 ${linkClasses}`}
-                  onClick={() => handleReorder(field)}
-                >
-                  {field}{' '}
-                  <RightIcon
-                    stroke={3}
-                    className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
-                  />
-                </button>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sorted &&
-            sorted.map((host) => (
-              <tr key={host.id} className="font-mono text-sm">
-                <td className="pr-6 py-0.5">
-                  <Uuid uuid={host.id} href={`/boards/logs/${host.id}`} />
-                </td>
-                <td className="pr-6 text-sm">
-                  <PageLink href={`/boards/logs/${host.id}`}>{host.name || host.fqdn}</PageLink>
-                </td>
-                <td className="pr-6 text-sm">{host.cores}</td>
-                <td className="pr-6 text-sm">{formatBytes(host.memory)}</td>
-                <td className="text-sm">{timeAgo(host.last_update, true, '')}</td>
-              </tr>
-            ))}
-        </tbody>
-      </Table>
+    <div>
+      <div className="flex flex-row gap-2 items-center">
+        <b>Group by:</b>
+        {['host', 'module', 'dataset'].map(type => (
+          <button
+            className={`btn btn-primary btn-sm ${groupBy !== type ? 'btn-outline' : ''}`}
+            onClick={() => setGroupBy(type)}
+          >{type}</button>
+        ))}
+        <span className="grow"></span>
+        <b>Browse by:</b>
+        {['host', 'module', 'dataset'].map(type => (
+          <button
+            className={`btn btn-primary btn-sm btn-outline`}
+            onClick={() => setGroupBy(type)}
+          >{type}</button>
+        ))}
+      </div>
+      {groupBy === 'host' ? <LogsPerHost {...{matches, inventory }} /> : null}
+      {groupBy === 'module' ? <LogsPerModule {...{matches, inventory }} /> : null}
+      {groupBy === 'dataset' ? <LogsPerDataset {...{matches, inventory }} /> : null}
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
-    </>
+    </div>
   )
+}
+
+const LogsPerHost = ({ matches, inventory }) => Object.keys(matches).sort().map(host => (
+  <Details summaryLeft={inventory[host]?.fqdn || host} key={host}>
+    {Object.keys(matches[host]).sort().map(module => (
+      <details key={module}>
+      <summary className="text-bold hover:cursor-pointer">{module}</summary>
+      <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
+        {Object.keys(matches[host][module]).sort().map(dataset => (
+          <li key={dataset}><Link href={`/boards/logs/show/${matches[host][module][dataset].key}/`}>{dataset}</Link></li>
+        ))}
+      </ul>
+      </details>
+    ))}
+  </Details>
+))
+
+const LogsPerModule = ({ matches, inventory }) => Object.keys(matches).sort().map(module => (
+  <Details summaryLeft={module} key={module}>
+    {Object.keys(matches[module]).sort().map(host => (
+      <details key={host}>
+      <summary className="text-bold hover:cursor-pointer">{inventory[host]?.fqdn || host}</summary>
+      <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
+        {Object.keys(matches[module][host]).sort().map(dataset => (
+          <li key={dataset}><Link href={`/boards/logs/show/${matches[module][host][dataset].key}/`}>{dataset}</Link></li>
+        ))}
+      </ul>
+      </details>
+    ))}
+  </Details>
+))
+
+const LogsPerDataset = ({ matches, inventory }) => Object.keys(matches).sort().map(dataset => (
+  <Details summaryLeft={dataset} key={dataset}>
+    {Object.keys(matches[dataset]).sort().map(host => (
+      <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc" key={host}>
+        {Object.keys(matches[dataset][host]).sort().map(module => (
+          <li key={module}>
+            <Link href={`/boards/logs/show/${matches[dataset][host][module].key}/`}>
+              {dataset} @ {inventory[host]?.fqdn || host}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    ))}
+  </Details>
+))
+
+function groupCacheKeys(keys, by='host') {
+  const obj = {}
+  const order = []
+  if (by === 'dataset') order.push('dataset', 'host', 'module')
+  else if (by === 'module') order.push('module', 'host', 'dataset')
+  else order.push('host', 'module', 'dataset')
+  for (const key of keys) {
+    const [log, host, module, dataset] = key.split('|')
+    const data = { host, module, dataset }
+    if (typeof obj[data[order[0]]] === 'undefined') obj[data[order[0]]] = {}
+    if (typeof obj[data[order[0]]][data[order[1]]] === 'undefined') obj[data[order[0]]][data[order[1]]] = {}
+    obj[data[order[0]]][data[order[1]]][data[order[2]]] = { host, module, dataset, key }
+  }
+
+  return obj
 }
 
 function unknownHost(id) {
@@ -139,10 +164,10 @@ function unknownHost(id) {
   }
 }
 
-async function runLogsTableApiCall(api, key) {
+async function runLogsTableApiCall(api, glob) {
   const data = {}
-  let result = await api.getCacheKey(key)
-  if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
+  let result = await api.listCacheKeys(glob)
+  if (Array.isArray(result) && result[1] === 200) data.cache = result[0]
   result = await api.getInventoryHostsObject()
   if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
 
@@ -183,8 +208,8 @@ export const HostLogsTable = ({ host, module = false }) => {
   if (Object.keys(cache).length < 1)
     return (
       <>
-        <Loading />
-        <p>Nothing in the cache to show you here.</p>
+        <p>No cache keys found.</p>
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
       </>
     )
 
@@ -263,19 +288,20 @@ const MorioLogset = ({ name, href }) =>
   )
 
 /**
- * This compnent renders a table with all cached logs for a given host
+ * This component renders a table with all cached logs for a given host
  */
-export const ShowLogs = ({ host, module, logset }) => {
+export const ShowLogs = ({ cachekey }) => {
   // State
   const [cache, setCache] = useState(false)
   const [paused, setPaused] = useState(false)
 
+  const [_, host, module, dataset] = cachekey.split('|')
   // Hooks
   const { api } = useApi()
   useQuery({
-    queryKey: [`${host}|${module}|${logset}`],
+    queryKey: [cachekey],
     queryFn: () => {
-      runShowLogsApiCall(api, host, module, logset).then((result) => {
+      runShowLogsApiCall(api, cachekey).then((result) => {
         if (result.cache) setCache(result.cache)
       })
     },
@@ -287,8 +313,8 @@ export const ShowLogs = ({ host, module, logset }) => {
   if (!cache || cache.length < 1)
     return (
       <>
-        <Loading />
-        <p>Nothing in the cache to show you here.</p>
+        <p>No cache keys found.</p>
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
       </>
     )
 
@@ -307,7 +333,7 @@ export const ShowLogs = ({ host, module, logset }) => {
         <div className="flex flex-row items-center justify-between gap-2 mt-4">
           <ToggleLiveButton {...{ paused, setPaused }} />
           <KeyVal k="module" val={module} />
-          <KeyVal k="logset" val={logset} />
+          <KeyVal k="dataset" val={dataset} />
         </div>
       </div>
       {fields ? (
@@ -326,9 +352,10 @@ export const ShowLogs = ({ host, module, logset }) => {
   )
 }
 
-async function runShowLogsApiCall(api, host, module, logset) {
+async function runShowLogsApiCall(api, key) {
+  const [log, host, module, dataset] = key.split('|')
   const data = {}
-  let result = await api.getCacheKey(`log|${host}|${module}|${logset}`)
+  let result = await api.getCacheKey(key)
   if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
   result = await api.getInventoryHost(host)
   if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]

@@ -1,29 +1,22 @@
-## Stage 1: Build in NodeJS v20 (builder)
-FROM node:20-slim as builder
+## Stage 1: Build in NodeJS v20
+FROM node:20-slim
 
 ## Make this folder our working directory
 WORKDIR /morio/api
+
+## Set environment variable to indicate this is production code
+ENV NODE_ENV production
 
 ## Copy in source and config
 COPY . .
 
+## Install all the latest updates
+## We need to bust the cache for this, or we'll get stale images
+ARG CACHEBUST=1
+RUN apt-get update && apt-get upgrade -y && apt-get install -y git vim
+
 ## Install dependencies
 RUN npm i
-
-## Build backend into a self-contained application
-RUN npm run build
-
-## Stage 2: Run in NodeJS v20 (runner)
-FROM node:20-slim as runner
-
-## Make this folder our working directory
-WORKDIR /morio/api
-
-## Install all the latest updates
-RUN apt-get update && apt-get upgrade -y && apt-get install -y git
-
-## Set environment variable to indicate this is production code
-ENV NODE_ENV production
 
 ## Install the pm2 process manager for NodeJS
 RUN npm install pm2 -g
@@ -34,10 +27,7 @@ RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} \
   && chown -R morio:morio /morio/api
 
 ## Copy the various PM2 scripts into the PATH
-COPY --from=builder /morio/api/bin/* /usr/local/bin/
-
-## Copy built artifact from builder
-COPY --from=builder /morio/api/dist/index.mjs ./dist/index.mjs
+COPY ./bin/* /usr/local/bin/
 
 ## Drop privleges and run NodeJS code via pm2
 USER ${USER:-morio}

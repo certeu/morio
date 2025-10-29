@@ -8,6 +8,8 @@ WORKDIR /morio/core
 ENV NODE_ENV production
 
 ## Install dependencies, build and debug tools,  and updates
+## We need to bust the cache for this, or we'll get stale images
+ARG CACHEBUST=1
 RUN apt-get update && apt-get install -y git python3 make g++ vim curl netcat-openbsd && apt-get upgrade -y
 
 ## Copy in source and config
