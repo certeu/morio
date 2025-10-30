@@ -155,6 +155,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         }
       },
       /*
+       * Global modules
+       */
+      functionGlobalContext: {
+        crypto: require('crypto'),
+      }.
+      /*
        * Allow modules
        */
       externalModules: {
