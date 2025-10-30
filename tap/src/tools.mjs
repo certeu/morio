@@ -47,6 +47,7 @@ export const tools = {
     hash,
     key: createKey,
     uuid: randomUUID,
+    debugHelper,
   },
   extract: {
     by: (data) => data?.msg?.agent?.name || 'unknown-agent',
@@ -570,4 +571,14 @@ function asString(input) {
   }
 
   return `${input}`
+}
+
+function debugHelper (id) {
+  if (id.length > 8) id = id.slice(0,8)
+
+  return {
+    start: () => cacheNote(`[${id}] Start event processor debug`),
+    msg: (msg, data) => cacheNote(`[${id}] ${msg}`, data),
+    end: () => cacheNote(`[${id}] End event processor debug`),
+  }
 }
