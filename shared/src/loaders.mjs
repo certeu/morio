@@ -813,13 +813,20 @@ function reduceStreamProcessorSettings(processorId, processorSettings, morioSett
   for (const [key, val] of Object.entries(processorSettings)) {
     // These fields take an array and should use used as such
     if (['topics', 'modules', 'datasets'].includes(key) && typeof val !== 'undefined') {
-      reducedSettings[key] = morioSettings.tap?.settings?.[processorId]?.[key] || val
+      reducedSettings[key] = typeof morioSettings.tap?.settings?.[processorId]?.[key] === 'undefined'
+        ? morioSettings.tap?.settings?.[processorId]?.[key] === 'undefined'
+        : val
     }
     // These take a UI config object, with the default value stored in the `dflt` key
     else if (typeof val.dflt !== 'undefined') {
-      reducedSettings[key] = val.dflt
       reducedSettings[key] = morioSettings.tap?.settings?.[processorId]?.[key] || val.dflt
-    } else log.warn(`Unable to reduce stream processor config for: ${processorId}`)
+    }
+    else if (typeof val === 'boolean') {
+      reducedSettings[key] = typeof morioSettings.tap?.settings?.[processorId]?.[key] === 'undefined'
+        ? morioSettings.tap?.settings?.[processorId]?.[key]
+        : val
+    }
+    else log.warn(`Unable to reduce stream processor config for: ${processorId}`)
   }
   // Enable if it is not explicitly configured
   if (![true, false].includes(processorSettings.enabled)) {
