@@ -42,7 +42,6 @@ export const tools = {
   valkey,
   create: {
     context: createContext,
-    contextFromParams: (params) => tools.create.context('morio', params.topic, params.module, params.dataset),
     elasticId: createElasticId,
     hash,
     key: createKey,
