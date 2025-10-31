@@ -50,6 +50,7 @@ function parseMessageData(message) {
   const data = {}
   data.timestamp = message.timestamp ? Number(message.timestamp) : null
   data.offset = message.offset ? Number(message.offset) : null
+  data.partition = message.partition ? Number(message.partition) : null
   try {
     data.data = JSON.parse(message.value)
   } catch (err) {
