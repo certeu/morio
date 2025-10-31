@@ -76,6 +76,7 @@ export const tools = {
       to: (slug, txt=false) => `[${txt ? txt : slug}](${tools.link.raw.to(slug)})`,
       audit: {
         host: (uuid, txt=false) => tools.link.md.to(`/boards/audit/host/${uuid}/`, txt ? txt : tools.shortUuid(id)),
+        log: (host, module, dataset, txt) => tools.link.md.to(`/boards/logs/show/log|${host}|${module}|${dataset}/`, txt),
         user: (username, txt=false) => tools.link.md.to(`/boards/audit/user/${username}/`, txt ? txt : username),
       },
       inventory: {
