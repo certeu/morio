@@ -115,6 +115,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
     /*
      * Node-Red settings
      * The custom storage module will be added to this by core
+     * As well as the `require` calls under functionGlobalContext
      */
     eda: {
       /*
@@ -157,9 +158,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       /*
        * Global modules
        */
-      functionGlobalContext: {
-        crypto: require('crypto'),
-      },
+      functionGlobalContext: { },
       /*
        * Allow modules
        */

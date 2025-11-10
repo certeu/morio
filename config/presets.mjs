@@ -376,6 +376,10 @@ presets.MORIO_EDA_CORE_MODULES = [
   'node-red-storage-rqlite',
 ]
 
+predocs.MORIO_EDA_GLOBAL_CONTEXT_MODULES =
+  'NodeJS modules that need to be made available in the global context'
+presets.MORIO_EDA_GLOBAL_CONTEXT_MODULES = [ 'crypto' ]
+
 predocs.MORIO_EDA_HTTP_PORT =
   'URL prefix for accessing the EDA service through the proxy service'
 presets.MORIO_EDA_HTTP_PORT = 1880
