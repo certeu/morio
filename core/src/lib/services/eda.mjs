@@ -23,7 +23,30 @@ export const service = {
      * Lifecycle hook to determine whether the container is wanted
      * The EDA service needs to be enabled with a feature flag
      */
-    wanted: () => utils.getFlag('ENABLE_SERVICE_EDA', false),
+    wanted: () => {
+      if (utils.isEphemeral()) return false
+      if (!utils.getFlag('ENABLE_SERVICE_EDA', false)) return false
+      /*
+       * We need the EdA service, but where do we run it?
+       * Do we have a specific eda node in the settings?
+       */
+      const edaNodes = utils.getSettings('flanking_services.eda.nodes', [])
+      if (edaNodes.includes(utils.getNodeFqdn())) return true
+      /*
+       * If there are explicit nodes, we are not part of them.
+       * So do not run this service.
+       */
+      if (edaNodes.length > 0) return false
+      /*
+       * No explicit EdA node configured.
+       * We will run it on all flanking nodes, or all broker nodes.
+       */
+      if (utils.getFlankingCount() > 0) {
+        if (utils.isFlankingNode()) return true
+      } else return true
+
+      return false
+    },
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      */
