@@ -108,7 +108,7 @@ async function ensureLocalPrerequisites() {
       storageModule: '__REQUIRE_STORAGE_MODULE__',
       functionGlobalContext: {},
     }
-    for (const mod of utils.getPreset('MORIO_EDA_CORE_MODULES') || []) {
+    for (const mod of utils.getPreset('MORIO_EDA_GLOBAL_CONTEXT_MODULES') || []) {
       base.functionGlobalContext[mod] = `__REQUIRE_CONTEXT_MODULE_${mod}__`
     }
     let edaSettings =
@@ -121,8 +121,8 @@ async function ensureLocalPrerequisites() {
       `"__REQUIRE_STORAGE_MODULE__"`,
       `require("/data/morio/node-red-storage-rqlite/index.js")(),`
     )
-    for (const mod of utils.getPreset('MORIO_EDA_CORE_MODULES') || []) {
-      edaSettings = edaSettings.replace(`"__REQUIRE_CONTEXT_MODULE_${mod}__"`, `require(${mod}),`)
+    for (const mod of utils.getPreset('MORIO_EDA_GLOBAL_CONTEXT_MODULES') || []) {
+      edaSettings = edaSettings.replace(`"__REQUIRE_CONTEXT_MODULE_${mod}__"`, `require("${mod}")`)
     }
     // Node-RED looks for `/data/settings.js`
     await writeFile('/morio/data/eda/settings.js', edaSettings, log, 0o640)
