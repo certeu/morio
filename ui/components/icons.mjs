@@ -688,7 +688,6 @@ export const RobotIcon = (props) => (
   </IconWrapper>
 )
 
-
 /*
  * RssIcon - Looks like the tilted wifi alike RSS symbol
  */

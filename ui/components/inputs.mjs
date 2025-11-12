@@ -611,7 +611,7 @@ export const RoleInput = ({
           label: <span className="text-center block">{role}</span>,
           disabled: maxRole ? i > roles.indexOf(maxRole) : false,
         }))}
-      dflt={allRoles.includes("user") ? "user" : allRoles[0]}
+      dflt={allRoles.includes('user') ? 'user' : allRoles[0]}
     />
   )
 }

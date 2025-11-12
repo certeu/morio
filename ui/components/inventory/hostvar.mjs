@@ -184,7 +184,9 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
 
   useEffect(() => {
     if (hosts.length < 1)
-      runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => ({ id: entry.id, fqdn: entry.fqdn }))))
+      runHostsTableApiCall(api).then((result) =>
+        setHosts(result.map((entry) => ({ id: entry.id, fqdn: entry.fqdn })))
+      )
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [api, key])
 
@@ -196,19 +198,25 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
       clearModal()
       setLoadingStatus([true, 'Hostvar created', true, true])
       if (setRefresh) setRefresh(refresh + 1)
-    }
-    else if (result[1] === 409 && result[0].title) {
-      setLoadingStatus([true, <div key={1}>{result[0].title}. See: <a href={result[0].type} className="text-error-content underline">Error Reference</a></div>, true, false])
-    }
-    else setLoadingStatus([true, 'Failed to create hostvar', true, false])
+    } else if (result[1] === 409 && result[0].title) {
+      setLoadingStatus([
+        true,
+        <div key={1}>
+          {result[0].title}. See:{' '}
+          <a href={result[0].type} className="text-error-content underline">
+            Error Reference
+          </a>
+        </div>,
+        true,
+        false,
+      ])
+    } else setLoadingStatus([true, 'Failed to create hostvar', true, false])
   }
 
   return (
     <div>
       <h3>Create a new hostvar</h3>
-      <p>
-        Give your new hostvar a key, val, an optional info and host.
-      </p>
+      <p>Give your new hostvar a key, val, an optional info and host.</p>
       <SelectInput
         label="Inventory Host"
         labelDflt="Choose a host to assign this var to"

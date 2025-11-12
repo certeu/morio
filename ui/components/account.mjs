@@ -520,49 +520,51 @@ export const AccountOidcClients = () => {
           </tr>
         </thead>
         <tbody className="nostripes">
-          {Object.keys(clients).sort().map(id => {
-            const data = clients[id]
-            return (
-              <tr
-                key={data.key}
-                className="hover:cursor-pointer hover:bg-primary hover:bg-opacity-20"
-                onClick={() =>
-                  pushModal(
-                    <ModalWrapper keepOpenOnClick>
-                      <EditOidcClient data={data} refresh={refresh} />
-                    </ModalWrapper>
-                  )
-                }
-              >
-                <td>
-                  <code>{data.id}</code>
-                </td>
-                <td>
-                  <b>{data.name}</b>
-                </td>
-                <td>
-                  <b>{data.by}</b>
-                </td>
-                <td>
-                  <b>{data.createdBy}</b>
-                </td>
-                <td>
-                  <span>
-                    <b>
-                      <TimeAgo iso={data.created_at} />
-                      <br />
-                      <small>
-                        <DateAndTime iso={data.created_at} />
-                      </small>
-                    </b>
-                  </span>
-                </td>
-              </tr>
-            )
-          })}
+          {Object.keys(clients)
+            .sort()
+            .map((id) => {
+              const data = clients[id]
+              return (
+                <tr
+                  key={data.key}
+                  className="hover:cursor-pointer hover:bg-primary hover:bg-opacity-20"
+                  onClick={() =>
+                    pushModal(
+                      <ModalWrapper keepOpenOnClick>
+                        <EditOidcClient data={data} refresh={refresh} />
+                      </ModalWrapper>
+                    )
+                  }
+                >
+                  <td>
+                    <code>{data.id}</code>
+                  </td>
+                  <td>
+                    <b>{data.name}</b>
+                  </td>
+                  <td>
+                    <b>{data.by}</b>
+                  </td>
+                  <td>
+                    <b>{data.createdBy}</b>
+                  </td>
+                  <td>
+                    <span>
+                      <b>
+                        <TimeAgo iso={data.created_at} />
+                        <br />
+                        <small>
+                          <DateAndTime iso={data.created_at} />
+                        </small>
+                      </b>
+                    </span>
+                  </td>
+                </tr>
+              )
+            })}
         </tbody>
       </table>
-      <p className='text-right'>
+      <p className="text-right">
         <NewOidcClientButton refresh={refresh} />
       </p>
     </>
@@ -604,7 +606,7 @@ export const AddOidcClient = ({ refresh }) => {
       <StringInput
         label="Client ID"
         labelBL="A unique ID to identity the client"
-        placeholder='pizza'
+        placeholder="pizza"
         current={id}
         update={(val) => setId(varify(val))}
         valid={(val) => (val.length > 2 ? true : false)}
@@ -653,7 +655,7 @@ const ClientInputs = ({ uris, setUris, name, setName, by, setBy }) => {
         <StringInput
           label="Name"
           labelBL="Application name for the consent screen"
-          placeholder='Pizza Vending Machine'
+          placeholder="Pizza Vending Machine"
           current={name}
           update={setName}
           valid={(val) => (val.length > 2 ? true : false)}
@@ -661,7 +663,7 @@ const ClientInputs = ({ uris, setUris, name, setName, by, setBy }) => {
         <StringInput
           label="By"
           labelBL="Developer/Company name for the consent screen"
-          placeholder='Boxo Co'
+          placeholder="Boxo Co"
           current={by}
           update={setBy}
           valid={(val) => (val.length > 2 ? true : false)}
@@ -689,7 +691,6 @@ const ClientInputs = ({ uris, setUris, name, setName, by, setBy }) => {
       </p>
     </>
   )
-
 }
 export const NewOidcClientButton = ({ refresh }) => {
   const { pushModal } = useContext(ModalContext)
@@ -763,7 +764,7 @@ export const EditOidcClient = ({ data, refresh }) => {
         </button>
         <button className="btn btn-primary" onClick={update}>
           <div className="flex flex-row gap-2 items-center justify-between w-full">
-            <OkIcon stroke={3}/>
+            <OkIcon stroke={3} />
             Update OIDC Client
           </div>
         </button>
@@ -771,5 +772,3 @@ export const EditOidcClient = ({ data, refresh }) => {
     </div>
   )
 }
-
-

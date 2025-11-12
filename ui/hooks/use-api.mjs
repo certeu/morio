@@ -365,7 +365,6 @@ MorioClient.prototype.removeOidcClient = async function (id) {
   })
 }
 
-
 /**
  * Activate a (local) morio account
  *
@@ -743,7 +742,7 @@ MorioClient.prototype.getCacheKey = async function (key) {
  * @param {string} glob - The cache key pattern to apply
  * @return {object} - The result
  */
-MorioClient.prototype.listCacheKeys = async function (glob="*") {
+MorioClient.prototype.listCacheKeys = async function (glob = '*') {
   return await this.call(`${morioConfig.api}/cache/glob/${glob}`)
 }
 

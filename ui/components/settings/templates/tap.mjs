@@ -15,7 +15,11 @@ export const tap = ({ mSettings = {}, update, dconf = false }) => {
    * dconf.tap should hold the dynamic tap configuration
    * If not return early
    */
-  if (!dconf?.tap?.processors || typeof dconf.tap?.processors !== 'object' || Object.keys(dconf.tap.processors).length < 1) {
+  if (
+    !dconf?.tap?.processors ||
+    typeof dconf.tap?.processors !== 'object' ||
+    Object.keys(dconf.tap.processors).length < 1
+  ) {
     return {
       title,
       about: `Once you add one or more stream processors, you will be able to configure them here.
