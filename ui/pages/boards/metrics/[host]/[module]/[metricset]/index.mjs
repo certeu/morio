@@ -1,51 +1,42 @@
-import { useState, useEffect } from 'react'
+// Hooks
+import { useApi } from 'hooks/use-api.mjs'
+import { useEffect, useState } from 'react'
+// Components
+import { Link } from 'components/link.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { StatusIcon } from 'components/icons.mjs'
-import { ShowMetrics } from 'components/boards/metrics.mjs'
-import { useApi } from 'hooks/use-api.mjs'
+import { MetricsTable } from 'components/boards/metrics.mjs'
+import { MiniTip } from 'components/mini.mjs'
+import { getHostFqdn } from 'components/boards/shared.mjs'
 
-export default function DashboardsHostMetricsPage({ host, module, metricset }) {
+const DashboardsMetricsPageHostModuleDataset = ({ host = '', module = '', metricset = '' }) => {
   const { api } = useApi()
-
-  const [hostname, setHostname] = useState(host)
-
-  useEffect(() => {
-    async function getHostName() {
-      let result
-      try {
-        result = await api.getInventoryHostname(host)
-        if (result.fqdn) setHostname(result.fqdn)
-      } catch (err) {
-        console.log(err)
-      }
-    }
-    getHostName()
-  }, [host, api])
-
+  const [fqdn, setFqdn] = useState(host)
   const meta = {
-    title: (
-      <span className="text-4xl font-medium">
-        <span className="font-light">{module}</span>
-        <span className="font-light px-1 opacity-50">/</span>
-        <span className="font-bold">{metricset}</span>
-        <br />
-        <span className="text-xl font-light pr-1 pacity-50">on</span>
-        <span className="text-2xl font-medium">{hostname}</span>
-      </span>
-    ),
-    page: ['boards', 'metrics', host, module, metricset],
+    title: 'Metrics',
+    page: ['boards', 'metrics', fqdn, module, metricset],
     Icon: StatusIcon,
   }
+
+  useEffect(() => {
+    getHostFqdn(host, setFqdn, api)
+  }, [host, api])
 
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <ShowMetrics host={host} module={module} metricset={metricset} hostname={hostname} />
+        <MiniTip>
+          Metrics for dataset <b>{metricset}</b> from module <b>{module}</b> on host{' '}
+          <Link href={`/inventory/hosts/${host}/`}>{fqdn}</Link>
+        </MiniTip>
+        <MetricsTable glob={`metric|${host}|${module}|${metricset}`} />
       </ContentWrapper>
     </PageWrapper>
   )
 }
+
+export default DashboardsMetricsPageHostModuleDataset
 
 export const getStaticProps = ({ params }) => ({
   props: {

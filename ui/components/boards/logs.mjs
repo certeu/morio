@@ -1,7 +1,7 @@
 // Dependencies
-import { formatBytes, timeAgo, parseJson } from 'lib/utils.mjs'
+import { timeAgo, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
-import { Link, linkClasses } from 'components/link.mjs'
+import { linkClasses } from 'components/link.mjs'
 // Hooks
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -11,13 +11,17 @@ import { RightIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { Loading } from 'components/animations.mjs'
-import { Uuid } from 'components/uuid.mjs'
 import { HostSummary } from 'components/inventory/host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { Popout } from 'components/popout.mjs'
-import { ToggleLiveButton } from 'components/boards/shared.mjs'
+import {
+  ToggleLiveButton,
+  DataPerHost,
+  DataPerModule,
+  DataPerDataset,
+} from 'components/boards/shared.mjs'
 import { Table } from 'components/table.mjs'
-import { Details } from 'components/details.mjs'
+import { StringInput } from 'components/inputs.mjs'
 
 /**
  * This compnent renders a table with the host for which we have cached logs
@@ -27,9 +31,8 @@ export const LogsTable = ({ glob = 'log|*' }) => {
   const [cache, setCache] = useState(false)
   const [inventory, setInventory] = useState({})
   const [refresh, setRefresh] = useState(0)
-  const [order, setOrder] = useState('name')
-  const [desc, setDesc] = useState(false)
   const [groupBy, setGroupBy] = useState('host')
+  const [filter, setFilter] = useState('')
 
   // Hooks
   const { api } = useApi()
@@ -67,101 +70,53 @@ export const LogsTable = ({ glob = 'log|*' }) => {
   return (
     <div>
       <div className="flex flex-row gap-2 items-center">
-        <b>Group by:</b>
-        {['host', 'module', 'dataset'].map(type => (
+        <b>Group&nbsp;by:</b>
+        {['host', 'module', 'dataset'].map((type) => (
           <button
+            key={type}
             className={`btn btn-primary btn-sm ${groupBy !== type ? 'btn-outline' : ''}`}
             onClick={() => setGroupBy(type)}
-          >{type}</button>
+          >
+            {type}
+          </button>
         ))}
         <span className="grow"></span>
-        <b>Browse by:</b>
-        {['host', 'module', 'dataset'].map(type => (
-          <button
-            className={`btn btn-primary btn-sm btn-outline`}
-            onClick={() => setGroupBy(type)}
-          >{type}</button>
-        ))}
+        <b>Filter:</b>
+        <StringInput
+          update={setFilter}
+          valid={() => true}
+          current={filter}
+          placeholder="Enter a string to filter"
+        />
       </div>
-      {groupBy === 'host' ? <LogsPerHost {...{matches, inventory }} /> : null}
-      {groupBy === 'module' ? <LogsPerModule {...{matches, inventory }} /> : null}
-      {groupBy === 'dataset' ? <LogsPerDataset {...{matches, inventory }} /> : null}
+      {groupBy === 'host' ? <DataPerHost {...{ matches, inventory, filter }} type="logs" /> : null}
+      {groupBy === 'module' ? (
+        <DataPerModule {...{ matches, inventory, filter }} type="logs" />
+      ) : null}
+      {groupBy === 'dataset' ? (
+        <DataPerDataset {...{ matches, inventory, filter }} type="logs" />
+      ) : null}
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
     </div>
   )
 }
 
-const LogsPerHost = ({ matches, inventory }) => Object.keys(matches).sort().map(host => (
-  <Details summaryLeft={inventory[host]?.fqdn || host} key={host}>
-    {Object.keys(matches[host]).sort().map(module => (
-      <details key={module}>
-      <summary className="text-bold hover:cursor-pointer">{module}</summary>
-      <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
-        {Object.keys(matches[host][module]).sort().map(dataset => (
-          <li key={dataset}><Link href={`/boards/logs/show/${matches[host][module][dataset].key}/`}>{dataset}</Link></li>
-        ))}
-      </ul>
-      </details>
-    ))}
-  </Details>
-))
-
-const LogsPerModule = ({ matches, inventory }) => Object.keys(matches).sort().map(module => (
-  <Details summaryLeft={module} key={module}>
-    {Object.keys(matches[module]).sort().map(host => (
-      <details key={host}>
-      <summary className="text-bold hover:cursor-pointer">{inventory[host]?.fqdn || host}</summary>
-      <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
-        {Object.keys(matches[module][host]).sort().map(dataset => (
-          <li key={dataset}><Link href={`/boards/logs/show/${matches[module][host][dataset].key}/`}>{dataset}</Link></li>
-        ))}
-      </ul>
-      </details>
-    ))}
-  </Details>
-))
-
-const LogsPerDataset = ({ matches, inventory }) => Object.keys(matches).sort().map(dataset => (
-  <Details summaryLeft={dataset} key={dataset}>
-    {Object.keys(matches[dataset]).sort().map(host => (
-      <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc" key={host}>
-        {Object.keys(matches[dataset][host]).sort().map(module => (
-          <li key={module}>
-            <Link href={`/boards/logs/show/${matches[dataset][host][module].key}/`}>
-              {dataset} @ {inventory[host]?.fqdn || host}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    ))}
-  </Details>
-))
-
-function groupCacheKeys(keys, by='host') {
+export function groupCacheKeys(keys, by = 'host') {
   const obj = {}
   const order = []
   if (by === 'dataset') order.push('dataset', 'host', 'module')
   else if (by === 'module') order.push('module', 'host', 'dataset')
   else order.push('host', 'module', 'dataset')
   for (const key of keys) {
-    const [log, host, module, dataset] = key.split('|')
+    const [host, module, dataset] = key.split('|').slice(1)
     const data = { host, module, dataset }
     if (typeof obj[data[order[0]]] === 'undefined') obj[data[order[0]]] = {}
-    if (typeof obj[data[order[0]]][data[order[1]]] === 'undefined') obj[data[order[0]]][data[order[1]]] = {}
+    if (typeof obj[data[order[0]]][data[order[1]]] === 'undefined')
+      obj[data[order[0]]][data[order[1]]] = {}
     obj[data[order[0]]][data[order[1]]][data[order[2]]] = { host, module, dataset, key }
   }
 
   return obj
-}
-
-function unknownHost(id) {
-  return {
-    id,
-    name: 'Unknown in inventory',
-    cores: 0,
-    memory: 0,
-    last_update: new Date(),
-  }
 }
 
 async function runLogsTableApiCall(api, glob) {
@@ -295,7 +250,7 @@ export const ShowLogs = ({ cachekey }) => {
   const [cache, setCache] = useState(false)
   const [paused, setPaused] = useState(false)
 
-  const [_, host, module, dataset] = cachekey.split('|')
+  const [host, module, dataset] = cachekey.split('|').slice(1)
   // Hooks
   const { api } = useApi()
   useQuery({
@@ -310,13 +265,7 @@ export const ShowLogs = ({ cachekey }) => {
   })
 
   // Don't bother if there's nothing in the caceh
-  if (!cache || cache.length < 1)
-    return (
-      <>
-        <p>No cache keys found.</p>
-        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
-      </>
-    )
+  if (!cache || cache.length < 1) return <p>No cache keys found.</p>
 
   // Can we figure out the field names?
   let fields = false
@@ -353,7 +302,7 @@ export const ShowLogs = ({ cachekey }) => {
 }
 
 async function runShowLogsApiCall(api, key) {
-  const [log, host, module, dataset] = key.split('|')
+  const host = key.split('|')[1]
   const data = {}
   let result = await api.getCacheKey(key)
   if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value

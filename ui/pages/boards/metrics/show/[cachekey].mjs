@@ -2,44 +2,39 @@
 import { useApi } from 'hooks/use-api.mjs'
 import { useEffect, useState } from 'react'
 // Components
-import { Link } from 'components/link.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { LogsIcon } from 'components/icons.mjs'
-import { LogsTable } from 'components/boards/logs.mjs'
-import { MiniTip } from 'components/mini.mjs'
+import { MetricsIcon } from 'components/icons.mjs'
+import { ShowMetrics } from 'components/boards/metrics.mjs'
 import { getHostFqdn } from 'components/boards/shared.mjs'
 
-const DashboardsLogsPageHost = ({ host = '' }) => {
+export default function DashboardsShowMetricsPage({ cachekey }) {
   const { api } = useApi()
-  const [fqdn, setFqdn] = useState(host)
-  const meta = {
-    title: 'Logs',
-    page: ['boards', 'lgos', fqdn],
-    Icon: LogsIcon,
-  }
+  const [host, module, dataset] = cachekey.split('|').slice(1)
 
+  const [fqdn, setFqdn] = useState(host)
   useEffect(() => {
     getHostFqdn(host, setFqdn, api)
   }, [host, api])
 
+  const meta = {
+    title: `Metrics: ${dataset}`,
+    page: ['boards', 'metrics', 'show', cachekey],
+    Icon: MetricsIcon,
+  }
+
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <MiniTip>
-          Logs for host <Link href={`/inventory/hosts/${host}/`}>{fqdn}</Link>
-        </MiniTip>
-        <LogsTable glob={`log|${host}|*`} />
+        <ShowMetrics host={host} module={module} metricset={dataset} hostname={fqdn} />
       </ContentWrapper>
     </PageWrapper>
   )
 }
 
-export default DashboardsLogsPageHost
-
 export const getStaticProps = ({ params }) => ({
   props: {
-    host: params.host,
+    cachekey: params.cachekey,
   },
 })
 

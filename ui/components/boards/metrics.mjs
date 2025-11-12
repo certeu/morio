@@ -1,5 +1,5 @@
 // Dependencies
-import { cloneAsPojo, formatBytes, timeAgo, parseJson } from 'lib/utils.mjs'
+import { cloneAsPojo, formatBytes, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { chartTemplates } from './chart-templates.mjs'
 import { linkClasses } from 'components/link.mjs'
@@ -12,38 +12,44 @@ import { RightIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { Loading } from 'components/animations.mjs'
-import { Uuid } from 'components/uuid.mjs'
 import { HostSummary } from 'components/inventory/host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
-import { ToggleLiveButton } from 'components/boards/shared.mjs'
+import {
+  ToggleLiveButton,
+  DataPerHost,
+  DataPerModule,
+  DataPerDataset,
+} from 'components/boards/shared.mjs'
 import { ChartsProvider } from './charts-provider.mjs'
 import { Echart } from 'components/echarts.mjs'
 import { Popout } from 'components/popout.mjs'
+import { groupCacheKeys } from './logs.mjs'
+import { StringInput } from 'components/inputs.mjs'
 
 /**
  * This component renders a table with the host for which we have cached metrics
  */
-export const MetricsTable = ({ cacheKey = 'metrics' }) => {
+export const MetricsTable = ({ glob = 'metric|*' }) => {
   // State
   const [cache, setCache] = useState(false)
   const [inventory, setInventory] = useState({})
   const [refresh, setRefresh] = useState(0)
-  const [order, setOrder] = useState('name')
-  const [desc, setDesc] = useState(false)
+  const [groupBy, setGroupBy] = useState('host')
+  const [filter, setFilter] = useState('')
 
   // Hooks
   const { api } = useApi()
 
   // Effects
   useEffect(() => {
-    runMetricsTableApiCall(api, cacheKey).then((result) => {
+    runMetricsTableApiCall(api, glob).then((result) => {
       if (result.cache) setCache(result.cache)
       if (result.inventory) setInventory(result.inventory)
     })
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
 
-  // Tell people  we are still lading
+  // Tell people  we are still loading
   if (cache === false)
     return (
       <>
@@ -56,82 +62,54 @@ export const MetricsTable = ({ cacheKey = 'metrics' }) => {
   if (cache.length < 1)
     return (
       <>
-        <Loading />
-        <p>Nothing in the cache to show you here.</p>
+        <p>No cache keys found.</p>
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
       </>
     )
 
-  // Only keep what is in the cache, but use the inventory data
-  const hosts = {}
-  for (const i in cache) {
-    /*
-     * This is a zset with scores
-     * So we ignore all odd indexes
-     */
-    if (i % 2 == 0) {
-      const id = cache[i]
-      if (inventory[id]) hosts[id] = inventory[id]
-      else hosts[id] = unknownHost(id)
-    }
-  }
-  const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
+  // Group keys according to groupBy
+  const matches = groupCacheKeys(cache, groupBy, inventory)
 
   return (
-    <>
-      <table className="table table-auto">
-        <thead>
-          <tr>
-            {['host', 'name', 'cores', 'memory', 'last_seen'].map((field) => (
-              <th key={field}>
-                <button
-                  className={`btn btn-link capitalize px-0 ${linkClasses}`}
-                  onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
-                >
-                  {field}{' '}
-                  <RightIcon
-                    stroke={3}
-                    className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
-                  />
-                </button>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((host) => (
-            <tr key={host.id}>
-              <td className="">
-                <Uuid uuid={host.id} href={`/boards/metrics/${host.id}`} />
-              </td>
-              <td className="">
-                <PageLink href={`/boards/metrics/${host.id}`}>{host.name || host.fqdn}</PageLink>
-              </td>
-              <td className="">{host.cores}</td>
-              <td className="">{formatBytes(host.memory)}</td>
-              <td className="">{timeAgo(host.last_update)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <div className="flex flex-row gap-2 items-center">
+        <b>Group&nbsp;by:</b>
+        {['host', 'module', 'dataset'].map((type) => (
+          <button
+            key={type}
+            className={`btn btn-primary btn-sm ${groupBy !== type ? 'btn-outline' : ''}`}
+            onClick={() => setGroupBy(type)}
+          >
+            {type}
+          </button>
+        ))}
+        <span className="grow"></span>
+        <b>Filter:</b>
+        <StringInput
+          update={setFilter}
+          valid={() => true}
+          current={filter}
+          placeholder="Enter a string to filter"
+        />
+      </div>
+      {groupBy === 'host' ? (
+        <DataPerHost {...{ matches, inventory, filter }} type="metrics" />
+      ) : null}
+      {groupBy === 'module' ? (
+        <DataPerModule {...{ matches, inventory, filter }} type="metrics" />
+      ) : null}
+      {groupBy === 'dataset' ? (
+        <DataPerDataset {...{ matches, inventory, filter }} type="metrics" />
+      ) : null}
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
-    </>
+    </div>
   )
 }
 
-function unknownHost(id) {
-  return {
-    id,
-    name: 'Unknown in inventory',
-    cores: 0,
-    memory: 0,
-    last_update: new Date(),
-  }
-}
-
-async function runMetricsTableApiCall(api, key) {
+async function runMetricsTableApiCall(api, glob) {
   const data = {}
-  let result = await api.getCacheKey(key)
-  if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
+  let result = await api.listCacheKeys(glob)
+  if (Array.isArray(result) && result[1] === 200) data.cache = result[0]
   result = await api.getInventoryHostsObject()
   if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
 
