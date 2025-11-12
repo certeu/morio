@@ -138,7 +138,8 @@ function getProcessors(topic=false, module='*', dataset='*') {
   matches.push(...(processors[topic]?.['*']?.[dataset] || []))
   matches.push(...(processors[topic]?.['*']?.['*'] || []))
 
-  return matches.filter(m => typeof m.handler === 'function')
+  // Weed out double entries in the processor list
+  return [...new Set(matches.filter(m => typeof m.handler === 'function'))]
 }
 
 
