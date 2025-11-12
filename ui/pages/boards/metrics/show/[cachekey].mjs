@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { MetricsIcon } from 'components/icons.mjs'
+import { StatusIcon } from 'components/icons.mjs'
 import { ShowMetrics } from 'components/boards/metrics.mjs'
 import { getHostFqdn } from 'components/boards/shared.mjs'
 
@@ -20,7 +20,7 @@ export default function DashboardsShowMetricsPage({ cachekey }) {
   const meta = {
     title: `Metrics: ${dataset}`,
     page: ['boards', 'metrics', 'show', cachekey],
-    Icon: MetricsIcon,
+    Icon: StatusIcon,
   }
 
   return (
