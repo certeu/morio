@@ -245,7 +245,7 @@ func GetVar(key string) string {
 		}
 	}
 
-	return string(value)
+	return strings.TrimSpace(string(value))
 }
 
 // Read the value of all variables
