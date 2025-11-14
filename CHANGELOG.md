@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.4] - 2025-11-14
+
+### Added
+
+- [config] Added the alerts topic
+- [core] Added support for settings overlays on disk
+- [tap] Added more tools that can be used
+- [tap] Pass message partition to handlers
+- [ui] Improve cache display for logs/metrics
+
+### Fixed
+
+- [client] Trim whitespace from client vars
+- [core] Await async loading of charts & stream processors
+- [core] Wanted hook for EdA service
+- [api] Bust container cache to avoid stale dependencies when building
+- [core] Bust container cache to avoid stale dependencies when building
+- [tap] Do not ensure local reprequisites in wanted hook
+- [tap] Filter out double entries in processor subscriptions
+
 ## [0.9.3] - 2025-10-20
 
 ### Added

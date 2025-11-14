@@ -1,6 +1,6 @@
 {
   "name": "@itsmorio/api",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Morio Management API",
   "private": true,
   "scripts": {
