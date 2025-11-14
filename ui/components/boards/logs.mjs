@@ -26,12 +26,12 @@ import { StringInput } from 'components/inputs.mjs'
 /**
  * This compnent renders a table with the host for which we have cached logs
  */
-export const LogsTable = ({ glob = 'log|*' }) => {
+export const LogsTable = ({ glob = 'log|*', hostView=false }) => {
   // State
   const [cache, setCache] = useState(false)
   const [inventory, setInventory] = useState({})
   const [refresh, setRefresh] = useState(0)
-  const [groupBy, setGroupBy] = useState('host')
+  const [groupBy, setGroupBy] = useState(hostView ? 'module' : 'host')
   const [filter, setFilter] = useState('')
 
   // Hooks
@@ -67,8 +67,12 @@ export const LogsTable = ({ glob = 'log|*' }) => {
   // Group keys according to groupBy
   const matches = groupCacheKeys(cache, groupBy, inventory)
 
+  const grouping = ['module', 'dataset']
+  if (!hostView) grouping.unshift('host')
+
   return (
     <div>
+      {hostView ? null : (
       <div className="flex flex-row gap-2 items-center">
         <b>Group&nbsp;by:</b>
         {['host', 'module', 'dataset'].map((type) => (
@@ -89,12 +93,13 @@ export const LogsTable = ({ glob = 'log|*' }) => {
           placeholder="Enter a string to filter"
         />
       </div>
+      )}
       {groupBy === 'host' ? <DataPerHost {...{ matches, inventory, filter }} type="logs" /> : null}
       {groupBy === 'module' ? (
-        <DataPerModule {...{ matches, inventory, filter }} type="logs" />
+        <DataPerModule {...{ matches, inventory, filter }} type="logs" hostView />
       ) : null}
       {groupBy === 'dataset' ? (
-        <DataPerDataset {...{ matches, inventory, filter }} type="logs" />
+        <DataPerDataset {...{ matches, inventory, filter }} type="logs" hostView />
       ) : null}
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
     </div>

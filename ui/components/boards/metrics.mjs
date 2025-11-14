@@ -29,12 +29,12 @@ import { StringInput } from 'components/inputs.mjs'
 /**
  * This component renders a table with the host for which we have cached metrics
  */
-export const MetricsTable = ({ glob = 'metric|*' }) => {
+export const MetricsTable = ({ glob = 'metric|*', hostView=false }) => {
   // State
   const [cache, setCache] = useState(false)
   const [inventory, setInventory] = useState({})
   const [refresh, setRefresh] = useState(0)
-  const [groupBy, setGroupBy] = useState('host')
+  const [groupBy, setGroupBy] = useState(hostView ? 'module': 'host')
   const [filter, setFilter] = useState('')
 
   // Hooks
@@ -70,36 +70,41 @@ export const MetricsTable = ({ glob = 'metric|*' }) => {
   // Group keys according to groupBy
   const matches = groupCacheKeys(cache, groupBy, inventory)
 
+  const grouping = ['module', 'dataset']
+  if (!hostView) grouping.unshift('host')
+
   return (
     <div>
-      <div className="flex flex-row gap-2 items-center">
-        <b>Group&nbsp;by:</b>
-        {['host', 'module', 'dataset'].map((type) => (
-          <button
-            key={type}
-            className={`btn btn-primary btn-sm ${groupBy !== type ? 'btn-outline' : ''}`}
-            onClick={() => setGroupBy(type)}
-          >
-            {type}
-          </button>
-        ))}
-        <span className="grow"></span>
-        <b>Filter:</b>
-        <StringInput
-          update={setFilter}
-          valid={() => true}
-          current={filter}
-          placeholder="Enter a string to filter"
-        />
-      </div>
+      {hostView ? null : (
+        <div className="flex flex-row gap-2 items-center">
+          <b>Group&nbsp;by:</b>
+          {grouping.map((type) => (
+            <button
+              key={type}
+              className={`btn btn-primary btn-sm ${groupBy !== type ? 'btn-outline' : ''}`}
+              onClick={() => setGroupBy(type)}
+            >
+              {type}
+            </button>
+          ))}
+          <span className="grow"></span>
+          <b>Filter:</b>
+          <StringInput
+            update={setFilter}
+            valid={() => true}
+            current={filter}
+            placeholder="Enter a string to filter"
+          />
+        </div>
+      )}
       {groupBy === 'host' ? (
         <DataPerHost {...{ matches, inventory, filter }} type="metrics" />
       ) : null}
       {groupBy === 'module' ? (
-        <DataPerModule {...{ matches, inventory, filter }} type="metrics" />
+        <DataPerModule {...{ matches, inventory, filter }} type="metrics" hostView />
       ) : null}
       {groupBy === 'dataset' ? (
-        <DataPerDataset {...{ matches, inventory, filter }} type="metrics" />
+        <DataPerDataset {...{ matches, inventory, filter }} type="metrics" hostView />
       ) : null}
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
     </div>

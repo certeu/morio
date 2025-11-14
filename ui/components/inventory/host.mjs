@@ -36,8 +36,8 @@ import { PkgsDisplayTable } from './pkg.mjs'
 import { ModsDisplayTable } from './mod.mjs'
 import { Details } from '../details.mjs'
 import { HostAudit } from '../boards/audit.mjs'
-import { HostLogsTable } from 'components/boards/logs.mjs'
-import { HostMetricsTable } from 'components/boards/metrics.mjs'
+import { LogsTable } from 'components/boards/logs.mjs'
+import { MetricsTable } from 'components/boards/metrics.mjs'
 import { runIpsTableApiCall } from './ip.mjs'
 import { runMacsTableApiCall } from './mac.mjs'
 import { runOssTableApiCall } from './os.mjs'
@@ -1237,10 +1237,10 @@ export const HostDetail = ({ data, refresh, setRefresh }) => {
         {data.id ? <HostAudit uuid={data.id} /> : <p>One moment please...</p>}
       </Details>
       <Details summaryLeft="Logs">
-        {data.id ? <HostLogsTable host={data.id} /> : <p>One moment please...</p>}
+        {data.id ?  <LogsTable glob={`log|${data.id}|*`} hostView /> : <p>One moment please...</p>}
       </Details>
       <Details summaryLeft="Metrics">
-        {data.id ? <HostMetricsTable host={data.id} /> : <p>One moment please...</p>}
+        {data.id ?  <MetricsTable glob={`metric|${data.id}|*`} hostView /> : <p>One moment please...</p>}
       </Details>
       <Details
         summaryLeft="IP Addresses"
