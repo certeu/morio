@@ -35,6 +35,7 @@ export const tools = {
     logline: cacheLogline,
     metricset: cacheMetricset,
     note: cacheNote,
+    top: cacheTop,
   },
   clean,
   ipaddr,
@@ -423,36 +424,34 @@ async function cacheMetricset(metrics, params, customset=false) {
    * Cache the dataset itself
    */
   ops.lpush(key, asString({ ...metrics, timestamp: when(params.data) })).ltrim(key, 0, cap)
-  /*
-   * Keep track of hosts for which we have metrics
-   * We also have to handle more complex expiry here
-  ops
-    .zadd('metrics', when(data), hostId)
-    .zremrangebyscore('metrics', '-inf', now() / 1000 - ttl * 3600)
-
-  /*
-   * Keep track of datasets collected for this host
-   * We also have to handle more complex expiry here
-  const lkey = createKey('metrics', hostId)
-  const datasets = JSON.parse(await valkey.hget(lkey, module))
-  ops
-    .hset(
-      lkey,
-      module,
-      asString(
-        datasets === null
-          ? // First dataset we see for this host, start new list
-            [dataset]
-          : // Add to list of datasets for this host, making sure to avoid duplicates
-            [...new Set([...datasets, dataset])]
-      )
-    )
-    .expire(lkey, ttl * 3600)
 
   /*
    * Execure ValKey commands
    */
   ops.exec((result) => logCacheErrors(result, { in: 'cacheMetrics', dataset, metrics, data: params.data }))
+}
+
+/**
+ * Cache top-x data
+ *
+ * @param {object} key - The key to cache under
+ * @param {Array} data - Either a [key, val] array, or an array of such arrays
+ * @param {object} params - The full params passed to the processor
+ */
+async function cacheTop(key, data, limit=10) {
+  if (!Array.isArray(data)) return cacheNote(`data passed to cacheTop needs to be an array`, data)
+
+  const pipeline = valkey.pipeline()
+  if (Array.isArray(data[0])) {
+    for (const d of data) pipeline.zadd(key, Number(d[1]), d[0])
+  }
+  else pipeline.zadd(key, Number(data[1]), data[0])
+  pipeline.zremrangebyrank(key, 0, -1 * limit - 1)
+
+  return pipeline.exec((res, err) => err
+    ? cacheNote(`Error during cacheTop Redis commands`, err)
+    : res
+  )
 }
 
 /**
