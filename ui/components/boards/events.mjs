@@ -17,6 +17,8 @@ import { Table } from 'components/table.mjs'
 import { TimeAgoBrief } from 'components/time.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { Popout } from 'components/popout.mjs'
+import { Markdown } from 'components/markdown.mjs'
+import { StringInput } from 'components/inputs.mjs'
 
 export const Events = () => {
   const [paused, setPaused] = useState(false)
@@ -45,20 +47,48 @@ export const Events = () => {
 
 const EventsTable = ({ data, paused, setPaused }) => {
   const [desc, setDesc] = useState(true)
+  const [sort, setSort] = useState('time')
+  const [hidden, setHidden] = useState([])
+  const [search, setSearch] = useState('')
   const { pushModal } = useContext(ModalContext)
 
-  const sorted = data ? orderBy(data, 'timestamp', desc ? 'desc' : 'asc') : false
+  const sorted = data ? orderBy(data, `morio.event.${sort}`, desc ? 'desc' : 'asc') : false
+  const filtered = (search === '')
+    ? [...sorted].filter(item => !hidden.includes(item.morio.event.type))
+    : [...sorted].filter(item => item.morio.event.title.toLowerCase().includes(search.toLowerCase()) && !hidden.includes(item.morio.event.type))
+  const types = [...new Set(sorted.map(item => item.morio.event.type))]
+
+  const toggleOrder = (by) => {
+    if (by === sort) setDesc(!desc)
+    else setSort(by)
+  }
+  const toggleHidden = (item) => {
+    const hide = new Set(hidden)
+    if (hidden.includes(item)) hide.delete(item)
+    else hide.add(item)
+    setHidden([...hide])
+  }
 
   return (
     <>
       <div className="flex flex-row gap-2 items-center">
         <ToggleLiveButton {...{ paused, setPaused }} />
-        <button
-          className="btn btn-xs btn-primary btn-outline border-2"
-          onClick={() => pushModal(<About />)}
-        >
-          What are events?
-        </button>
+        {types.map(type => (
+          <button key="type"
+            className={`badge ${hidden.includes(type) ? 'badge-error' : 'badge-success'}`}
+            onClick={() => toggleHidden(type)}
+          >
+            {type}
+          </button>
+        ))}
+      </div>
+      <div className="">
+        <StringInput
+          label="Filter"
+          update={setSearch}
+          placeholder="Enter text to filter the cached events"
+          current={search}
+        />
       </div>
       <Table>
         <thead>
@@ -66,21 +96,27 @@ const EventsTable = ({ data, paused, setPaused }) => {
             <th className="w-24 pr-4">
               <button
                 className={`text-primary capitalize px-0 ${linkClasses} flex flex-row gap-0.5 items-center pr-2 text-left`}
-                onClick={() => setDesc(!desc)}
+                onClick={() => toggleOrder('time')}
               >
-                Time <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} />
+                Time
+                {sort === 'time' ? <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} /> : null}
               </button>
             </th>
-            <th className="pr-4 text-left px-0">Title</th>
+            <th className="pr-4 text-left px-0 flex flex-row gap-4">
+              <button
+                className={`text-primary capitalize px-0 ${linkClasses} flex flex-row gap-0.5 items-center pr-2 text-left`}
+                onClick={() => toggleOrder('title')}
+              >
+                Title
+                {sort === 'title' ? <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} /> : null}
+              </button>
+            </th>
           </tr>
         </thead>
-        <tbody className="text-sm font-mono">
+        <tbody className="text-sm">
           {sorted
-            ? sorted.map((evt, i) => (
+            ? filtered.map((evt, i) => (
                 <tr key={i}>
-                  <td className="py-0">
-                    <TimeAgoBrief time={evt.timestamp} suffix="" />
-                  </td>
                   <td className="py-0">
                     <button
                       className={`text-primary px-0 pr-4 ${linkClasses}`}
@@ -94,8 +130,14 @@ const EventsTable = ({ data, paused, setPaused }) => {
                         )
                       }
                     >
-                      {evt.morio?.event?.title}
+                      <TimeAgoBrief time={evt.timestamp} suffix="" />
                     </button>
+                  </td>
+                  <td className="py-0">
+                    {evt.morio.event.md_title
+                      ? <Markdown>{evt.morio.event.md_title}</Markdown>
+                      : evt.morio.event.title
+                    }
                   </td>
                 </tr>
               ))
@@ -111,32 +153,6 @@ const runEventsCall = async (api) => {
   const result = await api.getCacheKey('events')
   return result[1] === 200 ? result[0] : false
 }
-
-const About = () => (
-  <ModalWrapper>
-    <h4>
-      What is an event? <small>Or what is event data?</small>
-    </h4>
-    <p>
-      In event-driven automation (EDA), events are the <b>triggers </b>
-      that we can use to react to changes, remediate problems, or escalate incidents in an automated
-      way. As such, an event can represent any status change inside your infrastructure.
-    </p>
-    <p>
-      In Morio, we strive to turn anything potentially noteworthy into an event. As such, events
-      cast the widest net, and serve as input for more refined filters.
-    </p>
-    <p>
-      As an example, alerts are typically not generated from raw data flowing through Morio.
-      Instead, raw data is turned into events (also known as <em>eventifying</em>). From those
-      events, we can now generate alerts, but also handle grouping, suppression, and other higher
-      level abstractions.
-    </p>
-    <p>
-      In a nutshell, you can think of events as the firehose of everything happening inside Morio.
-    </p>
-  </ModalWrapper>
-)
 
 function parseCachedEventData(data) {
   if (Array.isArray(data))

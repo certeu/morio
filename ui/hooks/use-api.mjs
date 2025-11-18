@@ -737,6 +737,30 @@ MorioClient.prototype.getCacheKey = async function (key) {
 }
 
 /**
+ * Get a list of cache keys
+ *
+ * @param {string} key - The cache key to retrieve
+ * @return {object} - The result
+ */
+MorioClient.prototype.getCacheKeys = async function (keys) {
+  return await this.call(`${morioConfig.api}/cache/keys`, {
+    headers: this.jsonHeaders,
+    method: "POST",
+    body: JSON.stringify({ keys }),
+  })
+}
+
+/**
+ * Get cache keys that (optionally) match a pattern
+ *
+ * @param {string} glob - The cache key pattern to apply
+ * @return {object} - The result
+ */
+MorioClient.prototype.getGlobCacheKeys = async function (glob = '*') {
+  return await this.call(`${morioConfig.api}/cache/globget/${glob}`)
+}
+
+/**
  * List cache keys that (optionally) match a pattern
  *
  * @param {string} glob - The cache key pattern to apply

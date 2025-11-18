@@ -25,6 +25,7 @@ import { Echart } from 'components/echarts.mjs'
 import { Popout } from 'components/popout.mjs'
 import { groupCacheKeys } from './logs.mjs'
 import { StringInput } from 'components/inputs.mjs'
+import { Tabs, Tab } from 'components/tabs.mjs'
 
 /**
  * This component renders a table with the host for which we have cached metrics
@@ -114,6 +115,16 @@ export const MetricsTable = ({ glob = 'metric|*', hostView=false }) => {
 async function runMetricsTableApiCall(api, glob) {
   const data = {}
   let result = await api.listCacheKeys(glob)
+  if (Array.isArray(result) && result[1] === 200) data.cache = result[0]
+  result = await api.getInventoryHostsObject()
+  if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
+
+  return data
+}
+
+async function runTopMetricsApiCall(api, keys) {
+  const data = {}
+  let result = await api.getCacheKeys(keys)
   if (Array.isArray(result) && result[1] === 200) data.cache = result[0]
   result = await api.getInventoryHostsObject()
   if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
@@ -217,6 +228,175 @@ export const HostMetricsTable = ({ host, module = false }) => {
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
     </>
   )
+}
+
+export const TopMetrics = () => {
+  // State
+  const [cache, setCache] = useState(false)
+  const [inventory, setInventory] = useState({})
+  const [refresh, setRefresh] = useState(0)
+  const [filter, setFilter] = useState('')
+  const [limit, setLimit] = useState(5)
+
+  // Hooks
+  const { api } = useApi()
+
+  // Effects
+  useEffect(() => {
+    runTopMetricsApiCall(api, [
+      "metric|top-linux-load1",
+      "metric|top-linux-load5",
+      "metric|top-linux-load15",
+      "metric|top-linux-mount-used",
+    ]).then((result) => {
+      if (result.cache) setCache(result.cache)
+      if (result.inventory) setInventory({ ...inventory, ...result.inventory })
+    })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [refresh])
+
+  // Tell people  we are still loading
+  if (cache === false)
+    return (
+      <>
+        <Loading />
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+      </>
+    )
+
+  return (
+    <>
+      <ul className="list list-disc list-inside ml-4">
+        <li><a href="#load">Top System Load</a></li>
+        <li><a href="#fs">Top Used Mounts</a></li>
+      </ul>
+      <h2 id="load">Top System Load</h2>
+      <Tabs tabs="Load-15, Load-5, Load-1">
+        <Tab tabId="Load-15">
+          <TopLoadChart data={cache["metric|top-linux-load15"].value} type={15} inventory={inventory} />
+        </Tab>
+        <Tab tabId="Load-5">
+          <TopLoadChart data={cache["metric|top-linux-load5"].value} type={5} inventory={inventory} />
+        </Tab>
+        <Tab tabId="Load-1">
+          <TopLoadChart data={cache["metric|top-linux-load1"].value} type={1} inventory={inventory} />
+        </Tab>
+      </Tabs>
+      <h2 id="fs">Top Used Mounts</h2>
+      <TopMountUsedChart data={cache["metric|top-linux-mount-used"].value} inventory={inventory} />
+    </>
+  )
+    //{loads.map(load => <SingleEchart key={`load-${load}`} option={optionTopLoads[load]} href={`/boards/top/`} />)}
+
+  // Don't bother if there's nothing in the cache
+  if (cache.length < 1)
+    return (
+      <>
+        <p>No cache keys found.</p>
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+      </>
+    )
+}
+
+const TopLoadChart = ({ data, type="15", inventory }) => {
+  const scores = []
+  let i = 0
+  while (i < data.length) {
+    scores.push({ k: data[i], v: Number(data[Number(i)+1]) })
+    i += 2
+  }
+  const ordered = orderBy(scores, 'v', 'desc')
+
+  // Now prepare the data for the Echarts
+  const option = {
+    title: {
+      text: `Top Load-${type} (normalized)`
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    xAxis: {
+      type: 'value',
+      min: 0,
+      name: 'Load',
+    },
+    yAxis: {
+      offset: 20000,
+      type: 'category',
+      axisTick: { show: false },
+      data: ordered.map(entry => ({ value: inventory[entry.k]?.fqdn || entry.k })),
+      name: 'Host',
+    },
+    series: [{
+      name: `load-${type}`,
+      type: 'bar',
+      label: {
+        show: true,
+        position: 'insideBottom',
+        distance: 15,
+        align: 'start',
+        verticalAlign: 'bottom',
+        formatter: "{b}: {c}",
+      },
+      data: ordered.map(entry => entry.v)
+    }],
+  }
+
+  return <SingleEchart option={option} href={`/boards/metrics/top/`} />
+}
+
+const TopMountUsedChart = ({ data, inventory }) => {
+  const scores = []
+  let i = 0
+  while (i < data.length) {
+    const chunks = data[i].split('|')
+    scores.push({ k: chunks[0], mount: chunks[1], v: Number(data[Number(i)+1]) })
+    i += 2
+  }
+  const ordered = orderBy(scores, 'v', 'desc')
+
+  // Now prepare the data for the Echarts
+  const option = {
+    title: {
+      text: `Top used mounts`
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    xAxis: {
+      type: 'value',
+      min: 0,
+      name: 'Used %',
+    },
+    yAxis: {
+      offset: 20000,
+      type: 'category',
+      axisTick: { show: false },
+      data: ordered.map(entry => ({ value: `${entry.mount} on ${inventory[entry.k]?.fqdn || entry.k }` })),
+      name: 'Host',
+    },
+    series: [{
+      name: `used`,
+      type: 'bar',
+      label: {
+        show: true,
+        position: 'insideBottom',
+        distance: 15,
+        align: 'start',
+        verticalAlign: 'bottom',
+        formatter: "{b}: {c}%",
+      },
+      data: ordered.map(entry => Math.round(entry.v * 1000)/10)
+    }],
+  }
+
+  return <SingleEchart option={option} href={`/boards/metrics/top/`} />
 }
 
 async function runHostMetricsTableApiCall(api, host) {

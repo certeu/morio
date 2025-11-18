@@ -19,6 +19,8 @@ import { Highlight } from 'components/highlight.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Table } from 'components/table.mjs'
 import { InventoryHostname } from 'components/inventory/host.mjs'
+import { Markdown } from 'components/markdown.mjs'
+import { StringInput } from 'components/inputs.mjs'
 
 export const Audit = () => {
   const [paused, setPaused] = useState(false)
@@ -69,34 +71,48 @@ export const HostAudit = ({ uuid }) => {
 
 const AuditTable = ({ data, paused, setPaused }) => {
   const [desc, setDesc] = useState(true)
+  const [sort, setSort] = useState('time')
+  const [hidden, setHidden] = useState([])
   const [search, setSearch] = useState('')
-  const [filtered, setFiltered] = useState([])
   const { pushModal } = useContext(ModalContext)
 
-  const sorted = data ? orderBy(data, 'time', desc ? 'desc' : 'asc') : false
+  const sorted = data ? orderBy(data, sort, desc ? 'desc' : 'asc') : false
+  const filtered = (search === '')
+    ? [...sorted].filter(item => !hidden.includes(item.type))
+    : [...sorted].filter(item => item.title.toLowerCase().includes(search.toLowerCase()) && !hidden.includes(item.type))
+  const types = [...new Set(sorted.map(item => item.type))]
 
-  useEffect(() => {
-    if (search == '') setFiltered([...sorted])
-    else {
-      const filteredArray = sorted.filter((item) =>
-        item.title.toLowerCase().includes(search.toLowerCase())
-      )
-
-      setFiltered(filteredArray)
-    }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [search])
+  const toggleOrder = (by) => {
+    if (by === sort) setDesc(!desc)
+    else setSort(by)
+  }
+  const toggleHidden = (item) => {
+    const hide = new Set(hidden)
+    if (hidden.includes(item)) hide.delete(item)
+    else hide.add(item)
+    setHidden([...hide])
+  }
 
   return (
     <>
       <div className="flex flex-row gap-2 items-center">
         <ToggleLiveButton {...{ paused, setPaused }} />
-        <button
-          className="btn btn-xs btn-primary btn-outline border-2"
-          onClick={() => pushModal(<About />)}
-        >
-          What is audit?
-        </button>
+        {types.map(type => (
+          <button key="type"
+            className={`badge ${hidden.includes(type) ? 'badge-error' : 'badge-success'}`}
+            onClick={() => toggleHidden(type)}
+          >
+            {type}
+          </button>
+        ))}
+      </div>
+      <div className="">
+        <StringInput
+          label="Filter"
+          update={setSearch}
+          placeholder="Enter text to filter the cached events"
+          current={search}
+        />
       </div>
       <Table>
         <thead>
@@ -104,34 +120,30 @@ const AuditTable = ({ data, paused, setPaused }) => {
             <th className="w-24 pr-4">
               <button
                 className={`text-primary capitalize px-0 ${linkClasses} flex flex-row gap-0.5 items-center pr-2 text-left`}
-                onClick={() => setDesc(!desc)}
+                onClick={() => toggleOrder('time')}
               >
-                Time <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} />
+                Time
+                {sort === 'time' ? <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} /> : null}
               </button>
             </th>
             <th className="pr-4 text-left px-0 flex flex-row gap-4">
-              Note{' '}
-              <input
-                type="text"
-                placeholder="Search..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="grow border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none text-[#555555]"
-              />
+              <button
+                className={`text-primary capitalize px-0 ${linkClasses} flex flex-row gap-0.5 items-center pr-2 text-left`}
+                onClick={() => toggleOrder('title')}
+              >
+                Title
+                {sort === 'title' ? <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} /> : null}
+              </button>
             </th>
-            <th className="w-28 pr-4 text-left px-0">Host</th>
           </tr>
         </thead>
-        <tbody className="text-sm font-mono">
+        <tbody className="text-sm">
           {filtered
             ? filtered.map((evt, i) => (
                 <tr key={i}>
                   <td className="py-0">
-                    <TimeAgoBrief time={evt.time} suffix="" />
-                  </td>
-                  <td className="py-0">
                     <button
-                      className={`text-primary px-0 pr-4 ${linkClasses}`}
+                      className={`text-primary px-0 pr-4 ${linkClasses} text-left`}
                       onClick={() =>
                         pushModal(
                           <ModalWrapper keepOpenOnClick>
@@ -142,11 +154,14 @@ const AuditTable = ({ data, paused, setPaused }) => {
                         )
                       }
                     >
-                      {evt.title}
+                      <TimeAgoBrief time={evt.time} suffix="" />
                     </button>
                   </td>
-                  <td className="py-0.5">
-                    {evt.host ? <InventoryHostname uuid={evt.host} /> : <Uuid uuid={false} />}
+                  <td className="py-0">
+                    {evt.md_title
+                      ? <Markdown>{evt.md_title}</Markdown>
+                      : evt.title
+                    }
                   </td>
                 </tr>
               ))
@@ -162,24 +177,6 @@ const runAuditCall = async (api) => {
   const result = await api.getCacheKey('audit')
   return result[1] === 200 ? result[0] : false
 }
-
-const About = () => (
-  <ModalWrapper>
-    <h4>
-      What is audit? <small>Or what is audit data?</small>
-    </h4>
-    <p>
-      Audit data can be anything that can help establish an <em>audit trail</em>, although in Morio
-      it is typically derived from data collected by the auditbeat agent.
-    </p>
-    <p>
-      In general, audit data is used to provide accountability. For example, a configuration file
-      being changed, a user logging in on a production server, or <code>sudo</code> invocation are
-      all typically audited events.
-    </p>
-    <p>All audit events are cached, and a subset of them may be further escalated.</p>
-  </ModalWrapper>
-)
 
 function parseCachedAuditData(data) {
   if (Array.isArray(data)) return data.map((entry) => parseJson(entry))

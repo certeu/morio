@@ -82,6 +82,17 @@ export default function DashboardsPage() {
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
+          <h3 className="mt-8">Summary</h3>
+          <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
+            <Card
+              role="user"
+              title={<span className="capitalize">Top Metrics</span>}
+              href={`/boards/top/`}
+              desc="Shows an overview of the most loaded systems and full disks."
+              width="w-full"
+              Icon={StatusIcon}
+            />
+          </div>
           <h3 className="mt-8">Per data type</h3>
           <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
             {Object.keys(types).map((type) => {
