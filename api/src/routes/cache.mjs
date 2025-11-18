@@ -11,13 +11,16 @@ const Cache = new Controller()
 export function routes(app) {
   /*
    * Read the list of keynames from the cache
-   * NOTE: This is not an efficient way to use the cache. Avoid if possible.
    */
   app.get(`/cache/glob/*`, rbac.user, Cache.listKeys)
 
   /*
+   * Read keys from the cache based on a glob pattern
+   */
+  app.get(`/cache/globget/*`, rbac.user, Cache.globReadKeys)
+
+  /*
    * Read the list of keynames from the cache
-   * NOTE: This is not an efficient way to use the cache. Avoid if possible.
    */
   app.get(`/cache/keys`, rbac.user, Cache.listKeys)
 

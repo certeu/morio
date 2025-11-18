@@ -91,3 +91,37 @@ Controller.prototype.readKeys = async function (req, res) {
 
   return res.send(values)
 }
+
+/**
+ * Get multiple cache keys based on a glob pattern
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.globReadKeys = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.cache.readKey`, { key: req.params[0] })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  // First, fetch the list of matching keys
+  const keys = await utils.cache.listKeys(req.params[0])
+
+  // Don't bother if no keys were found
+  if (!Array.isArray(keys) || keys.length < 0) return res.send({})
+
+  // Now, read the keys
+  const values = {}
+  const promises = []
+  for (const key of keys)
+    promises.push(utils.cache.read(key).then((result) => (values[key] = result.value)))
+
+  await Promise.all(promises)
+
+  return res.send(values)
+}
+
