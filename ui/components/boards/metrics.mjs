@@ -248,6 +248,21 @@ export const TopMetrics = () => {
       "metric|top-linux-load5",
       "metric|top-linux-load15",
       "metric|top-linux-mount-used",
+      "metric|top-linux-pressure-cpu-some10",
+      "metric|top-linux-pressure-cpu-some60",
+      "metric|top-linux-pressure-cpu-some300",
+      "metric|top-linux-pressure-io-some10",
+      "metric|top-linux-pressure-io-some60",
+      "metric|top-linux-pressure-io-some300",
+      "metric|top-linux-pressure-memory-some10",
+      "metric|top-linux-pressure-memory-some60",
+      "metric|top-linux-pressure-memory-some300",
+      "metric|top-linux-pressure-io-full10",
+      "metric|top-linux-pressure-io-full60",
+      "metric|top-linux-pressure-io-full300",
+      "metric|top-linux-pressure-memory-full10",
+      "metric|top-linux-pressure-memory-full60",
+      "metric|top-linux-pressure-memory-full300",
     ]).then((result) => {
       if (result.cache) setCache(result.cache)
       if (result.inventory) setInventory({ ...inventory, ...result.inventory })
@@ -263,13 +278,160 @@ export const TopMetrics = () => {
         <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
       </>
     )
+  const io = cache[`metric|top-linux-pressure-io-full300`]?.value || cache[`metric|top-linux-pressure-io-some300`]?.value ? true : false
+  const memory = cache[`metric|top-linux-pressure-memory-full300`]?.value || cache[`metric|top-linux-pressure-memory-some300`]?.value ? true : false
 
   return (
     <>
       <ul className="list list-disc list-inside ml-4">
+        <li><a href="#cpu">Top CPU Pressure</a></li>
+        {io ? <li><a href="#io">Top IO Pressure</a></li> :null }
+        {memory ? <li><a href="#mem">Top Memory Pressure</a></li> : null}
         <li><a href="#load">Top System Load</a></li>
         <li><a href="#fs">Top Used Mounts</a></li>
       </ul>
+      <h2 id="cpu">Top CPU Pressure</h2>
+      <Tabs tabs="5 minutes, 1 minute, 10 seconds">
+        <Tab tabId="5 minutes">
+          <TopPressureChart
+            data={cache[`metric|top-linux-pressure-cpu-some300`]?.value}
+            title="5-minute CPU Pressure"
+            inventory={inventory}
+          />
+        </Tab>
+        <Tab tabId="1 minute">
+          <TopPressureChart
+            data={cache[`metric|top-linux-pressure-cpu-some60`]?.value}
+            title="1-minute CPU Pressure"
+            inventory={inventory}
+          />
+        </Tab>
+        <Tab tabId="10 seconds">
+          <TopPressureChart
+            data={cache[`metric|top-linux-pressure-cpu-some10`]?.value}
+            title="10-second CPU Pressure"
+            inventory={inventory}
+          />
+        </Tab>
+      </Tabs>
+
+      {io ? <h2 id="io">Top IO Pressure</h2> : null}
+      {cache[`metric|top-linux-pressure-io-full300`]?.value ? (
+        <>
+          <h2 id="iofull">Full Stall</h2>
+          <Tabs tabs="5 minutes, 1 minute, 10 seconds">
+            <Tab tabId="5 minutes">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-io-full300`]?.value}
+                title="5-minute CPU Pressure"
+                inventory={inventory}
+              />
+            </Tab>
+            <Tab tabId="1 minute">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-io-full60`]?.value}
+                title="1-minute CPU Pressure"
+                inventory={inventory}
+              />
+            </Tab>
+            <Tab tabId="10 seconds">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-io-full10`]?.value}
+                title="10-second CPU Pressure"
+                inventory={inventory}
+              />
+            </Tab>
+          </Tabs>
+        </>
+      ) : null}
+      {cache[`metric|top-linux-pressure-io-some300`]?.value ? (
+        <>
+          <h2 id="iofull">Some Stalling</h2>
+          <Tabs tabs="5 minutes, 1 minute, 10 seconds">
+            <Tab tabId="5 minutes">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-io-some300`]?.value}
+                title="5-minute CPU Pressure"
+                inventory={inventory}
+              />
+            </Tab>
+            <Tab tabId="1 minute">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-io-some60`]?.value}
+                title="1-minute CPU Pressure"
+                inventory={inventory}
+              />
+            </Tab>
+            <Tab tabId="10 seconds">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-io-some10`]?.value}
+                title="10-second CPU Pressure"
+                inventory={inventory}
+              />
+            </Tab>
+          </Tabs>
+        </>
+      ) : null}
+
+      {memory ? <h2 id="mem">Top Memory Pressure</h2> : null}
+      {memory && cache[`metric|top-linux-pressure-memory-full300`]?.value ? (
+        <>
+          <h3 id="memoryfull">Full Stall</h3>
+          <Tabs tabs="5 minutes, 1 minute, 10 seconds">
+            <Tab tabId="5 minutes">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-memory-full300`]?.value}
+                title="5-minute Memory Pressure (full)"
+                inventory={inventory}
+              />
+            </Tab>
+            <Tab tabId="1 minute">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-memory-full60`]?.value}
+                title="1-minute Memory Pressure (full)"
+                inventory={inventory}
+              />
+            </Tab>
+            <Tab tabId="10 seconds">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-memory-full10`]?.value}
+                title="10-second Memory Pressure (full)"
+                inventory={inventory}
+              />
+            </Tab>
+          </Tabs>
+        </>
+      ) : null}
+      {cache[`metric|top-linux-pressure-memory-some300`]?.value ? (
+        <>
+          <h3 id="iofull">Some Stalling</h3>
+          <Tabs tabs="5 minutes, 1 minute, 10 seconds">
+            <Tab tabId="5 minutes">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-memory-some300`]?.value}
+                title="5-minute Memory Pressure (some)"
+                inventory={inventory}
+              />
+            </Tab>
+            <Tab tabId="1 minute">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-memory-some60`]?.value}
+                title="1-minute Memory Pressure (some)"
+                inventory={inventory}
+              />
+            </Tab>
+            <Tab tabId="10 seconds">
+              <TopPressureChart
+                data={cache[`metric|top-linux-pressure-memory-some10`]?.value}
+                title="10-second Memory Pressure (some)"
+                inventory={inventory}
+              />
+            </Tab>
+          </Tabs>
+        </>
+      ) : null}
+
+
       <h2 id="load">Top System Load</h2>
       <Tabs tabs="Load-15, Load-5, Load-1">
         <Tab tabId="Load-15">
@@ -353,7 +515,8 @@ const TopMountUsedChart = ({ data, inventory }) => {
   let i = 0
   while (i < data.length) {
     const chunks = data[i].split('|')
-    scores.push({ k: chunks[0], mount: chunks[1], v: Number(data[Number(i)+1]) })
+    const v = Number(data[Number(i)+1])
+    if (v > 0) scores.push({ k: chunks[0], mount: chunks[1], v })
     i += 2
   }
   const ordered = orderBy(scores, 'v', 'desc')
@@ -393,6 +556,58 @@ const TopMountUsedChart = ({ data, inventory }) => {
         formatter: "{b}: {c}%",
       },
       data: ordered.map(entry => Math.round(entry.v * 1000)/10)
+    }],
+  }
+
+  return <SingleEchart option={option} href={`/boards/metrics/top/`} />
+}
+
+const TopPressureChart = ({ data, title, inventory }) => {
+  if (!data) return <p>No data in the cache for this chart</p>
+  const scores = []
+  let i = 0
+  while (i < data.length) {
+    const v = Math.round(Number(data[Number(i)+1])*1000)/10
+    if (v > 0) scores.push({ k: data[i], v })
+    i += 2
+  }
+  const ordered = orderBy(scores, 'v', 'desc')
+
+  // Now prepare the data for the Echarts
+  const option = {
+    title: {
+      text: title,
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    xAxis: {
+      type: 'value',
+      min: 0,
+      name: 'Pressure',
+    },
+    yAxis: {
+      offset: 20000,
+      type: 'category',
+      axisTick: { show: false },
+      data: ordered.map(entry => ({ value: inventory[entry.k]?.fqdn || entry.k })),
+      name: 'Host',
+    },
+    series: [{
+      name: `pressure`,
+      type: 'bar',
+      label: {
+        show: true,
+        position: 'insideBottom',
+        distance: 15,
+        align: 'start',
+        verticalAlign: 'bottom',
+        formatter: "{b}: {c}%",
+      },
+      data: ordered.map(entry => entry.v)
     }],
   }
 
