@@ -371,7 +371,7 @@ const transformMetrics = (params) => {
  * This component renders visualisations for all cached
  * metrics for a given host/module/dataset
  */
-const ShowMetricsInner = ({ host, module, dataset, hostname, show, type="dataset", cachekey, inventory }) => {
+const ShowMetricsInner = ({ host, module, dataset, hostname, show=true, type="dataset", cachekey, inventory }) => {
   // State
   const [cache, setCache] = useState(false)
   const [paused, setPaused] = useState(false)
@@ -417,7 +417,8 @@ async function runShowMetricsApiCall(api, host, module, dataset) {
 }
 
 const EchartWrapper = (props) => {
-  const [enabled, setEnabled] = useState(props.show)
+  const { show=true } = props
+  const [enabled, setEnabled] = useState(show)
   // We are memoizing option to avoid re-renders
   const option = useMemo(
     () => transformMetrics({...props, templates: cloneAsPojo(chartTemplates) }),
@@ -433,6 +434,7 @@ const EchartWrapper = (props) => {
     setEnabled(newEnabled)
   }
 
+  console.log({enabled})
   const isEnabled = (opt, i) => (
     enabled === true ||
     (i === 0 && option.length === 1) ||

@@ -49,7 +49,7 @@ export default function DashboardsHostMetricsPage({ host, module, metricset, cha
         <ShowMetrics
           host={host}
           module={module}
-          metricset={metricset}
+          dataset={metricset}
           hostname={hostname}
           show={show}
         />
