@@ -73,6 +73,30 @@ const options = {
  * Shared chart templates
  */
 const charts = {
+  horbar: {
+    ...options,
+    title: {
+      left: 'center',
+      text: 'Set title.text to replace this title',
+    },
+    xAxis: {
+      type: 'value',
+      nameLocation: 'middle',
+      nameGap: 25,
+    },
+    yAxis: {
+      type: 'category',
+      name: 'set yAxis.name to replace this name',
+      nameLocation: 'middle',
+      nameGap: 20,
+      splitLine: {
+        show: true,
+        lineStyle: {
+          type: 'dashed',
+        },
+      },
+    },
+  },
   line: {
     ...options,
     title: {
@@ -102,6 +126,9 @@ const charts = {
     },
   },
 }
+// Remove datazoom from horbar
+delete charts.horbar.toolbox.feature.dataZoom
+delete charts.horbar.dataZoom
 
 /*
  * Wrapper templates object with charts, option, and series
@@ -110,6 +137,9 @@ export const chartTemplates = {
   charts,
   options,
   series: {
+    bar: {
+      type: 'bar',
+    },
     line: {
       type: 'line',
       symbol: 'none',

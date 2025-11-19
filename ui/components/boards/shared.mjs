@@ -186,3 +186,14 @@ export async function getHostFqdn(host, setFqdn, api) {
 
   setFqdn(result[1] === 200 && result[0]?.fqdn ? result[0].fqdn : host)
 }
+
+export async function getInventoryHosts(setInventory, api) {
+  let result
+  try {
+    result = await api.getInventoryHostsObject()
+  } catch (err) {
+    console.log(err)
+  }
+  if (Array.isArray(result) && result[1] === 200) setInventory(result[0])
+}
+

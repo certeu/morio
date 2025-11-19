@@ -122,6 +122,7 @@ const icons = {
   show: DocumentIcon,
   tasks: TaskIcon,
   tools: CogIcon,
+  top: StatusIcon,
   ui: DesktopIcon,
   volumes: StorageIcon,
   status: StatusIcon,
@@ -177,6 +178,10 @@ export const links = {
     },
     notes: {
       t: 'Notes',
+      r: 'user',
+    },
+    top: {
+      t: 'Top Metrics',
       r: 'user',
     },
     //search: {

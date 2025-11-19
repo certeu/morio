@@ -26,6 +26,7 @@ import { Popout } from 'components/popout.mjs'
 import { groupCacheKeys } from './logs.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
+import { MiniTip, MiniWarning } from 'components/mini.mjs'
 
 /**
  * This component renders a table with the host for which we have cached metrics
@@ -122,14 +123,16 @@ async function runMetricsTableApiCall(api, glob) {
   return data
 }
 
-async function runTopMetricsApiCall(api, keys) {
-  const data = {}
-  let result = await api.getCacheKeys(keys)
-  if (Array.isArray(result) && result[1] === 200) data.cache = result[0]
-  result = await api.getInventoryHostsObject()
-  if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
+async function runCacheKeyApiCall(api, key) {
+  const result = await api.getCacheKey(key)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
 
-  return data
+  return false
+}
+
+async function runInventoryApiCall(api, setInventory) {
+  const result = await api.getInventoryHostsObject()
+  if (Array.isArray(result) && result[1] === 200) setInventory(result[0])
 }
 
 /**
@@ -175,13 +178,13 @@ export const HostMetricsTable = ({ host, module = false }) => {
   const data = []
   for (const mod in cache) {
     if (!module || mod === module) {
-      for (const metricset of JSON.parse(cache[mod])) {
-        data.push({ module: mod, metricset, host })
+      for (const dataset of JSON.parse(cache[mod])) {
+        data.push({ module: mod, dataset, host })
       }
     }
   }
   const sorted = orderBy(data, [order], [desc ? 'desc' : 'asc'])
-  const cols = module ? ['metricset'] : ['module', 'metricset']
+  const cols = module ? ['dataset'] : ['module', 'dataset']
 
   return (
     <>
@@ -207,7 +210,7 @@ export const HostMetricsTable = ({ host, module = false }) => {
         </thead>
         <tbody>
           {sorted.map((entry) => (
-            <tr key={entry.metricset + entry.host + entry.module}>
+            <tr key={entry.dataset + entry.host + entry.module}>
               {module ? null : (
                 <td className="py-0.5 pr-4 font-mono text-sm">
                   <PageLink href={`/boards/metrics/${host}/${entry.module}/`}>
@@ -216,9 +219,9 @@ export const HostMetricsTable = ({ host, module = false }) => {
                 </td>
               )}
               <td className="py-0.5 font-mono text-sm">
-                <MorioMetricset
-                  name={entry.metricset}
-                  href={`/boards/metrics/${host}/${entry.module}/${entry.metricset}`}
+                <MorioDataset
+                  name={entry.dataset}
+                  href={`/boards/metrics/${host}/${entry.module}/${entry.dataset}`}
                 />
               </td>
             </tr>
@@ -232,386 +235,88 @@ export const HostMetricsTable = ({ host, module = false }) => {
 
 export const TopMetrics = () => {
   // State
-  const [cache, setCache] = useState(false)
-  const [inventory, setInventory] = useState({})
+  const [inventory, setInventory] = useState(false)
   const [refresh, setRefresh] = useState(0)
-  const [filter, setFilter] = useState('')
-  const [limit, setLimit] = useState(5)
 
   // Hooks
   const { api } = useApi()
 
   // Effects
   useEffect(() => {
-    runTopMetricsApiCall(api, [
-      "metric|top-linux-load1",
-      "metric|top-linux-load5",
-      "metric|top-linux-load15",
-      "metric|top-linux-mount-used",
-      "metric|top-linux-pressure-cpu-some10",
-      "metric|top-linux-pressure-cpu-some60",
-      "metric|top-linux-pressure-cpu-some300",
-      "metric|top-linux-pressure-io-some10",
-      "metric|top-linux-pressure-io-some60",
-      "metric|top-linux-pressure-io-some300",
-      "metric|top-linux-pressure-memory-some10",
-      "metric|top-linux-pressure-memory-some60",
-      "metric|top-linux-pressure-memory-some300",
-      "metric|top-linux-pressure-io-full10",
-      "metric|top-linux-pressure-io-full60",
-      "metric|top-linux-pressure-io-full300",
-      "metric|top-linux-pressure-memory-full10",
-      "metric|top-linux-pressure-memory-full60",
-      "metric|top-linux-pressure-memory-full300",
-    ]).then((result) => {
-      if (result.cache) setCache(result.cache)
-      if (result.inventory) setInventory({ ...inventory, ...result.inventory })
-    })
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [refresh])
+    runInventoryApiCall(api, setInventory)
+  }, [refresh, api])
 
   // Tell people  we are still loading
-  if (cache === false)
+  if (inventory === false)
     return (
       <>
         <Loading />
         <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
       </>
     )
-  const io = cache[`metric|top-linux-pressure-io-full300`]?.value || cache[`metric|top-linux-pressure-io-some300`]?.value ? true : false
-  const memory = cache[`metric|top-linux-pressure-memory-full300`]?.value || cache[`metric|top-linux-pressure-memory-some300`]?.value ? true : false
+
+  const topProps = { inventory, type: "top" }
 
   return (
     <>
-      <ul className="list list-disc list-inside ml-4">
-        <li><a href="#cpu">Top CPU Pressure</a></li>
-        {io ? <li><a href="#io">Top IO Pressure</a></li> :null }
-        {memory ? <li><a href="#mem">Top Memory Pressure</a></li> : null}
-        <li><a href="#load">Top System Load</a></li>
-        <li><a href="#fs">Top Used Mounts</a></li>
-      </ul>
-      <h2 id="cpu">Top CPU Pressure</h2>
+      <h2 id="cpu">CPU Pressure</h2>
+      <MiniTip>Data will only show up if there are hosts under CPU pressure</MiniTip>
       <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-        <Tab tabId="5 minutes">
-          <TopPressureChart
-            data={cache[`metric|top-linux-pressure-cpu-some300`]?.value}
-            title="5-minute CPU Pressure"
-            inventory={inventory}
-          />
+        <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-cpu-some300" /></Tab>
+        <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-cpu-some60" /></Tab>
+        <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-cpu-some10" /></Tab>
+      </Tabs>
+
+      <h2 id="io">IO Pressure</h2>
+      <MiniTip>Data will only show up if there are hosts under full/some IO pressure</MiniTip>
+      <Tabs tabs="full pressure, some pressure">
+        <Tab tabId="full pressure">
+          <Tabs tabs="5 minutes, 1 minute, 10 seconds">
+            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-full300" /></Tab>
+            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-full60" /></Tab>
+            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-full10" /></Tab>
+          </Tabs>
         </Tab>
-        <Tab tabId="1 minute">
-          <TopPressureChart
-            data={cache[`metric|top-linux-pressure-cpu-some60`]?.value}
-            title="1-minute CPU Pressure"
-            inventory={inventory}
-          />
-        </Tab>
-        <Tab tabId="10 seconds">
-          <TopPressureChart
-            data={cache[`metric|top-linux-pressure-cpu-some10`]?.value}
-            title="10-second CPU Pressure"
-            inventory={inventory}
-          />
+        <Tab tabId="some pressure">
+          <Tabs tabs="5 minutes, 1 minute, 10 seconds">
+            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-some300" /></Tab>
+            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-some60" /></Tab>
+            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-some10" /></Tab>
+          </Tabs>
         </Tab>
       </Tabs>
 
-      {io ? <h2 id="io">Top IO Pressure</h2> : null}
-      {cache[`metric|top-linux-pressure-io-full300`]?.value ? (
-        <>
-          <h2 id="iofull">Full Stall</h2>
+      <h2 id="memory">Memory Pressure</h2>
+      <h3>Full pressure</h3>
+      <MiniTip>Data will only show up if there are hosts under full/some memory pressure</MiniTip>
+      <Tabs tabs="full pressure, some pressure">
+        <Tab tabId="full pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-io-full300`]?.value}
-                title="5-minute CPU Pressure"
-                inventory={inventory}
-              />
-            </Tab>
-            <Tab tabId="1 minute">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-io-full60`]?.value}
-                title="1-minute CPU Pressure"
-                inventory={inventory}
-              />
-            </Tab>
-            <Tab tabId="10 seconds">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-io-full10`]?.value}
-                title="10-second CPU Pressure"
-                inventory={inventory}
-              />
-            </Tab>
+            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-full300" /></Tab>
+            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-full60" /></Tab>
+            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-full10" /></Tab>
           </Tabs>
-        </>
-      ) : null}
-      {cache[`metric|top-linux-pressure-io-some300`]?.value ? (
-        <>
-          <h2 id="iofull">Some Stalling</h2>
+        </Tab>
+        <Tab tabId="some pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-io-some300`]?.value}
-                title="5-minute CPU Pressure"
-                inventory={inventory}
-              />
-            </Tab>
-            <Tab tabId="1 minute">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-io-some60`]?.value}
-                title="1-minute CPU Pressure"
-                inventory={inventory}
-              />
-            </Tab>
-            <Tab tabId="10 seconds">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-io-some10`]?.value}
-                title="10-second CPU Pressure"
-                inventory={inventory}
-              />
-            </Tab>
+            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-some300" /></Tab>
+            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-some60" /></Tab>
+            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-some10" /></Tab>
           </Tabs>
-        </>
-      ) : null}
+        </Tab>
+      </Tabs>
 
-      {memory ? <h2 id="mem">Top Memory Pressure</h2> : null}
-      {memory && cache[`metric|top-linux-pressure-memory-full300`]?.value ? (
-        <>
-          <h3 id="memoryfull">Full Stall</h3>
-          <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-memory-full300`]?.value}
-                title="5-minute Memory Pressure (full)"
-                inventory={inventory}
-              />
-            </Tab>
-            <Tab tabId="1 minute">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-memory-full60`]?.value}
-                title="1-minute Memory Pressure (full)"
-                inventory={inventory}
-              />
-            </Tab>
-            <Tab tabId="10 seconds">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-memory-full10`]?.value}
-                title="10-second Memory Pressure (full)"
-                inventory={inventory}
-              />
-            </Tab>
-          </Tabs>
-        </>
-      ) : null}
-      {cache[`metric|top-linux-pressure-memory-some300`]?.value ? (
-        <>
-          <h3 id="iofull">Some Stalling</h3>
-          <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-memory-some300`]?.value}
-                title="5-minute Memory Pressure (some)"
-                inventory={inventory}
-              />
-            </Tab>
-            <Tab tabId="1 minute">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-memory-some60`]?.value}
-                title="1-minute Memory Pressure (some)"
-                inventory={inventory}
-              />
-            </Tab>
-            <Tab tabId="10 seconds">
-              <TopPressureChart
-                data={cache[`metric|top-linux-pressure-memory-some10`]?.value}
-                title="10-second Memory Pressure (some)"
-                inventory={inventory}
-              />
-            </Tab>
-          </Tabs>
-        </>
-      ) : null}
-
-
-      <h2 id="load">Top System Load</h2>
+      <h2 id="load">System Load</h2>
       <Tabs tabs="Load-15, Load-5, Load-1">
-        <Tab tabId="Load-15">
-          <TopLoadChart data={cache["metric|top-linux-load15"].value} type={15} inventory={inventory} />
-        </Tab>
-        <Tab tabId="Load-5">
-          <TopLoadChart data={cache["metric|top-linux-load5"].value} type={5} inventory={inventory} />
-        </Tab>
-        <Tab tabId="Load-1">
-          <TopLoadChart data={cache["metric|top-linux-load1"].value} type={1} inventory={inventory} />
-        </Tab>
+        <Tab tabId="Load-15"><ShowMetrics {...topProps} cachekey="metric|top-linux-load15" /></Tab>
+        <Tab tabId="Load-5"><ShowMetrics {...topProps} cachekey="metric|top-linux-load5" /></Tab>
+        <Tab tabId="Load-1"><ShowMetrics {...topProps} cachekey="metric|top-linux-load1" /></Tab>
       </Tabs>
-      <h2 id="fs">Top Used Mounts</h2>
-      <TopMountUsedChart data={cache["metric|top-linux-mount-used"].value} inventory={inventory} />
+
+      <h2 id="storage">Storage Used</h2>
+      <ShowMetrics {...topProps} cachekey="metric|top-linux-mount-used" />
     </>
   )
-    //{loads.map(load => <SingleEchart key={`load-${load}`} option={optionTopLoads[load]} href={`/boards/top/`} />)}
-
-  // Don't bother if there's nothing in the cache
-  if (cache.length < 1)
-    return (
-      <>
-        <p>No cache keys found.</p>
-        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
-      </>
-    )
-}
-
-const TopLoadChart = ({ data, type="15", inventory }) => {
-  const scores = []
-  let i = 0
-  while (i < data.length) {
-    scores.push({ k: data[i], v: Number(data[Number(i)+1]) })
-    i += 2
-  }
-  const ordered = orderBy(scores, 'v', 'desc')
-
-  // Now prepare the data for the Echarts
-  const option = {
-    title: {
-      text: `Top Load-${type} (normalized)`
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      }
-    },
-    xAxis: {
-      type: 'value',
-      min: 0,
-      name: 'Load',
-    },
-    yAxis: {
-      offset: 20000,
-      type: 'category',
-      axisTick: { show: false },
-      data: ordered.map(entry => ({ value: inventory[entry.k]?.fqdn || entry.k })),
-      name: 'Host',
-    },
-    series: [{
-      name: `load-${type}`,
-      type: 'bar',
-      label: {
-        show: true,
-        position: 'insideBottom',
-        distance: 15,
-        align: 'start',
-        verticalAlign: 'bottom',
-        formatter: "{b}: {c}",
-      },
-      data: ordered.map(entry => entry.v)
-    }],
-  }
-
-  return <SingleEchart option={option} href={`/boards/metrics/top/`} />
-}
-
-const TopMountUsedChart = ({ data, inventory }) => {
-  const scores = []
-  let i = 0
-  while (i < data.length) {
-    const chunks = data[i].split('|')
-    const v = Number(data[Number(i)+1])
-    if (v > 0) scores.push({ k: chunks[0], mount: chunks[1], v })
-    i += 2
-  }
-  const ordered = orderBy(scores, 'v', 'desc')
-
-  // Now prepare the data for the Echarts
-  const option = {
-    title: {
-      text: `Top used mounts`
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      }
-    },
-    xAxis: {
-      type: 'value',
-      min: 0,
-      name: 'Used %',
-    },
-    yAxis: {
-      offset: 20000,
-      type: 'category',
-      axisTick: { show: false },
-      data: ordered.map(entry => ({ value: `${entry.mount} on ${inventory[entry.k]?.fqdn || entry.k }` })),
-      name: 'Host',
-    },
-    series: [{
-      name: `used`,
-      type: 'bar',
-      label: {
-        show: true,
-        position: 'insideBottom',
-        distance: 15,
-        align: 'start',
-        verticalAlign: 'bottom',
-        formatter: "{b}: {c}%",
-      },
-      data: ordered.map(entry => Math.round(entry.v * 1000)/10)
-    }],
-  }
-
-  return <SingleEchart option={option} href={`/boards/metrics/top/`} />
-}
-
-const TopPressureChart = ({ data, title, inventory }) => {
-  if (!data) return <p>No data in the cache for this chart</p>
-  const scores = []
-  let i = 0
-  while (i < data.length) {
-    const v = Math.round(Number(data[Number(i)+1])*1000)/10
-    if (v > 0) scores.push({ k: data[i], v })
-    i += 2
-  }
-  const ordered = orderBy(scores, 'v', 'desc')
-
-  // Now prepare the data for the Echarts
-  const option = {
-    title: {
-      text: title,
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      }
-    },
-    xAxis: {
-      type: 'value',
-      min: 0,
-      name: 'Pressure',
-    },
-    yAxis: {
-      offset: 20000,
-      type: 'category',
-      axisTick: { show: false },
-      data: ordered.map(entry => ({ value: inventory[entry.k]?.fqdn || entry.k })),
-      name: 'Host',
-    },
-    series: [{
-      name: `pressure`,
-      type: 'bar',
-      label: {
-        show: true,
-        position: 'insideBottom',
-        distance: 15,
-        align: 'start',
-        verticalAlign: 'bottom',
-        formatter: "{b}: {c}%",
-      },
-      data: ordered.map(entry => entry.v)
-    }],
-  }
-
-  return <SingleEchart option={option} href={`/boards/metrics/top/`} />
 }
 
 async function runHostMetricsTableApiCall(api, host) {
@@ -624,7 +329,7 @@ async function runHostMetricsTableApiCall(api, host) {
   return data
 }
 
-const MorioMetricset = ({ name, href }) =>
+const MorioDataset = ({ name, href }) =>
   href ? (
     <PageLink href={href}>{name.split('.').join(' / ')}</PageLink>
   ) : (
@@ -643,35 +348,41 @@ export const ShowMetrics = (props) => (
 // Avoid re-using objects
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
-const transformMetrics = ({ host, module, metricset, data, templates }) =>
-  typeof window?.morio?.charts?.metrics?.[module]?.[metricset] === 'function'
-    ? window.morio.charts.metrics[module][metricset]({
-        host,
-        module,
-        metricset,
-        data,
-        templates,
-        clone,
-        formatBytes,
-      })
-    : { err: 'noTransformAvailable', data }
+const transformMetrics = (params) => {
+  const transformParams = {...params, clone, formatBytes, orderBy }
+  if (typeof window?.morio?.charts?.metrics?.[params.module]?.[params.dataset] === 'function') {
+    return  window.morio.charts.metrics[params.module][params.dataset](transformParams)
+  }
+  if (params.cachekey) {
+    const id = params.cachekey.split('|').slice(1)
+    if (typeof window?.morio?.charts?.metrics?.[id] === 'function') {
+      return  window.morio.charts.metrics[id](transformParams)
+    }
+  }
+
+  return { err: 'noTransformAvailable', data: params.data }
+}
 
 /**
  * This component renders visualisations for all cached
- * metrics for a given host/module/metricset
+ * metrics for a given host/module/dataset
  */
-const ShowMetricsInner = ({ host, module, metricset, hostname, show }) => {
+const ShowMetricsInner = ({ host, module, dataset, hostname, show, type="dataset", cachekey, inventory }) => {
   // State
   const [cache, setCache] = useState(false)
   const [paused, setPaused] = useState(false)
-
   // Hooks
   const { api } = useApi()
   useQuery({
-    queryKey: [`${host}|${module}|${metricset}`],
+    queryKey: type === 'dataset' ? [`${host}|${module}|${dataset}`] : [cachekey],
     queryFn: () => {
-      runShowMetricsApiCall(api, host, module, metricset).then((result) => {
-        if (result.cache) setCache(result.cache)
+      if (type === "dataset") runShowMetricsApiCall(api, host, module, dataset).then((result) => {
+        if (result) setCache(result)
+        return result
+      })
+      else if (type === "top") runCacheKeyApiCall(api, cachekey).then((result) => {
+        if (result) setCache(result)
+        return result
       })
     },
     refetchInterval: paused ? false : 15000,
@@ -679,53 +390,35 @@ const ShowMetricsInner = ({ host, module, metricset, hostname, show }) => {
   })
 
   // Don't bother if there's nothing in the cache
-  if (!cache || cache.length < 1)
-    return (
-      <>
-        <Loading />
-        <p>Nothing in the cache to show you here.</p>
-      </>
-    )
+  if (!cache || cache.length < 1) return <MiniWarning>No relevant data was found in the cache.</MiniWarning>
 
   // Defer to chart transformer
   const data = parseCachedMetrics(cache)
 
-  return <EchartWrapper {...{ data, host, module, metricset, paused, setPaused, hostname, show }} />
+  return <EchartWrapper {...{ data, host, module, dataset, paused, setPaused, hostname, show, type, cachekey, inventory }} />
 }
 
-async function runShowMetricsApiCall(api, host, module, metricset) {
-  const data = {}
-  let result = await api.getCacheKey(`metric|${host}|${module}|${metricset}`)
-  if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
-  result = await api.getInventoryHost(host)
-  if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
+async function runShowMetricsApiCall(api, host, module, dataset) {
+  let result
+  try {
+    result = await api.getCacheKey(`metric|${host}|${module}|${dataset}`)
+  }
+  catch (err) {
+    console.log(err)
+  }
 
-  return data
+  return (Array.isArray(result) && result[1] === 200)
+    ? result[0]
+    : false
 }
 
-const EchartWrapper = ({
-  data,
-  host,
-  module,
-  metricset,
-  paused,
-  setPaused,
-  hostname,
-  show = true,
-}) => {
-  const [enabled, setEnabled] = useState(show)
-
+const EchartWrapper = (props) => {
+  const [enabled, setEnabled] = useState(props.show)
   // We are memoizing option to avoid re-renders
   const option = useMemo(
-    () =>
-      transformMetrics({
-        host,
-        module,
-        metricset,
-        data,
-        templates: cloneAsPojo(chartTemplates),
-      }),
-    [host, module, metricset, data]
+    () => transformMetrics({...props, templates: cloneAsPojo(chartTemplates) }),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    [props.host, props.module, props.dataset, props.data, props.cachekey]
   )
 
   const toggleChart = (id) => {
@@ -736,29 +429,37 @@ const EchartWrapper = ({
     setEnabled(newEnabled)
   }
 
-  const isEnabled = (option, i) =>
-    enabled === true || (enabled && (enabled[i] || enabled[option?.id])) ? true : false
+  const isEnabled = (opt, i) => (
+    enabled === true ||
+    (i === 0 && option.length === 1) ||
+    (enabled && (enabled[i] || enabled[opt?.id]))
+  ) ? true : false
 
-  if (option.err === 'noTransformAvailable')
+  if (option === null) return <MiniTip>No relevant data was found in the cache</MiniTip>
+  if (!option || option.err === 'noTransformAvailable')
     return (
       <Popout note>
         <h5>No visualisations available</h5>
-        <p>
-          No charts are loaded for the <code>{metricset}</code> metricset of the{' '}
-          <code>{module}</code> module.
-        </p>
-        <p>If this module provides chart templates, you may need to preseed them.</p>
+        <p>No charts are loaded for the
+        {props.dataset && props.module
+          ? <span> <code>{props.dataset}</code> dataset of the{' '} <code>{props.module}</code> module</span>
+          : <span> <code>{props.cachekey}</code> cache key</span>
+        }
+        .</p>
+        <p>You may need to preseed a chart handler for metrics of type s.</p>
       </Popout>
     )
 
+  const { paused, setPaused } = props
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row flex-wrap items-center justify-center gap-1 mb-4">
         <ToggleLiveButton {...{ paused, setPaused }} />
-        <KeyVal k="module" val={module} />
-        <KeyVal k="metricset" val={metricset} />
-        {hostname ? <KeyVal k="hostname" val={hostname} /> : <KeyVal k="host" val={host} />}
-        {Array.isArray(option) && typeof show !== 'object'
+        {props.module ? <KeyVal k="module" val={props.module} /> : null}
+        {props.dataset ? <KeyVal k="dataset" val={props.dataset} /> : null}
+        {props.hostname ? <KeyVal k="hostname" val={props.hostname} /> : null}
+        {props.host ? <KeyVal k="host" val={props.host} /> : null}
+        {Array.isArray(option) && option.length > 1 && typeof show !== 'object'
           ? option.map((opt, i) =>
               opt ? (
                 <KeyVal
@@ -778,14 +479,20 @@ const EchartWrapper = ({
             <SingleEchart
               key={i}
               option={opt}
-              href={`/boards/metrics/${host}/${module}/${metricset}/${opt.id || i}`}
+              href={props.type === "dataset"
+                ? `/boards/metrics/${props.host}/${props.module}/${props.dataset}/${opt.id || i}`
+                : `/boards/metrics/show/${props.cachekey}/`
+              }
             />
           )
         )
       ) : (
         <SingleEchart
           option={option}
-          href={`/boards/metrics/${host}/${module}/${metricset}/${option.id || 0}`}
+          href={props.type === "dataset"
+            ? `/boards/metrics/${props.host}/${props.module}/${props.dataset}/}`
+            : `/boards/metrics/show/${props.cachekey}/`
+          }
         />
       )}
     </div>
@@ -813,14 +520,22 @@ export const SingleEchart = ({ option, href = false }) => {
  * @return {object} data - The same data parsed
  */
 export function parseCachedMetrics(data) {
-  if (!data) return data
-  if (Array.isArray(data))
-    return orderBy(
-      data.map((entry) => parseJson(entry)),
-      'timestamp',
-      'ASC'
-    )
+  if (!data || !data.type || !data.value) return data
+  if (data.type.toLowerCase() === "zset") {
+    const scores = []
+    let i = 0
+    while (i < data.value.length) {
+      scores.push({ entry: data.value[i], value: Number(data.value[Number(i)+1]) })
+      i += 2
+    }
+    return orderBy(scores, 'value', 'desc')
+  }
+  if (data.type.toLowerCase() === "list") return orderBy(
+    data.value.map((entry) => parseJson(entry)),
+    'timestamp',
+    'ASC'
+  )
 
-  console.log('Metrics data was not an array. This is unexpected', data)
+  console.log('Metrics data was not a type we know how to handle. This is unexpected', data)
   return []
 }
