@@ -255,16 +255,16 @@ export const TopMetrics = () => {
       </>
     )
 
-  const topProps = { inventory, type: "top" }
+  const topProps = { inventory, type: "top", module: "top" }
 
   return (
     <>
       <h2 id="cpu">CPU Pressure</h2>
       <MiniTip>Data will only show up if there are hosts under CPU pressure</MiniTip>
       <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-        <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-cpu-some300" /></Tab>
-        <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-cpu-some60" /></Tab>
-        <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-cpu-some10" /></Tab>
+        <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-cpu-some300" /></Tab>
+        <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-cpu-some60" /></Tab>
+        <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-cpu-some10" /></Tab>
       </Tabs>
 
       <h2 id="io">IO Pressure</h2>
@@ -272,16 +272,16 @@ export const TopMetrics = () => {
       <Tabs tabs="full pressure, some pressure">
         <Tab tabId="full pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-full300" /></Tab>
-            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-full60" /></Tab>
-            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-full10" /></Tab>
+            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-full300" /></Tab>
+            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-full60" /></Tab>
+            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-full10" /></Tab>
           </Tabs>
         </Tab>
         <Tab tabId="some pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-some300" /></Tab>
-            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-some60" /></Tab>
-            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-io-some10" /></Tab>
+            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-some300" /></Tab>
+            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-some60" /></Tab>
+            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-some10" /></Tab>
           </Tabs>
         </Tab>
       </Tabs>
@@ -292,29 +292,29 @@ export const TopMetrics = () => {
       <Tabs tabs="full pressure, some pressure">
         <Tab tabId="full pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-full300" /></Tab>
-            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-full60" /></Tab>
-            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-full10" /></Tab>
+            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-full300" /></Tab>
+            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-full60" /></Tab>
+            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-full10" /></Tab>
           </Tabs>
         </Tab>
         <Tab tabId="some pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-some300" /></Tab>
-            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-some60" /></Tab>
-            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|top-linux-pressure-memory-some10" /></Tab>
+            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-some300" /></Tab>
+            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-some60" /></Tab>
+            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-some10" /></Tab>
           </Tabs>
         </Tab>
       </Tabs>
 
       <h2 id="load">System Load</h2>
       <Tabs tabs="Load-15, Load-5, Load-1">
-        <Tab tabId="Load-15"><ShowMetrics {...topProps} cachekey="metric|top-linux-load15" /></Tab>
-        <Tab tabId="Load-5"><ShowMetrics {...topProps} cachekey="metric|top-linux-load5" /></Tab>
-        <Tab tabId="Load-1"><ShowMetrics {...topProps} cachekey="metric|top-linux-load1" /></Tab>
+        <Tab tabId="Load-15"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-load15" /></Tab>
+        <Tab tabId="Load-5"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-load5" /></Tab>
+        <Tab tabId="Load-1"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-load1" /></Tab>
       </Tabs>
 
       <h2 id="storage">Storage Used</h2>
-      <ShowMetrics {...topProps} cachekey="metric|top-linux-mount-used" />
+      <ShowMetrics {...topProps} cachekey="metric|-|top|linux-mount-used" />
     </>
   )
 }
@@ -354,10 +354,14 @@ const transformMetrics = (params) => {
     return  window.morio.charts.metrics[params.module][params.dataset](transformParams)
   }
   if (params.cachekey) {
-    const id = params.cachekey.split('|').slice(1)
-    if (typeof window?.morio?.charts?.metrics?.[id] === 'function') {
-      return  window.morio.charts.metrics[id](transformParams)
-    }
+    // Handle 'top' metrics
+    const [topic, host, module, id] = params.cachekey.split('|')
+    if (
+      topic === "metric" &&
+      host === "-" &&
+      module === "top" &&
+      typeof window?.morio?.charts?.metrics?.top?.[id] === 'function'
+    ) return window.morio.charts.metrics.top[id](transformParams)
   }
 
   return { err: 'noTransformAvailable', data: params.data }
