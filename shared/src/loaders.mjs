@@ -881,7 +881,10 @@ export async function loadChartProcessors(settings, log) {
             try {
               // Import file dynamically
               const esm = await import(sourceFile)
-              if (esm && typeof esm.default === 'object') metrics[module] = esm.default
+              if (esm && typeof esm.default === 'object') {
+                if (typeof metrics[module] === 'undefined') metrics[module] = esm.default
+                else metrics[module] = { ...metrics[module], ...esm.default }
+              }
             } catch (err) {
               log.warn(`Failed to load chart transformer: ${sourceFile}. ${err}`)
             }
