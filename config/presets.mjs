@@ -402,13 +402,6 @@ predocs.MORIO_PROXY_LOG_LEVEL = `Log level for the _proxy service_. One of
 To change this, set \`MORIO_PROXY_LOG_LEVEL\` in your Morio settings.`
 presets.MORIO_PROXY_LOG_LEVEL = 'DEBUG'
 
-predocs.MORIO_PROXY_ACCESS_LOG_FILEPATH =
-  'Access log file path for Traefik inside the _proxy service_ container'
-presets.MORIO_PROXY_ACCESS_LOG_FILEPATH = '/var/log/morio/traefik.access.log'
-
-predocs.MORIO_PROXY_LOG_FILEPATH = 'Log file path for Traefik inside the _proxy service_ container'
-presets.MORIO_PROXY_LOG_FILEPATH = '/var/log/morio/traefik.log'
-
 predocs.MORIO_PROXY_LOG_FORMAT =
   'Log format for the _proxy service_. One of json or common. Common is plain text.'
 presets.MORIO_PROXY_LOG_FORMAT = 'json'

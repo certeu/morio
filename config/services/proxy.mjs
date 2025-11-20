@@ -169,16 +169,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '--entrypoints.https.address=:443',
         // Set the log level to info in development
         `--log.level=${PROD ? utils.getPreset('MORIO_PROXY_LOG_LEVEL') : 'debug'}`,
-        // Set the log destination
-        `--log.filePath=${utils.getPreset('MORIO_PROXY_LOG_FILEPATH')}`,
         // Set the log format
         `--log.format=${utils.getPreset('MORIO_PROXY_LOG_FORMAT')}`,
         // Enable access logs
         '--accesslog=true',
         // Enable access logs for internal services
         '--accesslog.addinternals=true',
-        // Set the access log destination
-        `--accesslog.filePath=${utils.getPreset('MORIO_PROXY_ACCESS_LOG_FILEPATH')}`,
         // Log in JSON
         `--accesslog.format=${utils.getPreset('MORIO_PROXY_LOG_FORMAT')}`,
         // Do not verify backend certificates, just encrypt
