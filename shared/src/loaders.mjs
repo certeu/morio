@@ -12,6 +12,7 @@ import {
   readDirectory,
   readFile,
   readJsonFile,
+  readYamlFile,
   writeFile,
   writeJsonFile,
   globDir,
@@ -964,21 +965,40 @@ function applyOverlays(settings, overlays, log) {
  * Find overlays on disk
  */
 async function getSettingsOverlayFiles() {
-  const overlayFiles = ((await readDirectory(`/etc/morio`)) || [])
-    .filter((file) => new RegExp(`overlay.[a-z]+.json`).test(file))
-    .sort()
+  const overlayFiles = {
+    // Find JSON files
+    json: ((await readDirectory(`/etc/morio`)) || [])
+      .filter((file) => new RegExp(`overlay.[a-z._-]+.json`).test(file))
+      .sort(),
+    // Find YAML files
+    yaml: ((await readDirectory(`/etc/morio`)) || [])
+      .filter((file) => new RegExp(`overlay.[a-z._-]+.yaml`).test(file))
+      .sort(),
+  }
 
-  return overlayFiles.length > 0 ? overlayFiles : false
+  return overlayFiles
 }
 
 export async function applyOverlayFiles(settings, log) {
   const files = await getSettingsOverlayFiles()
-  if (!files) return settings
 
-  for (const file of files) {
-    const overlay = await readJsonFile(`/etc/morio/${file}`)
-    log.debug(`Applying disk-based settings overlay: ${file}`)
-    settings = applyOverlay(settings, overlay)
+  // JSON first
+  for (const file of (files.json || [])) {
+    const overlay = await readJsonFile(`/etc/morio/${file}`, (err) => log.warn(err))
+    if (overlay) {
+      log.debug(`Applying disk-based settings overlay: ${file}`)
+      settings = applyOverlay(settings, overlay)
+    }
+    else log.debug(`Failed to load disk-based settings overlay: ${file}`)
+  }
+  // Then YAML
+  for (const file of (files.yaml || [])) {
+    const overlay = await readYamlFile(`/etc/morio/${file}`, (err) => log.warn(err))
+    if (overlay) {
+      log.debug(`Applying disk-based settings overlay: ${file}`)
+      settings = applyOverlay(settings, overlay)
+    }
+    else log.debug(`Failed to load disk-based settings overlay: ${file}`)
   }
 
   return settings
