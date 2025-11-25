@@ -78,6 +78,20 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * Heartbeat configuration file
      */
     heartbeat: {
+      name: utils.getNodeFqdn(),
+      /*
+       * Keep monitors outside the main config so they can be hot-reloaded
+       */
+      config: {
+        monitors: {
+          path: "/usr/share/heartbeat/monitors.d/*.yml",
+          reload: {
+            enabled: true,
+            period: "30s",
+          }
+        }
+      },
+
       /*
        * Set node name based on the node serial and nodes list
        */
@@ -152,12 +166,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
         enabled: true,
         port: utils.getPreset('MORIO_WATCHER_HTTP_PORT'),
         host: '0.0.0.0',
-      },
-      /*
-       * Heartbeat settings which hold our monitors
-       */
-      heartbeat: {
-        monitors: [],
       },
     },
 

@@ -1000,6 +1000,7 @@ export async function applyOverlayFiles(settings, log) {
     }
     else log.debug(`Failed to load disk-based settings overlay: ${file}`)
   }
+  log.todo(settings.watcher)
 
   return settings
 }

@@ -14,22 +14,19 @@ export const service = {
     /**
      * Lifecycle hook to determine whether the container is wanted
      */
-    wanted: async () => {
-      const wNodes = utils.getSettings('flanking_services.watcher.nodes', [])
-      if (wNodes.includes(utils.getNodeFqdn())) return true
-      /*
-       * If there are explicit nodes, we are not part of them.
-       * So do not run this service.
-       */
-      if (wNodes.length > 0) return false
-      /*
-       * No explicit watcher node configured.
-       * We will run it on the node with the lowest serial.
-       * First we check flanking nodes, finally we try broker nodes.
-       */
-      if (utils.getFlankingCount() > 0)
-        return utils.getNodeSerial() === utils.getLowestFlankingNodeSerial() ? true : false
-      else return utils.getNodeSerial() === utils.getLowestBrokerNodeSerial() ? true : false
+    wanted: isWatcherServiceWanted,
+    /*
+     * On reload, generate the monitors config if the service is
+     * wanted. This will be picked up automatically by hearbeat
+     * as it is configured to hot-reload the monitors
+     */
+    reload: async () => {
+      if (isWatcherServiceWanted()) {
+        // Note: there is no need to await this
+        ensureMonitors()
+      }
+
+      return true
     },
     /*
      * Lifecycle hook to determine whether to recreate the container
@@ -60,12 +57,68 @@ function generateMonitorList(config = {}) {
   return Object.entries(config).map(([id, val]) => ({ id, ...val }))
 }
 
+/*
+ * Bundles monitors and write them to the monitors.d folder
+   Note that we add a default schedule of 30s
+ */
+async function ensureMonitors() {
+  const config = utils.getMorioServiceConfig('watcher', false)
+  if (config) {
+    const monitors = [
+      ...generateMonitorList(config.internal_monitors),
+      ...generateMonitorList(utils.getSettings('watcher.monitors', {})),
+    ].map((monitor) => ({ schedule: '@every 30s', ...monitor }))
+
+    /*
+     * Handle inventory ICMP checks if needed
+     */
+    const fqdns = await getInventoryFqdns()
+    if (Array.isArray(fqdns)) {
+      monitors.push(
+        ...fqdns.map((fqdn) => ({
+          type: 'icmp',
+          id: `${fqdn}/ping`,
+          name: `Ping ${fqdn}`,
+          hosts: [fqdn],
+          schedule: '@every 30s',
+        }))
+      )
+    }
+
+    /*
+     * Now write to disk
+     */
+    const file = '/etc/morio/watcher/monitors.d/bundle.yml'
+    log.debug('Watcher: Creating monitors config file')
+
+    return await writeYamlFile(file, monitors, log, 0o644)
+  } else log.warn(`Failed to load watcher config to generate monitors`)
+
+  return false
+}
+
+async function getInventoryFqdns() {
+  const [status, result] = await utils.db.read(`SELECT fqdn FROM inventory_hosts`)
+  if (status === 200 && Array.isArray(result?.results?.[0].values)) {
+    const fqdns = result.results[0].values.map((entry) => entry[0])
+
+    if (fqdns) return fqdns
+  }
+
+  return false
+}
+
 async function ensureLocalPrerequisites() {
   /*
    * Make sure the folders exist, and are writable
    */
   const uid = utils.getPreset('MORIO_WATCHER_UID')
-  for (const dir of ['/etc/morio/watcher', '/morio/data/watcher', '/morio/data/watcher/tls']) {
+  for (const dir of [
+    '/etc/morio/watcher',
+    '/etc/morio/watcher/monitors.d',
+    '/morio/data/watcher',
+    '/morio/data/watcher/tls',
+  ]) {
     await mkdir(dir)
     await chown(dir, uid, uid)
   }
@@ -91,14 +144,34 @@ async function ensureLocalPrerequisites() {
    */
   const config = utils.getMorioServiceConfig('watcher', false)
   if (config) {
-    config.heartbeat.heartbeat.monitors = [
-      ...generateMonitorList(config.internal_monitors),
-      ...generateMonitorList(utils.getSettings('watcher.monitors', {})),
-    ]
     const file = '/etc/morio/watcher/heartbeat.yml'
     log.debug('Watcher: Creating config file')
     await writeYamlFile(file, config.heartbeat, log, 0o644)
   }
 
+  /*
+   * Bundle monitors and write them to the monitors.d folder
+   * There is no need to await this
+   */
+  ensureMonitors()
+
   return true
+}
+
+function isWatcherServiceWanted() {
+  const wNodes = utils.getSettings('flanking_services.watcher.nodes', [])
+  if (wNodes.includes(utils.getNodeFqdn())) return true
+  /*
+   * If there are explicit nodes, we are not part of them.
+   * So do not run this service.
+   */
+  if (wNodes.length > 0) return false
+  /*
+   * No explicit watcher node configured.
+   * We will run it on the node with the lowest serial.
+   * First we check flanking nodes, finally we try broker nodes.
+   */
+  if (utils.getFlankingCount() > 0)
+    return utils.getNodeSerial() === utils.getLowestFlankingNodeSerial() ? true : false
+  else return utils.getNodeSerial() === utils.getLowestBrokerNodeSerial() ? true : false
 }
