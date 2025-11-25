@@ -57,5 +57,8 @@ COPY --from=builder /morio/core/dist/index.mjs ./dist/index.mjs
 ## Copy eda modules
 COPY --from=builder /morio/core/lib ./lib
 
+## Ensure the overlays.d folder exists
+RUN mkdir -p /etc/morio/overlays.d
+
 ## Now run NodeJS code inside PM2
 CMD [ "pm2-runtime", "start", "/morio/core/pm2.config.js" ]

@@ -25,6 +25,7 @@ import {
   writeSettingsData,
 } from '../lib/services/core.mjs'
 import {
+  applyOverlayFiles,
   loadPreseededSettings,
   ensurePreseededContent,
   loadClientModules,
@@ -749,6 +750,13 @@ const reseedHandler = async function (newSettings = false) {
    * Ensure preseeded stream processors are in place
    */
   await ensureStreamProcessors(settings)
+
+  /*
+   * Preseeding can add overlays to disk.
+   * In which case, we need to load them prior
+   * to returning.
+   */
+  await applyOverlayFiles(settings, log)
 
   return settings
 }

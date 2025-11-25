@@ -793,7 +793,7 @@ export async function loadStreamProcessors(settings, log) {
   /*
    * Write dynamic tap overlay to disk
    */
-  writeJsonFile('/etc/morio/overlay.tap.json', {
+  await writeJsonFile('/etc/morio/overlays.d/__morio.tap.json', {
     set: {
       tap: tapSettings,
     },
@@ -967,12 +967,12 @@ function applyOverlays(settings, overlays, log) {
 async function getSettingsOverlayFiles() {
   const overlayFiles = {
     // Find JSON files
-    json: ((await readDirectory(`/etc/morio`)) || [])
-      .filter((file) => new RegExp(`overlay.[a-z._-]+.json`).test(file))
+    json: ((await readDirectory(`/etc/morio/overlays.d`)) || [])
+      .filter((file) => new RegExp(`[a-z._-]+.json`).test(file))
       .sort(),
     // Find YAML files
-    yaml: ((await readDirectory(`/etc/morio`)) || [])
-      .filter((file) => new RegExp(`overlay.[a-z._-]+.yaml`).test(file))
+    yaml: ((await readDirectory(`/etc/morio/overlays.d`)) || [])
+      .filter((file) => new RegExp(`[a-z._-]+.yaml`).test(file))
       .sort(),
   }
 
@@ -984,7 +984,7 @@ export async function applyOverlayFiles(settings, log) {
 
   // JSON first
   for (const file of (files.json || [])) {
-    const overlay = await readJsonFile(`/etc/morio/${file}`, (err) => log.warn(err))
+    const overlay = await readJsonFile(`/etc/morio/overlays.d/${file}`, (err) => log.warn(err))
     if (overlay) {
       log.debug(`Applying disk-based settings overlay: ${file}`)
       settings = applyOverlay(settings, overlay)
@@ -993,14 +993,13 @@ export async function applyOverlayFiles(settings, log) {
   }
   // Then YAML
   for (const file of (files.yaml || [])) {
-    const overlay = await readYamlFile(`/etc/morio/${file}`, (err) => log.warn(err))
+    const overlay = await readYamlFile(`/etc/morio/overlays.d/${file}`, (err) => log.warn(err))
     if (overlay) {
       log.debug(`Applying disk-based settings overlay: ${file}`)
       settings = applyOverlay(settings, overlay)
     }
     else log.debug(`Failed to load disk-based settings overlay: ${file}`)
   }
-  log.todo(settings.watcher)
 
   return settings
 }

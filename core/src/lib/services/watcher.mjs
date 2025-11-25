@@ -72,17 +72,19 @@ async function ensureMonitors() {
     /*
      * Handle inventory ICMP checks if needed
      */
-    const fqdns = await getInventoryFqdns()
-    if (Array.isArray(fqdns)) {
-      monitors.push(
-        ...fqdns.map((fqdn) => ({
-          type: 'icmp',
-          id: `${fqdn}/ping`,
-          name: `Ping ${fqdn}`,
-          hosts: [fqdn],
-          schedule: '@every 30s',
-        }))
-      )
+    if (utils.getSettings(`watcher.monitor_inventory`, false)) {
+      const fqdns = await getInventoryFqdns()
+      if (Array.isArray(fqdns)) {
+        monitors.push(
+          ...fqdns.map((fqdn) => ({
+            type: 'icmp',
+            id: `${fqdn}/ping`,
+            name: `Ping ${fqdn}`,
+            hosts: [fqdn],
+            schedule: '@every 30s',
+          }))
+        )
+      }
     }
 
     /*

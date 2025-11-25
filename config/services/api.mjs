@@ -134,7 +134,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       apps: [
         {
           name: "api",
-          script: PROD ? "./dist/index.mjs" : "./src/index.mjs",
+          script: "./src/index.mjs",
           cwd: "/morio/api",
           max_memory_restart: "250M",
           watch: PROD ? false : ['./src'],

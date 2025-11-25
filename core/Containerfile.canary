@@ -30,5 +30,8 @@ COPY bin/* /usr/local/bin/
 ## Copy the PM2 config file
 COPY pm2.canary.config.js /morio/core/pm2.config.js
 
+## Ensure the overlays.d folder exists
+RUN mkdir -p /etc/morio/overlays.d
+
 ## Now run NodeJS code inside PM2
 CMD [ "pm2-runtime", "start", "/morio/core/pm2.config.js" ]
