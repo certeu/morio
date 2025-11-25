@@ -367,7 +367,9 @@ func AddDefaultProcessorsToInputs(inputs []map[string]interface{}, from string) 
 			},
 		},
 		{
-			"add_id": nil,
+			"add_id": map[string]string{
+        "target_field": "@metadata._id",
+      },
 		},
 	}
 
