@@ -100,7 +100,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
        * Set the log level and format
        */
       logging: {
-        level: 'debug',
+        level: 'info',
         metrics: { enabled: false },
         to_files: true,
       },
