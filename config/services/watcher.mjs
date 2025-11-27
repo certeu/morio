@@ -49,12 +49,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_DATA_ROOT')}/watcher:/usr/share/heartbeat/data`,
             `${utils.getPreset('MORIO_LOGS_ROOT')}/watcher:/var/log/heartbeat`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/watcher/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/watcher/monitors.d:/usr/share/heartbeat/monitors.d`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/watcher/tls:/usr/share/heartbeat/tls`,
           ]
         : [
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/watcher:/usr/share/heartbeat/data`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/logs/watcher:/var/log/heartbeat`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/watcher/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/watcher/monitors.d:/usr/share/heartbeat/monitors.d`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/watcher/tls:/usr/share/heartbeat/tls:ro`,
           ],
     },
