@@ -448,10 +448,7 @@ async function cacheTop(key, data, limit=10) {
   else pipeline.zadd(key, Number(data[1]), data[0])
   pipeline.zremrangebyrank(key, 0, -1 * limit - 1)
 
-  return pipeline.exec((res, err) => err
-    ? cacheNote(`Error during cacheTop Redis commands`, err)
-    : res
-  )
+  return pipeline.exec((result) => logCacheErrors(result, { in: 'cacheTop', key, data }))
 }
 
 /**
