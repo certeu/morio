@@ -84,12 +84,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
       /*
        * Keep monitors outside the main config so they can be hot-reloaded
        */
-      config: {
-        monitors: {
-          path: "/usr/share/heartbeat/monitors.d/*.yml",
-          reload: {
-            enabled: true,
-            period: "30s",
+      heartbeat: {
+        config: {
+          monitors: {
+            path: "/usr/share/heartbeat/monitors.d/*.yml",
+            reload: {
+              enabled: true,
+              period: "30s",
+            }
           }
         }
       },
