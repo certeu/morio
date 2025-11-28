@@ -22,6 +22,7 @@ export const service = {
      */
     reload: async () => {
       if (isWatcherServiceWanted()) {
+        log.todo('ENSURING MONITORS')
         // Note: there is no need to await this
         ensureMonitors()
       }
@@ -63,11 +64,23 @@ function generateMonitorList(config = {}) {
  */
 async function ensureMonitors() {
   const config = utils.getMorioServiceConfig('watcher', false)
+  const cas = utils.getSettings('watcher.ca_list', false)
   if (config) {
     const monitors = [
       ...generateMonitorList(config.internal_monitors),
       ...generateMonitorList(utils.getSettings('watcher.monitors', {})),
-    ].map((monitor) => ({ schedule: '@every 30s', ...monitor }))
+    ].map((monitor) => {
+      const m = { schedule: '@every 30s', ...monitor }
+      // Add trusted CAs if they are configured and it's an HTTPS monitor
+      return monitor.type === 'http' &&
+        Array.isArray(cas) &&
+        monitor.urls.filter((url) => url.toLowerCase().slice(0, 8) === 'https://').length > 0
+        ? {
+            ...m,
+            ssl: { certificate_authorities: ['/usr/share/heartbeat/tls/tls-ca.pem', ...cas] },
+          }
+        : m
+    })
 
     /*
      * Handle inventory ICMP checks if needed
