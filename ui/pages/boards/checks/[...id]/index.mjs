@@ -4,6 +4,10 @@ import { CheckCircleIcon } from 'components/icons.mjs'
 import { Check } from 'components/boards/checks.mjs'
 
 export default function HealthcheckPage({ id }) {
+  // We allow '/' in IDs but that means it's parsed
+  // as several URL parts
+  id = id.join('/')
+
   const meta = {
     title: `Health check`,
     page: ['boards', 'checks', id],
