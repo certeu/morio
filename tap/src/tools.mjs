@@ -522,6 +522,7 @@ function produceStructuredMessage(msgType, msgData) {
     morio: {
       uuid: tools.create.uuid()
     },
+    "@timestamp": when(msgData)
   }
   msg.morio[msgType] = { context, data, time, title, type, hash: hash(type + context) }
   for (const key of ['md_title', 'msg', 'md_msg']) {
