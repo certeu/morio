@@ -1,7 +1,7 @@
 // Dependencies
 import { cloneAsPojo, timeAgo, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
-import { chartTemplates } from './chart-templates.mjs'
+import { chartTemplates, markLine } from './chart-templates.mjs'
 // Hooks
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -451,6 +451,26 @@ export const Check = ({ id = false, cacheKey = false }) => {
     option.series[0].areaStyle = {
       opacity: 0.2,
       color: chartGradient('#1b88a2'),
+    }
+    option.series[0].markLine = {
+      type: 'line',
+      data: ['avg', 'med', 'p95'].map(name => ({
+        yAxis: markLine[name](option.series[0].data.map(d => d[1])),
+        name,
+        lineStyle: {
+          color: '#14b8a660',
+          opacity: 1,
+          animation: false,
+          type: [2, 4],
+        },
+        label: {
+          show: true,
+          formatter: name,
+          position: 'insideEnd',
+          padding: [0, 16, 0, 0],
+          color: '#14b8a6',
+        }
+      }))
     }
   }
   const check = data[data.length - 1] // Get the latest check instead of shifting

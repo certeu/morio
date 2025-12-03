@@ -147,3 +147,14 @@ export const chartTemplates = {
     },
   },
 }
+
+export const markLine = {
+  // Average
+  avg: (data) => data.reduce((a, b) => a + b) / data.length,
+  // Median
+  med: (data) => data.sort()[Math.round(data.length/2)],
+  // 95th percentile
+  p95: (data) => data.sort()[Math.ceil((95 / 100) * data.length) - 1],
+}
+
+
