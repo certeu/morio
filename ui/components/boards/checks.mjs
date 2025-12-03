@@ -21,25 +21,32 @@ import { Popout } from 'components/popout.mjs'
 /**
  * This component renders a status page view of health checks
  */
-export const ChecksTable = () => {
+export const ChecksTable = ({ glob = 'check|*' }) => {
   // State
   const [cache, setCache] = useState(false)
+  const [inventory, setInventory] = useState({})
   const [refresh, setRefresh] = useState(0)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [filter, setFilter] = useState('')
+  const [loading, setLoading] = useState('Finding all active healthchecks')
 
   // Hooks
   const { api } = useApi()
 
   // Effects
   useEffect(() => {
-    runChecksTableApiCall(api, 'checks').then((result) => {
-      if (result) {
+    api.getInventoryHostsObject().then((result) => {
+      if (Array.isArray(result) && result[1] === 200) setInventory(result[0])
+    })
+    api.listCacheKeys(glob).then((result) => {
+      if (Array.isArray(result) && result[1] === 200) {
+        setLoading(`Found ${result[0].length} healthchecks. Loading latest data...`)
         const all = []
-        for (const check of result) {
+        for (const check of result[0]) {
           const chunks = check.split('|')
           all.push({ key: check, id: chunks[1] })
         }
         setCache(all)
+        setLoading(false)
       }
     })
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -52,10 +59,10 @@ export const ChecksTable = () => {
   }, [refresh])
 
   // Tell people we are still loading
-  if (cache === false)
+  if (loading)
     return (
       <>
-        <Loading />
+        <div className="flex flex-row items-center gap-2 italic opacity-70 p-4 bg-secondary rounded-lg bg-opacity-40"><Spinner /> {loading}</div>
         <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
       </>
     )
@@ -83,15 +90,15 @@ export const ChecksTable = () => {
             type="text"
             placeholder="Search health checks by name or ID..."
             className="input input-bordered w-full pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
           />
         </div>
       </div>
 
       {/* Health checks status display */}
       <div className="space-y-1">
-        <HealthChecksList checks={cache} searchTerm={searchTerm} showFailingFirst={true} />
+        <HealthChecksList checks={cache} filter={filter} showFailingFirst={true} />
       </div>
 
       <div className="mt-4">
@@ -104,43 +111,34 @@ export const ChecksTable = () => {
 /**
  * Component to display the list of health checks with status
  */
-const HealthChecksList = ({ checks, searchTerm, showFailingFirst }) => {
+const HealthChecksList = ({ checks, filter, showFailingFirst }) => {
   const [healthCheckData, setHealthCheckData] = useState({})
   const { api } = useApi()
 
   // Fetch data for all health checks
   useEffect(() => {
-    const fetchAllData = async () => {
-      const data = {}
-      for (const check of checks) {
-        try {
-          const result = await runCheckApiCall(api, check.key)
-          if (result) {
-            data[check.key] = result
-          }
-        } catch (error) {
-          console.error(`Failed to fetch data for ${check.key}:`, error)
-        }
+    api.getCacheKeys(checks.map(check => check.key)).then((result) => {
+      if (result[1] === 200 && typeof result[0] === 'object') {
+        const data = {}
+        for (const check of Object.values(result[0])) data[check.key] = check.value
+        setHealthCheckData(data)
       }
-      setHealthCheckData(data)
-    }
-
-    if (checks.length > 0) {
-      fetchAllData()
-    }
+    })
   }, [checks, api])
 
-  // Filter checks based on search term
+  // Filter checks based on input
   const filteredChecks = checks.filter((check) => {
-    if (!searchTerm) return true
+    if (!filter) return true
     const data = healthCheckData[check.key]
     if (!data || !Array.isArray(data) || data.length === 0) return false
 
     const latestCheck = JSON.parse(data[0])
-    const searchLower = searchTerm.toLowerCase()
+    const filterLower = filter.toLowerCase()
     return (
-      latestCheck.name?.toLowerCase().includes(searchLower) ||
-      latestCheck.id?.toLowerCase().includes(searchLower)
+      latestCheck.name?.toLowerCase().includes(filterLower) ||
+      latestCheck.id?.toLowerCase().includes(filterLower) ||
+      latestCheck.host?.name?.toLowerCase().includes(filterLower) ||
+      latestCheck.host?.id?.toLowerCase().includes(filterLower)
     )
   })
 
@@ -223,7 +221,7 @@ const HealthCheckRow = ({ check, data }) => {
       <div className="flex items-center justify-between p-4 bg-base-200 rounded-lg mb-2">
         <div className="flex items-center space-x-4">
           <div className="bg-base-300 text-base-content px-3 py-1 rounded-full text-sm font-medium">
-            ---%
+            <Spinner />
           </div>
           <div>
             <div className="font-medium text-base-content">{check.id}</div>
@@ -262,8 +260,9 @@ const HealthCheckRow = ({ check, data }) => {
   const uptimePercentage = Math.round(calculatedUptime * 100 * 10) / 10
 
   // Determine status color: green for 100%, red for anything less
-  const statusColor = uptimePercentage === 100 ? 'bg-success' : 'bg-error'
-
+  let statusColor = 'bg-success'
+  if (uptimePercentage !== 100) statusColor = 'bg-warning'
+  if (!latestCheck.up) statusColor = 'bg-error'
   // Take last 30 checks for the timeline (or all if less than 30)
   const timelineChecks = sortedChecks.slice(0, 30).reverse() // Reverse to show oldest to newest
 
@@ -318,11 +317,14 @@ const HealthCheckRow = ({ check, data }) => {
   )
 }
 
-async function runChecksTableApiCall(api, key) {
-  const result = await api.getCacheKey(key)
-  if (Array.isArray(result) && result[1] === 200) return result[0].value
+async function runChecksTableApiCall(api, glob) {
+  const data = {}
+  let result = await api.listCacheKeys(glob)
+  if (Array.isArray(result) && result[1] === 200) data.cache = result[0]
+  result = await api.getInventoryHostsObject()
+  if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
 
-  return false
+  return data
 }
 
 export const UpOrNot = ({ cacheKey, hideOnUp = false }) => {
