@@ -274,6 +274,7 @@ async function cacheEvent(data, settings = {}) {
    */
   const {
     cap = 150, // Set to zero to disable
+    hostCap = 100, // Set to zero to disable
   } = settings
 
   /*
@@ -297,6 +298,7 @@ async function cacheHealthcheck(data, settings = {}) {
    * These limits can be set in the settings
    */
   const {
+    cap = 300,
     hostCap = 100, // Set to zero to disable
   } = settings
 
@@ -314,6 +316,8 @@ async function cacheHealthcheck(data, settings = {}) {
    * Prepare ValKey commands
    */
   const ops = valkey.pipeline()
+    .lpush(key, d)
+    .ltrim(key, 0, cap)
 
   /*
    * Cache per host
