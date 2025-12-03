@@ -80,6 +80,7 @@ export const tools = {
         log: (host, module, dataset, txt) => tools.link.md.to(`/boards/logs/show/log|${host}|${module}|${dataset}/`, txt),
         user: (username, txt=false) => tools.link.md.to(`/boards/audit/user/${username}/`, txt ? txt : username),
       },
+      healthcheck: (id, name, txt=false) => `[${txt ? txt : name}](${tools.link.raw.to('/boards/checks/'+id)})`,
       inventory: {
         host: (uuid, txt=false) => tools.link.md.to(`/inventory/hosts/${uuid}/`, txt ? txt : tools.shortUuid(uuid)),
       },
