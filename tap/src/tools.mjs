@@ -297,7 +297,7 @@ async function cacheHealthcheck(data, settings = {}) {
    * These limits can be set in the settings
    */
   const {
-    hostCap = 25, // Set to zero to disable
+    hostCap = 100, // Set to zero to disable
   } = settings
 
   /*
@@ -318,8 +318,8 @@ async function cacheHealthcheck(data, settings = {}) {
   /*
    * Cache per host
    */
-  if (hostCap && typeof data.host === 'string') {
-    const key = createKey('check', 'host', data.host)
+  if (hostCap && typeof data.host?.id === 'string') {
+    const key = createKey('hostchecks', data.host)
     ops.lpush(key, d).ltrim(key, 0, hostCap)
   }
 
