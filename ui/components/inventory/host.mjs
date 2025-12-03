@@ -22,6 +22,7 @@ import {
   PackageIcon,
   PuzzleIcon,
   RightIcon,
+  SearchIcon,
   TrashIcon,
 } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
@@ -58,14 +59,24 @@ export const HostsTable = () => {
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('host')
   const [desc, setDesc] = useState(false)
+  const [filter, setFilter] = useState('')
 
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
   const { pushModal } = useContext(ModalContext)
 
+  // Sort and filter
+  const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
+    .filter((host) => filter ? (
+      host.id.toLowerCase().includes(filter.toLowerCase()) ||
+      host.fqdn.toLowerCase().includes(filter.toLowerCase()) ||
+      host.name.toLowerCase().includes(filter.toLowerCase()) ||
+      host.notes.toLowerCase().includes(filter.toLowerCase()) ||
+      host.tags.toLowerCase().includes(filter.toLowerCase())
+    ) : true)
+
   // Hooks
   const { api } = useApi()
-  const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
   const { count, selection, setSelection, toggle, toggleAll } = useSelection(sorted)
 
   // Effects
@@ -97,6 +108,19 @@ export const HostsTable = () => {
 
   return (
     <>
+      {/* Search field */}
+      <div className="mb-4">
+        <div className="relative">
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" />
+          <input
+            type="text"
+            placeholder="Filter hosts"
+            className="input input-bordered w-full pl-10"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
+      </div>
       <div className="flex flex-row item-center gap-2">
         <button
           className="btn btn-primary"
