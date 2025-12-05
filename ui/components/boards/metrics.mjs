@@ -434,7 +434,6 @@ const EchartWrapper = (props) => {
     setEnabled(newEnabled)
   }
 
-  console.log({enabled})
   const isEnabled = (opt, i) => (
     enabled === true ||
     (i === 0 && option.length === 1) ||
