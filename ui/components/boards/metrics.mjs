@@ -21,7 +21,7 @@ import {
   DataPerDataset,
 } from 'components/boards/shared.mjs'
 import { ChartsProvider } from './charts-provider.mjs'
-import { Echart } from 'components/echarts.mjs'
+import { Echart, chartsGradient } from 'components/echarts.mjs'
 import { Popout } from 'components/popout.mjs'
 import { groupCacheKeys } from './logs.mjs'
 import { StringInput } from 'components/inputs.mjs'
@@ -349,7 +349,7 @@ export const ShowMetrics = (props) => (
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
 const transformMetrics = (params) => {
-  const transformParams = {...params, clone, formatBytes, orderBy }
+  const transformParams = {...params, clone, formatBytes, orderBy, chartsGradient }
   if (typeof window?.morio?.charts?.metrics?.[params.module]?.[params.dataset] === 'function') {
     return  window.morio.charts.metrics[params.module][params.dataset](transformParams)
   }
