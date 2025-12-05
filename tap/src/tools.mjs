@@ -284,7 +284,7 @@ async function cacheEvent(data, settings = {}) {
     .pipeline()
     .lpush('events', asString({ ...data, timestamp: when(data) }))
     .ltrim('events', 0, cap)
-    .exec((result) => logCacheErrors(result, { in: 'cacheAudit', settings, data }))
+    .exec((result) => logCacheErrors(result, { in: 'cacheEvent', settings, data }))
 }
 
 /**
@@ -525,7 +525,7 @@ function produceStructuredMessage(msgType, msgData) {
     "@timestamp": when(msgData)
   }
   msg.morio[msgType] = { context, data, time, title, type, hash: hash(type + context) }
-  for (const key of ['md_title', 'msg', 'md_msg']) {
+  for (const key of ['md_title', 'msg', 'md_msg', 'reps']) {
     if (typeof msgData[key] !== 'undefined') msg.morio[msgType][key] = msgData[key]
   }
 
