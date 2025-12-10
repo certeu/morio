@@ -751,6 +751,20 @@ MorioClient.prototype.getCacheKeys = async function (keys) {
 }
 
 /**
+ * Get a list of cache keys, but fetch only one record in a Redis list
+ *
+ * @param {string} key - The cache key to retrieve
+ * @return {object} - The result
+ */
+MorioClient.prototype.skimCacheKeys = async function (keys) {
+  return await this.call(`${morioConfig.api}/cache/skimkeys`, {
+    headers: this.jsonHeaders,
+    method: "POST",
+    body: JSON.stringify({ keys }),
+  })
+}
+
+/**
  * Get cache keys that (optionally) match a pattern
  *
  * @param {string} glob - The cache key pattern to apply

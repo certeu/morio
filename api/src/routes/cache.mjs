@@ -30,6 +30,11 @@ export function routes(app) {
   app.post(`/cache/keys`, rbac.user, Cache.readKeys)
 
   /*
+   * Read a list of keys from the cache but only return 1 record of lists in Redis
+   */
+  app.post(`/cache/skimkeys`, rbac.user, (req, res) => Cache.readKeys(req, res, true))
+
+  /*
    * Read a key from the cache
    */
   app.get(`/cache/keys/*`, rbac.user, Cache.readKey)

@@ -70,9 +70,10 @@ Controller.prototype.readKey = async function (req, res) {
  * Get multiple cache keys
  *
  * @param {object} req - The request object from Express
+ * @param {boolean} skim - Set to true return as little data as possible
  * @param {object} res - The response object from Express
  */
-Controller.prototype.readKeys = async function (req, res) {
+Controller.prototype.readKeys = async function (req, res, skim=false) {
   /*
    * Validate input
    */
@@ -85,7 +86,7 @@ Controller.prototype.readKeys = async function (req, res) {
   const values = {}
   const promises = []
   for (const key of valid.keys)
-    promises.push(utils.cache.read(key).then((result) => (values[key] = result)))
+    promises.push(utils.cache.read(key, skim).then((result) => (values[key] = result)))
 
   await Promise.all(promises)
 

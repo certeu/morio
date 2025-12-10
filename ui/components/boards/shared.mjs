@@ -1,5 +1,11 @@
-import { Link } from 'components/link.mjs'
+import { cloneAsPojo, formatBytes, formatNumber } from 'lib/utils.mjs'
+import { useState, useEffect } from 'react'
+import { useApi } from 'hooks/use-api.mjs'
+import { Link, linkClasses } from 'components/link.mjs'
 import { Details } from 'components/details.mjs'
+import orderBy from 'lodash/orderBy.js'
+import get from 'lodash/get.js'
+import { chartTemplates, lineChart } from './chart-templates.mjs'
 
 /**
  * A helper method to parse a Redis/ValKey stream into an object
@@ -54,34 +60,146 @@ export const ToggleGraphButton = ({ graph, setGraph }) => (
   </button>
 )
 
-export const DataPerHost = ({ type = 'logs', matches, inventory, filter = false }) =>
-  Object.keys(matches)
+async function loadChartTitles(type, matches, api, setMatches) {
+  /*
+   * First construct a list of all cache keys along with their module/dataset
+   */
+  const keys = new Set()
+  for (const [host, match] of Object.entries(matches)) {
+    for (const module in match) {
+      for (const dataset in match[module]) {
+        keys.add(match[module][dataset].key)
+      }
+    }
+  }
+
+  /*
+   * Now fetch data for all these keys.
+   * We use skimCacheKeys here, to load as little data as possible
+   */
+  let result = false
+  const data = {}
+  try {
+    result = await api.skimCacheKeys([...keys])
+  }
+  catch (err) {
+    console.log(err)
+  }
+  if (result[1] === 200 && result[0]) {
+    for (const entry of Object.values(result[0])) {
+      if (entry.value) {
+        try {
+          if (entry.type === 'zset') data[entry.key] = entry.value
+          else data[entry.key] = entry.value.map(val => JSON.parse(val))
+        }
+        catch (err) {
+          console.log(err, entry)
+        }
+      }
+    }
+  }
+  if (!data) return setMatches(matches)
+
+  /*
+   * Now see if there is a chart function for the module/dataset
+   * and if so, call it with the real data to get a list of avaiable charts
+   * This ensures we have all charts, even those that depend on runtime data.
+   */
+  for (const [host, match] of Object.entries(matches)) {
+    for (const module in match) {
+      for (const dataset in match[module]) {
+        //console.log(match[module][dataset].key)
+        if (
+          typeof window.morio?.charts?.[type]?.[module]?.[dataset] === 'function' &&
+          data[match[module][dataset].key]
+        ) {
+          try {
+            // We need to mimic all props passed to charts when they are getting the full data
+            const charts = window.morio.charts[type][module][dataset]({
+              data: data[match[module][dataset].key],
+              chartGradient: () => {},
+              clone: cloneAsPojo,
+              formatBytes,
+              formatNumber,
+              get,
+              orderBy,
+              templates: chartTemplates,
+              inventory: {},
+              lineChart
+            })
+            if (charts) {
+              const chartIds = {}
+              for (const chart of charts) chartIds[chart.id] = chart.title?.subtext
+                ? chart.title.text + ' - ' + chart.title.subtext
+                : chart.title.text
+              matches[host][module][dataset].charts = chartIds
+            }
+          } catch(err) {
+            console.log(err)
+          }
+        } else {
+          console.log(`No chart for ${type}.${module}.${dataset}`)
+        }
+      }
+    }
+  }
+
+  return setMatches(matches)
+}
+
+export const DataPerHost = ({ type = 'logs', matches, inventory, filter = false }) => {
+  // State
+  const [enrichedMatches, setEnrichedMatches] = useState(matches)
+
+  // Hooks
+  const { api } = useApi()
+
+  // Effect
+  useEffect(() => {
+    loadChartTitles(type, matches, api, setEnrichedMatches)
+  },[type, matches])
+
+  const list = Object.keys(matches)
     .sort()
     .filter((host) =>
       filter ? (inventory[host]?.fqdn || host).toLowerCase().includes(filter.toLowerCase()) : true
     )
-    .map((host) => (
-      <Details summaryLeft={inventory[host]?.fqdn || host} key={host}>
-        {Object.keys(matches[host])
-          .sort()
-          .map((module) => (
-            <details key={module}>
-              <summary className="text-bold hover:cursor-pointer">{module}</summary>
-              <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
-                {Object.keys(matches[host][module])
-                  .sort()
-                  .map((dataset) => (
-                    <li key={dataset}>
-                      <Link href={`/boards/${type}/show/${matches[host][module][dataset].key}/`}>
-                        {dataset}
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-            </details>
-          ))}
-      </Details>
-    ))
+
+  return list.map((host) => (
+    <Details summaryLeft={inventory[host]?.fqdn || host} key={host}>
+      {Object.keys(enrichedMatches[host])
+        .sort()
+        .map((module) => (
+          <details key={module}>
+            <summary className={`text-bold text-lg hover:cursor-pointer ${linkClasses}`}>
+              <b>{module}</b> <span className="opacity-75">module</span>
+            </summary>
+            <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
+              {Object.keys(enrichedMatches[host][module])
+                .sort()
+                .map((dataset) => (
+                  <li key={dataset}>
+                    <Link href={`/boards/${type}/show/${enrichedMatches[host][module][dataset].key}/`} className={linkClasses}>
+                      <b>{dataset}</b>
+                      <span className="opacity-75"> dataset</span>
+                    </Link>
+                    <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
+                      {Object.entries(enrichedMatches[host][module]?.[dataset].charts || {}).map(([key, title]) => (
+                        <li key={key}>
+                          <Link href={`/boards/${type}/${host}/${module}/${dataset}/${key}/`} className={linkClasses}>
+                            {title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+            </ul>
+          </details>
+        ))}
+    </Details>
+  ))
+}
 
 export const DataPerModule = ({ type = 'logs', matches, inventory, filter = false, hostView = false }) =>
   Object.keys(matches)

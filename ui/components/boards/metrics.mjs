@@ -1,7 +1,8 @@
 // Dependencies
-import { cloneAsPojo, formatBytes, parseJson } from 'lib/utils.mjs'
+import { cloneAsPojo, formatBytes, formatNumber, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
-import { chartTemplates } from './chart-templates.mjs'
+import get from 'lodash/get.js'
+import { chartTemplates, lineChart } from './chart-templates.mjs'
 import { linkClasses } from 'components/link.mjs'
 // Hooks
 import { useEffect, useState, useMemo } from 'react'
@@ -79,17 +80,6 @@ export const MetricsTable = ({ glob = 'metric|*', hostView=false }) => {
     <div>
       {hostView ? null : (
         <div className="flex flex-row gap-2 items-center">
-          <b>Group&nbsp;by:</b>
-          {grouping.map((type) => (
-            <button
-              key={type}
-              className={`btn btn-primary btn-sm ${groupBy !== type ? 'btn-outline' : ''}`}
-              onClick={() => setGroupBy(type)}
-            >
-              {type}
-            </button>
-          ))}
-          <span className="grow"></span>
           <b>Filter:</b>
           <StringInput
             update={setFilter}
@@ -99,16 +89,18 @@ export const MetricsTable = ({ glob = 'metric|*', hostView=false }) => {
           />
         </div>
       )}
-      {groupBy === 'host' ? (
-        <DataPerHost {...{ matches, inventory, filter }} type="metrics" />
-      ) : null}
-      {groupBy === 'module' ? (
-        <DataPerModule {...{ matches, inventory, filter }} type="metrics" hostView />
-      ) : null}
-      {groupBy === 'dataset' ? (
-        <DataPerDataset {...{ matches, inventory, filter }} type="metrics" hostView />
-      ) : null}
-      <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+      <ChartsProvider type="metrics">
+        {groupBy === 'host' ? (
+          <DataPerHost {...{ matches, inventory, filter }} type="metrics" />
+        ) : null}
+        {groupBy === 'module' ? (
+          <DataPerModule {...{ matches, inventory, filter }} type="metrics" hostView />
+        ) : null}
+        {groupBy === 'dataset' ? (
+          <DataPerDataset {...{ matches, inventory, filter }} type="metrics" hostView />
+        ) : null}
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+      </ChartsProvider>
     </div>
   )
 }
@@ -349,7 +341,7 @@ export const ShowMetrics = (props) => (
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
 const transformMetrics = (params) => {
-  const transformParams = {...params, clone, formatBytes, orderBy, chartGradient }
+  const transformParams = {...params, chartGradient, clone, formatBytes, formatNumber, get, orderBy, lineChart }
   if (typeof window?.morio?.charts?.metrics?.[params.module]?.[params.dataset] === 'function') {
     return  window.morio.charts.metrics[params.module][params.dataset](transformParams)
   }

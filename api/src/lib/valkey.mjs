@@ -85,9 +85,10 @@ Cache.prototype.listKeys = async function (pattern = '*') {
  * High-level method to read any type of cache key
  *
  * @param {string} key - The key ID to read
+ * @param {boolean} skim - Set to true return as little data as possible
  * @return {object} result - The result with key, value, and type, or false
  */
-Cache.prototype.read = async function (key = false) {
+Cache.prototype.read = async function (key = false, skim=false) {
   if (!key) return this.invalid
 
   const type = await this.type(key)
@@ -95,7 +96,7 @@ Cache.prototype.read = async function (key = false) {
   if (type === 'none') return { morio_cache_error: 404 }
 
   if (type === 'hash') return this.readHash(key)
-  if (type === 'list') return this.readList(key)
+  if (type === 'list') return this.readList(key, skim)
   if (type === 'set') return this.readSet(key)
   if (type === 'string') return this.readString(key)
   if (type === 'stream') return this.readStream(key)
@@ -126,12 +127,13 @@ Cache.prototype.readHash = async function (key = false) {
  * High-level method to read a key of type list
  *
  * @param {string} key - The key ID to read
+ * @param {boolean} skim - Set to true return as little data as possible
  * @return {object} result - The result with key, value, and type
  */
-Cache.prototype.readList = async function (key = false) {
+Cache.prototype.readList = async function (key = false, skim=false) {
   if (key) {
     // Using 1e6 as upper limit here, that should be enough
-    const value = await this.client.lrange(key, 0, 1e6)
+    const value = await this.client.lrange(key, 0, skim ? 1 : 1e6)
     // List keys return an array
     if (Array.isArray(value)) return { key, value, type: 'list' }
   }
@@ -175,11 +177,15 @@ Cache.prototype.readString = async function (key = false) {
  * High-level method to read a key of type stream
  *
  * @param {string} key - The key ID to read
+ * @param {boolean} skim - Set to true return as little data as possible
  * @return {object} result - The result with key, value, and type
  */
-Cache.prototype.readStream = async function (key = false) {
+Cache.prototype.readStream = async function (key = false, skim=false) {
   if (key) {
-    const value = await this.client.xrange(key, '-', '+')
+    const extra = skim
+      ? ['COUNT', 1]
+      : []
+    const value = await this.client.xrange(key, '-', '+', ...extra)
     // set keys return an array
     if (Array.isArray(value)) return { key, value, type: 'stream' }
   }
