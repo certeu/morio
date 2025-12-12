@@ -71,8 +71,8 @@ export const HostsTable = () => {
       host.id.toLowerCase().includes(filter.toLowerCase()) ||
       host.fqdn.toLowerCase().includes(filter.toLowerCase()) ||
       host.name.toLowerCase().includes(filter.toLowerCase()) ||
-      host.notes.toLowerCase().includes(filter.toLowerCase()) ||
-      host.tags.toLowerCase().includes(filter.toLowerCase())
+      (host.notes && host.notes.toLowerCase().includes(filter.toLowerCase())) ||
+      (host.tags && host.tags.toLowerCase().includes(filter.toLowerCase()))
     ) : true)
 
   // Hooks
