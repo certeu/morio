@@ -536,3 +536,93 @@ export function parseCachedMetrics(data) {
   console.log('Metrics data was not a type we know how to handle. This is unexpected', data)
   return []
 }
+
+export async function loadMetricsChartTitles(type, matches, api, setMatches) {
+  /*
+   * First construct a list of all cache keys along with their module/dataset
+   */
+  const keys = new Set()
+  for (const [host, match] of Object.entries(matches)) {
+    for (const module in match) {
+      for (const dataset in match[module]) {
+        keys.add(match[module][dataset].key)
+      }
+    }
+  }
+
+  /*
+   * Now fetch data for all these keys.
+   * We use skimCacheKeys here, to load as little data as possible
+   */
+  let result = false
+  const data = {}
+  try {
+    result = await api.skimCacheKeys([...keys])
+  }
+  catch (err) {
+    console.log(err)
+  }
+  if (result[1] === 200 && result[0]) {
+    for (const entry of Object.values(result[0])) {
+      if (entry.value) data[entry.key] = parseCachedMetrics(entry)
+    }
+  }
+  if (!data) return setMatches(matches)
+
+  /*
+   * Now see if there is a chart function for the module/dataset
+   * and if so, call it with the real data to get a list of avaiable charts
+   * This ensures we have all charts, even those that depend on runtime data.
+   */
+  for (const [host, match] of Object.entries(matches)) {
+    for (const module in match) {
+      for (const dataset in match[module]) {
+        //console.log(match[module][dataset].key)
+        if (
+          typeof window.morio?.charts?.[type]?.[module]?.[dataset] === 'function' &&
+          data[match[module][dataset].key]
+        ) {
+          try {
+            // We need to mimic all props passed to charts when they are getting the full data
+            const charts = window.morio.charts[type][module][dataset]({
+              data: data[match[module][dataset].key],
+              chartGradient: () => {},
+              clone: cloneAsPojo,
+              formatBytes,
+              formatNumber,
+              get,
+              orderBy,
+              templates: chartTemplates,
+              inventory: {},
+              lineChart
+            })
+            // Array of charts
+            if (Array.isArray(charts)) {
+              const chartIds = {}
+              for (const chart of charts) chartIds[chart.id] = chart.title?.subtext
+                ? chart.title.text + ' - ' + chart.title.subtext
+                : chart.title.text
+              matches[host][module][dataset].charts = chartIds
+            }
+            // Single chart
+            else if (charts?.id && charts?.title?.text) {
+              const chart = {}
+              chart[charts.id] = charts.title?.subtext
+                ? charts.title.text + ' - ' + charts.title.subtext
+                : charts.title.text
+              matches[host][module][dataset].charts = chart
+            }
+            // Something else?
+            else console.log('Returned chart data lacks id or title', charts)
+          } catch(err) {
+            console.log(err)
+          }
+        } else {
+          console.log(`No chart for ${type}.${module}.${dataset}`)
+        }
+      }
+    }
+  }
+
+  return setMatches(matches)
+}

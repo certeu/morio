@@ -1,11 +1,10 @@
-import { cloneAsPojo, formatBytes, formatNumber } from 'lib/utils.mjs'
 import { useState, useEffect } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { Link, linkClasses } from 'components/link.mjs'
 import { Details } from 'components/details.mjs'
 import orderBy from 'lodash/orderBy.js'
 import get from 'lodash/get.js'
-import { chartTemplates, lineChart } from './chart-templates.mjs'
+import { loadMetricsChartTitles } from './metrics.mjs'
 
 /**
  * A helper method to parse a Redis/ValKey stream into an object
@@ -60,93 +59,6 @@ export const ToggleGraphButton = ({ graph, setGraph }) => (
   </button>
 )
 
-async function loadChartTitles(type, matches, api, setMatches) {
-  /*
-   * First construct a list of all cache keys along with their module/dataset
-   */
-  const keys = new Set()
-  for (const [host, match] of Object.entries(matches)) {
-    for (const module in match) {
-      for (const dataset in match[module]) {
-        keys.add(match[module][dataset].key)
-      }
-    }
-  }
-
-  /*
-   * Now fetch data for all these keys.
-   * We use skimCacheKeys here, to load as little data as possible
-   */
-  let result = false
-  const data = {}
-  try {
-    result = await api.skimCacheKeys([...keys])
-  }
-  catch (err) {
-    console.log(err)
-  }
-  if (result[1] === 200 && result[0]) {
-    for (const entry of Object.values(result[0])) {
-      if (entry.value) {
-        try {
-          if (entry.type === 'zset') data[entry.key] = entry.value
-          else data[entry.key] = entry.value.map(val => JSON.parse(val))
-        }
-        catch (err) {
-          console.log(err, entry)
-        }
-      }
-    }
-  }
-  if (!data) return setMatches(matches)
-
-  /*
-   * Now see if there is a chart function for the module/dataset
-   * and if so, call it with the real data to get a list of avaiable charts
-   * This ensures we have all charts, even those that depend on runtime data.
-   */
-  for (const [host, match] of Object.entries(matches)) {
-    for (const module in match) {
-      for (const dataset in match[module]) {
-        //console.log(match[module][dataset].key)
-        if (
-          typeof window.morio?.charts?.[type]?.[module]?.[dataset] === 'function' &&
-          data[match[module][dataset].key]
-        ) {
-          try {
-            // We need to mimic all props passed to charts when they are getting the full data
-            const charts = window.morio.charts[type][module][dataset]({
-              data: data[match[module][dataset].key],
-              chartGradient: () => {},
-              clone: cloneAsPojo,
-              formatBytes,
-              formatNumber,
-              get,
-              orderBy,
-              templates: chartTemplates,
-              inventory: {},
-              lineChart
-            })
-            if (charts) {
-              const chartIds = {}
-              for (const chart of charts) chartIds[chart.id] = chart.title?.subtext
-                ? chart.title.text + ' - ' + chart.title.subtext
-                : chart.title.text
-              matches[host][module][dataset].charts = chartIds
-            }
-          } catch(err) {
-            console.log(err)
-          }
-        } else {
-          console.log(`No chart for ${type}.${module}.${dataset}`)
-        }
-      }
-    }
-  }
-
-  return setMatches(matches)
-}
-
 export const DataPerHost = ({ type = 'logs', matches, inventory, filter = false }) => {
   // State
   const [enrichedMatches, setEnrichedMatches] = useState(matches)
@@ -156,7 +68,7 @@ export const DataPerHost = ({ type = 'logs', matches, inventory, filter = false 
 
   // Effect
   useEffect(() => {
-    loadChartTitles(type, matches, api, setEnrichedMatches)
+    if (type === 'metrics') loadMetricsChartTitles(type, matches, api, setEnrichedMatches)
   },[type, matches])
 
   const list = Object.keys(matches)
