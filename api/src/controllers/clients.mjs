@@ -1,6 +1,5 @@
 import { utils } from '../lib/utils.mjs'
-import { Host } from '../lib/inventory/host.mjs'
-
+import { Host, Group } from '../lib/inventory/index.mjs'
 import { createApikey, deleteApikey } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
 import { currentUser } from '../rbac.mjs'
@@ -447,6 +446,100 @@ Controller.prototype.getCommandStatus = async function (req, res) {
   const updates = await new Host().getClientCommandStatusUpdates(req.params.id)
 
   return res.send(updates)
+}
+
+/**
+ * Clients can join an inventory group with this endpoint
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.joinGroup = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.client.join.group`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err?.message,
+    })
+
+  /*
+   * No funny business
+   */
+  if (!matchClientApikey(req, valid.uuid))
+    return utils.sendErrorResponse(res, 'morio.api.clients.authentication_mismatch', req.url)
+
+  /*
+   * Verify that it's the correct cluster
+   */
+  if (valid.cluster !== utils.getClusterFqdn())
+    return utils.sendErrorResponse(res, 'morio.api.clients.cluster_mismatch', req.url)
+
+  /*
+   * Verify the group exists
+   */
+  const group = new Group()
+  const info = await group.read(valid.group)
+
+  /*
+   * If the group does not exist, return 404
+   */
+  if (!info.id || info.id !== valid.group) return res.status(404).send()
+
+  /*
+   * Update inventory to add host to group
+   */
+  await group.addHostToGroup(valid.uuid, valid.group)
+
+  return res.status(204).send()
+}
+
+/**
+ * Clients can leave an inventory group with this endpoint
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.leaveGroup = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.client.join.group`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err?.message,
+    })
+
+  /*
+   * No funny business
+   */
+  if (!matchClientApikey(req, valid.uuid))
+    return utils.sendErrorResponse(res, 'morio.api.clients.authentication_mismatch', req.url)
+
+  /*
+   * Verify that it's the correct cluster
+   */
+  if (valid.cluster !== utils.getClusterFqdn())
+    return utils.sendErrorResponse(res, 'morio.api.clients.cluster_mismatch', req.url)
+
+  /*
+   * Verify the group exists
+   */
+  const group = new Group()
+  const info = await group.read(valid.group)
+
+  /*
+   * If the group does not exist, return 404
+   */
+  if (!info.id || info.id !== valid.group) return res.status(404).send()
+
+  /*
+   * Update inventory to add host to group
+   */
+  await group.removeHostFromGroup(valid.uuid, valid.group)
+
+  return res.status(204).send()
 }
 
 /**

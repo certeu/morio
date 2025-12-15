@@ -15,6 +15,16 @@ export function routes(app) {
   app.post(`/clients/join`, (req, res) => Clients.join(req, res, false))
 
   /*
+   * Endpoint for a client to join an inventory group
+   */
+  app.post(`/clients/join/group`, (req, res) => Clients.joinGroup(req, res, false))
+
+  /*
+   * Endpoint for a client to leave an inventory group
+   */
+  app.post(`/clients/leave/group`, (req, res) => Clients.leaveGroup(req, res, false))
+
+  /*
    * Endpoint for a client to re-join the cluster
    */
   app.post(`/clients/rejoin`, (req, res) => Clients.join(req, res, true))

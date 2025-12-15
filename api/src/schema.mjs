@@ -218,6 +218,16 @@ export const schema = {
     uuid: uuid.optional(),
     info: client,
   }),
+  'req.client.join.group': Joi.object({
+    cluster: Joi.string().hostname().required(),
+    uuid: uuid.required(),
+    group: Joi.string().required(),
+  }),
+  'req.client.leave.group': Joi.object({
+    cluster: Joi.string().hostname().required(),
+    uuid: uuid.required(),
+    group: Joi.string().required(),
+  }),
   'req.client.push': Joi.object({
     uuid: uuid.required().description('The UUID of the client'),
     cluster: Joi.string().hostname().required().description('The FQDN of the Morio cluster'),
