@@ -395,8 +395,10 @@ Host.prototype.getAnsibleInventory = async function (withSecrets = false) {
 
   // Add host vars
   for (const hvar of hostvars) {
-    if (withSecrets || hvar.key.slice(-6) !== 'SECRET')
-      inventory[hvar.host][hvar.key] = unwrapVar(hvar.key, hvar.val)
+    if (withSecrets || hvar.key.slice(-6) !== 'SECRET') {
+      if (inventory[hvar.host]) inventory[hvar.host][hvar.key] = unwrapVar(hvar.key, hvar.val)
+      else log.warn(`Hostvar ${hvar.key} is set on non-existing host ${hvar.host}`)
+    }
   }
 
   // Structure as ansible inventory
