@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/accounts'
-import { rbac } from '../middleware.mjs'
+import { abac } from '../middleware.mjs'
 
 const Accounts = new Controller()
 
@@ -12,27 +12,27 @@ export function routes(app) {
   /*
    * List accounts known to Morio
    */
-  app.get(`/accounts`, rbac.manager, Accounts.list)
+  app.get(`/accounts`, abac.manager, Accounts.list)
 
   /*
    * Create account
    */
-  app.post(`/account`, rbac.manager, Accounts.create)
+  app.post(`/account`, abac.manager, Accounts.create)
 
   /*
    * Delete account
    */
-  app.delete(`/accounts/:id`, rbac.manager, Accounts.delete)
+  app.delete(`/accounts/:id`, abac.manager, Accounts.delete)
 
   /*
    * Update account
    */
-  app.patch(`/accounts/:id`, rbac.manager, Accounts.update)
+  app.patch(`/accounts/:id`, abac.manager, Accounts.update)
 
   /*
    * Enable/Disable account
    */
-  app.patch(`/accounts/enable/:id`, rbac.manager, Accounts.enable)
+  app.patch(`/accounts/enable/:id`, abac.manager, Accounts.enable)
 
   /*
    * Activate account

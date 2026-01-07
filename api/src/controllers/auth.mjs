@@ -3,6 +3,7 @@ import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
 import { availableRoles, isRoleAvailable } from '../rbac.mjs'
+import { checkAccessPolicy } from '../abac.mjs'
 import { oidcCallbackHandler } from '../idps/oidc.mjs'
 import { isInSubnet } from 'is-in-subnet'
 import { Buffer } from 'node:buffer'
@@ -159,6 +160,27 @@ Controller.prototype.authenticate = async function (req, res) {
   }
 
   /*
+   * At this point, we have gathered all info required to evaluate the access policy
+   * If the access policy explicitly allows or denies this request, we return here
+   * If it returns null, we fall back to the default role-based access
+   */
+  const policyResult = checkAccessPolicy(
+    createRequestContextForAccessPolicy(payload, req),
+    utils.getSettings('access', false)
+  )
+  if (policyResult === true) {
+    // These may or may not be set (access policy can be used to grant anonymous access)
+    if (payload.role) res.set('X-Morio-Role', payload.role)
+    if (payload.user) res.set('X-Morio-User', payload.user)
+    if (payload.provider) res.set('X-Morio-Provider', payload.provider)
+    // Let API know that this request was approved by the access policy
+    res.set('X-Morio-Access-Policy', 'allow')
+    return res.status(200).end()
+  } else if (policyResult === false)
+    return utils.sendErrorResponse(res, 'morio.api.abac.denied', uri)
+
+  /*
+   * No access policy in place, let's continue with RBAC.
    * Do we have a payload and know what service it is?
    */
   const service = req.headers['x-morio-service']
@@ -227,6 +249,18 @@ Controller.prototype.authenticate = async function (req, res) {
     !token && !header ? 'morio.api.authentication.required' : 'morio.api.rbac.denied',
     uri
   )
+}
+
+function createRequestContextForAccessPolicy(payload, req) {
+  const context = {
+    url: req.headers['x-replaced-path'],
+    method: req.method,
+  }
+  for (const field of ['user', 'provider', 'labels']) {
+    if (payload[field]) context[field] = payload[field]
+  }
+
+  return context
 }
 
 /**

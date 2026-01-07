@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/cache'
-import { rbac } from '../middleware.mjs'
+import { abac } from '../middleware.mjs'
 
 const Cache = new Controller()
 
@@ -12,30 +12,30 @@ export function routes(app) {
   /*
    * Read the list of keynames from the cache
    */
-  app.get(`/cache/glob/*`, rbac.user, Cache.listKeys)
+  app.get(`/cache/glob/*`, abac.user, Cache.listKeys)
 
   /*
    * Read keys from the cache based on a glob pattern
    */
-  app.get(`/cache/globget/*`, rbac.user, Cache.globReadKeys)
+  app.get(`/cache/globget/*`, abac.user, Cache.globReadKeys)
 
   /*
    * Read the list of keynames from the cache
    */
-  app.get(`/cache/keys`, rbac.user, Cache.listKeys)
+  app.get(`/cache/keys`, abac.user, Cache.listKeys)
 
   /*
    * Read a list of keys from the cache
    */
-  app.post(`/cache/keys`, rbac.user, Cache.readKeys)
+  app.post(`/cache/keys`, abac.user, Cache.readKeys)
 
   /*
    * Read a list of keys from the cache but only return 1 record of lists in Redis
    */
-  app.post(`/cache/skimkeys`, rbac.user, (req, res) => Cache.readKeys(req, res, true))
+  app.post(`/cache/skimkeys`, abac.user, (req, res) => Cache.readKeys(req, res, true))
 
   /*
    * Read a key from the cache
    */
-  app.get(`/cache/keys/*`, rbac.user, Cache.readKey)
+  app.get(`/cache/keys/*`, abac.user, Cache.readKey)
 }

@@ -305,6 +305,14 @@ export const errors = {
     detail: 'This endpoint requires a higher role.',
   },
   /*
+   * Error for when the access policy denies access
+   */
+  'morio.api.abac.denied': {
+    status: 403,
+    title: 'Denied by the access policy',
+    detail: 'The request did not pass the access policy check.',
+  },
+  /*
    * Error for when a role is not sufficient to access and endpoint
    */
   'morio.api.rbac.denied': {

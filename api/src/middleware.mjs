@@ -114,11 +114,19 @@ function requireRole(req, res, next, role) {
 }
 
 /*
- * Helper RBAC middleware
+ * Middleware to ensure either ABAC or RBAC allows this request
  */
-export const rbac = {}
+function verifyAccess(req, res, next, role) {
+  if (req.headers['x-morio-access-policy'] === 'allow') return next()
+  else return requireRole(req, res, next, role)
+}
+
+/*
+ * Helper ABAC middleware (falls back to RBAC)
+ */
+export const abac = {}
 for (const role of [...roles, ...hiddenRoles])
-  rbac[role] = (req, res, next) => requireRole(req, res, next, role)
+  abac[role] = (req, res, next) => verifyAccess(req, res, next, role)
 
 /*
  * Add custom middleware to load roles from header

@@ -73,7 +73,7 @@ Controller.prototype.readKey = async function (req, res) {
  * @param {boolean} skim - Set to true return as little data as possible
  * @param {object} res - The response object from Express
  */
-Controller.prototype.readKeys = async function (req, res, skim=false) {
+Controller.prototype.readKeys = async function (req, res, skim = false) {
   /*
    * Validate input
    */
@@ -125,4 +125,3 @@ Controller.prototype.globReadKeys = async function (req, res) {
 
   return res.send(values)
 }
-

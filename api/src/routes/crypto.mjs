@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/crypto'
-import { rbac } from '../middleware.mjs'
+import { abac } from '../middleware.mjs'
 
 const Crypto = new Controller()
 
@@ -13,10 +13,10 @@ export function routes(app) {
   /*
    * Encrypt data
    */
-  app.post(`/encrypt`, rbac.operator, Crypto.encrypt)
+  app.post(`/encrypt`, abac.operator, Crypto.encrypt)
 
   /*
    * Decrypt data
    */
-  app.post(`/decrypt`, rbac.engineer, Crypto.decrypt)
+  app.post(`/decrypt`, abac.engineer, Crypto.decrypt)
 }

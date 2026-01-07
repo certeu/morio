@@ -229,9 +229,82 @@ const preseed = Joi.alternatives().try(
 )
 
 /*
+ * A single access policy pattern matcher (is/glob/regex with optional _not variants)
+ */
+const accessPattern = Joi.object({
+  is: Joi.string(),
+  is_not: Joi.string(),
+  glob: Joi.string(),
+  glob_not: Joi.string(),
+  regex: Joi.string(),
+  regex_not: Joi.string()
+})
+  .oxor('is', 'is_not', 'glob', 'glob_not', 'regex', 'regex_not') // Only one matcher type allowed
+  .min(1)
+
+/*
+ * An access policy condition value - can be:
+ * - Simple string: "GET"
+ * - Pattern object: { is: "GET" }
+ * - Logical operator with array: { or: [...] }
+ */
+const accessConditionValue = Joi.alternatives().try(
+  Joi.string(), // Simple: method: "GET"
+  accessPattern, // Pattern: method: { is: "GET" }
+  Joi.object({
+    or: Joi.alternatives().try(
+      Joi.array().items(Joi.string(), accessPattern).min(1),
+      Joi.string(),
+      accessPattern
+    )
+  }),
+  Joi.object({
+    and: Joi.alternatives().try(
+      Joi.array().items(Joi.string(), accessPattern).min(1),
+      Joi.string(),
+      accessPattern
+    )
+  }),
+  Joi.object({
+    or_not: Joi.alternatives().try(
+      Joi.array().items(Joi.string(), accessPattern).min(1),
+      Joi.string(),
+      accessPattern
+    )
+  }),
+  Joi.object({
+    and_not: Joi.alternatives().try(
+      Joi.array().items(Joi.string(), accessPattern).min(1),
+      Joi.string(),
+      accessPattern
+    )
+  })
+)
+
+// An access policy 'when' block
+const accessWhen = Joi.object({
+  url: accessConditionValue,
+  method: accessConditionValue,
+  role: accessConditionValue,
+  user: accessConditionValue,
+  provider: accessConditionValue,
+  label: accessConditionValue
+}).min(1) // At least one condition must be specified
+
+// A single access policy rule
+const accessRule = Joi.object({
+  when: accessWhen.required(),
+  then: Joi.string().valid('allow', 'deny').required()
+})
+
+/*
  * The Morio settings object
  */
 const settings = Joi.object({
+  access: Joi.object().pattern(
+    Joi.string(), // Policy name (any string key)
+    accessRule
+  ),
   cluster: Joi.object({
     name: Joi.string()
       .required()

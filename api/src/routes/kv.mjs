@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/kv'
-import { rbac } from '../middleware.mjs'
+import { abac } from '../middleware.mjs'
 
 const KV = new Controller()
 
@@ -12,30 +12,30 @@ export function routes(app) {
   /*
    * Write/Update a key
    */
-  app.post(`/kv/keys/*`, rbac.user, KV.writeKey)
+  app.post(`/kv/keys/*`, abac.user, KV.writeKey)
 
   /*
    * List all keys in KV
    */
-  app.get(`/kv/keys`, rbac.operator, KV.listKeys)
+  app.get(`/kv/keys`, abac.operator, KV.listKeys)
 
   /*
    * Read a key
    */
-  app.get(`/kv/keys/*`, rbac.user, KV.readKey)
+  app.get(`/kv/keys/*`, abac.user, KV.readKey)
 
   /*
    * Delete a key
    */
-  app.delete(`/kv/keys/*`, rbac.user, KV.deleteKey)
+  app.delete(`/kv/keys/*`, abac.user, KV.deleteKey)
 
   /*
    * List all keys in KV
    */
-  app.get(`/kv/glob/*`, rbac.operator, KV.globKeys)
+  app.get(`/kv/glob/*`, abac.operator, KV.globKeys)
 
   /*
    * Dump all kv data
    */
-  app.get(`/kv/dump`, rbac.engineer, KV.dumpData)
+  app.get(`/kv/dump`, abac.engineer, KV.dumpData)
 }

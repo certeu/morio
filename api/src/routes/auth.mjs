@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/auth'
-import { rbac } from '../middleware.mjs'
+import { abac } from '../middleware.mjs'
 
 const Auth = new Controller()
 
@@ -32,7 +32,7 @@ export function routes(app) {
   /*
    * Refresh token route
    */
-  app.get(`/token`, rbac.user, Auth.renewToken)
+  app.get(`/token`, abac.user, Auth.renewToken)
 
   /*
    * Request a token for ccdbauth
@@ -49,8 +49,8 @@ export function routes(app) {
   /*
    * Whoami/ping check
    */
-  app.get(`/whoami`, rbac.user, Auth.whoami)
-  app.get(`/whoami/`, rbac.user, Auth.whoami)
+  app.get(`/whoami`, abac.user, Auth.whoami)
+  app.get(`/whoami/`, abac.user, Auth.whoami)
 
   /*
    * OIDC callback route
