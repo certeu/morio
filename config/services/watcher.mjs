@@ -80,7 +80,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * Heartbeat configuration file
      */
     heartbeat: {
-      name: utils.getNodeFqdn(),
       /*
        * Keep monitors outside the main config so they can be hot-reloaded
        */
