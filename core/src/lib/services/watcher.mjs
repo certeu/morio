@@ -21,11 +21,8 @@ export const service = {
      * as it is configured to hot-reload the monitors
      */
     reload: async () => {
-      if (isWatcherServiceWanted()) {
-        log.todo('ENSURING MONITORS')
-        // Note: there is no need to await this
-        ensureMonitors()
-      }
+      // Note: there is no need to await this
+      if (isWatcherServiceWanted()) ensureMonitors()
 
       return true
     },
