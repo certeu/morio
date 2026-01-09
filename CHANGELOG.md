@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.6] - 2026-01-09
+
+### Added
+
+- [api] Added access policy support (ABAC)
+- [core] Added support for running multiple instances of the EdA service
+
+### Changed
+
+- [client] Do not enable the morio-listener service by default
+- [moriod] Do not stop non-core containers when stopping moriod service
+
+## [0.9.5] - 2026-01-07
+
+### Added
+
+- [api] Added endpoints for top metrics cache keys
+- [client] Added support for joining/leaving inventory groups from the client
+- [core] Added support for overlays.d folder
+- [core] Load watcher monitors and allow hot-reloading of them
+- [tap] Added helper method for caching top values
+- [tap] Added helper method to link to healthchecks
+- [ui] Added dashboards for top metrics
+- [ui] Added marklines to healtcheck charts
+- [ui] Allow filtering of inventory hosts
+- [ui] Make chartsGradient available to metrics transformers
+- [watcher] Add support for loading trusted CAs
+
+### Changed
+
+- [ui] Use dataset instead of metricset as term to be topic-agnostic
+- [proxy] Send traefik logs to stdout
+- [tap] Do not maintain a global checks key
+- [tap] Changed per-host healthcheck caching
+- [tap] Allow reps in structured events schema
+- [ui] List available dashboard based on data that is available in the cache, rather than data that should be available in the cache
+- [ui] Refactored chart listing
+- [watcher] Changed watcher log level to info
+
+### Fixed
+
+- [api] Guard against hostvars set on non-existing hosts
+- [client] Set id in ECS-compliant field
+- [tap] Ensure timestamp in structured messages
+- [ui] Improved performance of the healthchecks page
+- [ui] Make host filter more robust
+
 ## [0.9.4] - 2025-11-14
 
 ### Added
