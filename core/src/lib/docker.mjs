@@ -24,15 +24,15 @@ const apiCache = {
 /**
  * Creates a container for a morio service
  *
- * @param {string} serviceName = Name of the service
+ * @param {string} instanceServiceName = Name of the service (or service instance)
  * @param {object} config = The container config to pass to the Docker API
  * @returm {object|bool} options - The id of the created container or false if no container could be created
  */
-export async function createDockerContainer(serviceName, config) {
-  log.debug(`[${serviceName}] Creating container`)
+export async function createDockerContainer(instanceServiceName, config) {
+  log.debug(`[${instanceServiceName}] Creating container`)
   const [success, result] = await runDockerApiCommand('createContainer', config, true)
   if (success) {
-    log.debug(`[${serviceName}] Container created`)
+    log.debug(`[${instanceServiceName}] Container created`)
     return result.id
   } else if (
     result?.json?.message &&
@@ -48,14 +48,15 @@ export async function createDockerContainer(serviceName, config) {
      */
     const [removed] = await runContainerApiCommand(rid, 'remove', { force: true, v: true })
     if (removed) {
-      log.debug(`[${serviceName}] Removed existing container`)
+      log.debug(`[${instanceServiceName}] Removed existing container`)
       const [ok, created] = await runDockerApiCommand('createContainer', config, true)
       if (ok) {
-        log.debug(`[${serviceName}] Container recreated`)
+        log.debug(`[${instanceServiceName}] Container recreated`)
         return created.id
-      } else log.warn(`[${serviceName}] Failed to recreate container`)
-    } else log.warn(`[${serviceName}] Failed to remove container - Not creating new container`)
-  } else log.warn(`[${serviceName}] Failed to create service container`)
+      } else log.warn(`[${instanceServiceName}] Failed to recreate container`)
+    } else
+      log.warn(`[${instanceServiceName}] Failed to remove container - Not creating new container`)
+  } else log.warn(`[${instanceServiceName}] Failed to create service container`)
 
   return false
 }
@@ -63,7 +64,7 @@ export async function createDockerContainer(serviceName, config) {
 /**
  * Gets a service id, based on its name
  */
-export async function getServiceId(serviceName) {
+export async function getServiceId(serviceName, instanceName) {
   /*
    * Update state with currently running services
    */
@@ -72,8 +73,11 @@ export async function getServiceId(serviceName) {
   /*
    * Make sure to log a warning if the Id is not found as that should not happen
    */
-  const id = utils.getServiceState(serviceName)?.id || false
-  if (!id) log.warn(`Running getServiceId failed for service ${serviceName}`)
+  const id = utils.getServiceState(serviceName, instanceName)?.id || false
+  if (!id)
+    log.warn(
+      `Running getServiceId failed for service ${utils.instanceServiceName(serviceName, instanceName)}`
+    )
 
   return id
 }
@@ -81,15 +85,15 @@ export async function getServiceId(serviceName) {
 /**
  * Stops a service. which just means it stops a container
  */
-export async function stopService(serviceName) {
-  const id = await getServiceId(serviceName)
+export async function stopService(serviceName, instanceName) {
+  const id = await getServiceId(serviceName, instanceName)
   if (!id) return false
 
   let result
   try {
     result = await runContainerApiCommand(id, 'stop', {}, true)
   } catch (err) {
-    log.warn(err, `Failed to stop service: ${serviceName}`)
+    log.warn(err, `Failed to stop service: ${utils.instanceServiceName(serviceName, instanceName)}`)
   }
 
   return result
@@ -227,17 +231,19 @@ export async function attachToDockerNetwork(serviceName, network, endpointConfig
  * This will take the service configuration and build an options
  * object to configure the container as listed in this file
  *
- * @param {object} config - The resolved service configuration
+ * @param {string} serviceName - The name of the service
+ * @param {string|false} instanceName - The name of the service instance, or false
  * @retun {object} opts - The options object for the Docker API
  */
-export function generateContainerConfig(serviceName) {
-  const config = utils.getMorioServiceConfig(serviceName)
+export function generateContainerConfig(serviceName, instanceName = false) {
+  const instanceServiceName = utils.instanceServiceName(serviceName, instanceName)
+  const config = utils.getMorioServiceConfig(serviceName, instanceName)
   /*
    * Basic options
    */
   const name = utils.getPreset('MORIO_CONTAINER_PREFIX') + config.container.container_name
   const aliases = config.container.aliases || []
-  log.debug(`[${serviceName}] Generating container configuration`)
+  log.debug(`[${instanceServiceName}] Generating container configuration`)
   const opts = {
     name,
     HostConfig: {
@@ -629,7 +635,17 @@ export async function forceUpdateRunningServicesState() {
     for (const container of runningContainers) {
       const name = container.Names[0]
       if (name.slice(0, 7) === '/morio-') {
-        utils.setServiceState(name.slice(7), dockerStateToServiceState(container))
+        // Handle multi-instance services
+        const fullServiceName = name.slice(7)
+        const split = fullServiceName.split('-')
+        if (split.length === 1)
+          utils.setServiceState(fullServiceName, false, dockerStateToServiceState(container))
+        else if (split.length === 2)
+          utils.setServiceState(...split, dockerStateToServiceState(container))
+        else
+          log.error(
+            `Container ${name} could not be parsed into a valid Morio service/instance name.`
+          )
       }
     }
   }

@@ -6,6 +6,9 @@ import { defaultRestartServiceHook, defaultRecreateServiceHook } from './index.m
 
 /**
  * Service object holds the various lifecycle methods
+ * Note that the EdA service supports running as a multi-istance
+ * service, so we need to handle that in the various hooks.
+ * That makes this a bit more complex.
  */
 export const service = {
   name: 'eda',
@@ -14,38 +17,54 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
+      // If the feature flag is not set, this is easy
       if (!utils.getFlag('ENABLE_SERVICE_EDA', false)) return true
 
       // FIXME
-      return false
+      return true
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
      * The EDA service needs to be enabled with a feature flag
+     * but it also supports a multi-instance setup where we have
+     * multiple EDA services on a single node, so this takes a
+     * instanceName attributes in the hookParams to tell us what's up
      */
-    wanted: () => {
+    wanted: ({ instanceName = false }) => {
+      // Short-circuit when possible
       if (utils.isEphemeral()) return false
       if (!utils.getFlag('ENABLE_SERVICE_EDA', false)) return false
-      /*
-       * We need the EdA service, but where do we run it?
-       * Do we have a specific eda node in the settings?
-       */
-      const edaNodes = utils.getSettings('flanking_services.eda.nodes', [])
-      if (edaNodes.includes(utils.getNodeFqdn())) return true
-      /*
-       * If there are explicit nodes, we are not part of them.
-       * So do not run this service.
-       */
-      if (edaNodes.length > 0) return false
-      /*
-       * No explicit EdA node configured.
-       * We will run it on all flanking nodes, or all broker nodes.
-       */
-      if (utils.getFlankingCount() > 0) {
-        if (utils.isFlankingNode()) return true
-      } else return true
+      if (!instanceName) {
+        /*
+         * We need a regular EdA service (no multi-instance), but where do we run it?
+         * Do we have a specific eda node in the settings?
+         */
+        const edaNodes = utils.getSettings('flanking_services.eda.nodes', [])
+        if (edaNodes.includes(utils.getNodeFqdn())) return true
+        /*
+         * If there are explicit nodes, we are not part of them.
+         * So do not run this service.
+         */
+        if (edaNodes.length > 0) return false
+        /*
+         * No explicit EdA node configured.
+         * We will run it on all flanking nodes, or all broker nodes.
+         */
+        if (utils.getFlankingCount() > 0) {
+          if (utils.isFlankingNode()) return true
+        } else return true
 
-      return false
+        return false
+      } else {
+        /*
+         * We need a multi-instance EdA
+         * The hookParams will hold instanceName
+         * We also need to make sure it's a local instance
+         */
+        const localInstances = utils.getLocalServiceInstances('eda')
+        if (localInstances.includes(instanceName)) return true
+        else return false
+      }
     },
     /**
      * Lifecycle hook for anything to be done prior to creating the container
@@ -56,14 +75,18 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    prestart: async () => await ensureServiceCertificate('eda', true),
+    prestart: async (hookParams) =>
+      await ensureServiceCertificate(
+        utils.instanceServiceName('eda', hookParams.instanceName),
+        true
+      ),
     /*
      * Lifecycle hook to determine whether to recreate the service
      * We just reuse the default hook here, telling it we need TLS configured.
      */
-    recreate: () => {
-      ensureLocalPrerequisites()
-      return defaultRecreateServiceHook('eda')
+    recreate: (hookParams) => {
+      ensureLocalPrerequisites(hookParams)
+      return defaultRecreateServiceHook('eda', hookParams)
     },
     /**
      * Lifecycle hook to determine whether to restart the service
@@ -74,19 +97,21 @@ export const service = {
   },
 }
 
-async function ensureLocalPrerequisites() {
+async function ensureLocalPrerequisites({ instanceName = false }) {
+  const instanceSuffix = instanceName ? `-${instanceName}` : ''
+
   try {
     // Create config folder
-    await mkdir('/etc/morio/eda')
-    await chown('/etc/morio/eda', 1000, 1000)
+    await mkdir(`/etc/morio/eda${instanceSuffix}`)
+    await chown(`/etc/morio/eda${instanceSuffix}`, 1000, 1000)
 
     // Create data folder
-    await mkdir('/morio/data/eda/morio')
-    await chown('/morio/data/eda', 1000, 1000)
+    await mkdir(`/morio/data/eda${instanceSuffix}/morio`)
+    await chown(`/morio/data/eda${instanceSuffix}`, 1000, 1000)
 
     // Copy custom modules
     for (const mod of utils.getPreset('MORIO_EDA_CORE_MODULES')) {
-      const target = `/morio/data/eda/morio/${mod}`
+      const target = `/morio/data/eda${instanceSuffix}/morio/${mod}`
       await mkdir(target)
       await chown(target, 1000, 1000)
       await cp(`lib/eda/${mod}`, target, { dereference: true, force: true, recursive: true })
@@ -104,7 +129,7 @@ async function ensureLocalPrerequisites() {
      * needs some work to assemble a config file that works as intended.
      */
     const base = {
-      ...utils.getMorioServiceConfig('eda').eda,
+      ...utils.getMorioServiceConfig('eda', instanceName).eda,
       storageModule: '__REQUIRE_STORAGE_MODULE__',
       functionGlobalContext: {},
     }
@@ -125,17 +150,17 @@ async function ensureLocalPrerequisites() {
       edaSettings = edaSettings.replace(`"__REQUIRE_CONTEXT_MODULE_${mod}__"`, `require("${mod}")`)
     }
     // Node-RED looks for `/data/settings.js`
-    await writeFile('/morio/data/eda/settings.js', edaSettings, log, 0o640)
+    await writeFile(`/morio/data/eda${instanceSuffix}/settings.js`, edaSettings, log, 0o640)
     // Prevent read access
-    await chown('/morio/data/eda/settings.js', 1000, 1000)
+    await chown(`/morio/data/eda${instanceSuffix}/settings.js`, 1000, 1000)
 
     // Ensure service certificate exists
-    await ensureServiceCertificate('eda', true)
+    await ensureServiceCertificate(utils.instanceServiceName('eda', instanceName), true)
 
     /*
      * Construct Morio plugin settings
      *
-     * If this is is a broker node, the database service is available locally.
+     * If this is a broker node, the database service is available locally.
      * But if not, we need a cross-cluser connection, also fetch a JWT for access.
      * Our custom storage plugin handles all of this. The only thing we need to do
      * is tell it what kind of a node we are on, it's FQDN and the cluster FQDN.
@@ -146,20 +171,20 @@ async function ensureLocalPrerequisites() {
         brokers: utils
           .getBrokerFqdns()
           .map((broker) => `${broker}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
-        clientId: 'morio-eda',
+        clientId: `morio-eda${instanceSuffix}`,
         logLevel: 'info',
         ssl: {
           rejectUnauthorized: false,
           ca: [utils.getCaTrustChain()],
-          cert: await readFile(`/etc/morio/eda/tls-cert.pem`),
-          key: await readFile(`/etc/morio/eda/tls-key.pem`),
+          cert: await readFile(`/etc/morio/eda${instanceSuffix}/tls-cert.pem`),
+          key: await readFile(`/etc/morio/eda${instanceSuffix}/tls-key.pem`),
         },
       },
       db: {
         local: `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db.internal:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
         ccdb: `https://${utils.getLeaderFqdn() || utils.getCentralFqdns()[0]}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
         connection: utils.isBrokerNode() ? 'local' : 'ccdb',
-        tablePrefix: utils.getPreset('MORIO_EDA_TABLE_PREFIX'),
+        tablePrefix: `${utils.getPreset('MORIO_EDA_TABLE_PREFIX')}${instanceSuffix}`,
       },
     }
 
@@ -170,7 +195,7 @@ async function ensureLocalPrerequisites() {
      * the EDA service horizontally.
      */
     await writeFile(
-      '/etc/morio/eda/morio-settings.js',
+      `/etc/morio/eda${instanceSuffix}/morio-settings.js`,
       [
         `// These settings are auto-generated by Morio`,
         `module.exports = ${JSON.stringify(settings, null, 2)}`,
@@ -179,7 +204,7 @@ async function ensureLocalPrerequisites() {
       0o640
     )
     // Prevent read access
-    await chown('/etc/morio/eda/morio-settings.js', 1000, 1000)
+    await chown(`/etc/morio/eda${instanceSuffix}/morio-settings.js`, 1000, 1000)
 
     /**
      * We update the entrypoint shell script with our own one.
@@ -188,16 +213,17 @@ async function ensureLocalPrerequisites() {
      * Our custom entrypoint will install the local storage module and the module
      * that provides morio integration
      */
-    let file = '/morio/data/eda/entrypoint.sh'
+    let file = `/morio/data/eda${instanceSuffix}/entrypoint.sh`
     const entrypoint = await readFile(file)
     if (entrypoint && entrypoint.includes('Morio')) {
-      log.debug('EDA: Custom entrypoint exists, no action needed')
+      log.debug('EdA: Custom entrypoint exists, no action needed')
     } else {
-      log.debug('EDA: Creating custom entrypoint')
-      await writeFile(file, utils.getMorioServiceConfig('eda').entrypoint, log, 0o755)
+      log.debug('EdA: Creating custom entrypoint')
+      await writeFile(file, utils.getMorioServiceConfig('eda', instanceName).entrypoint, log, 0o755)
     }
   } catch (err) {
-    log.warn(err, `Precreate hook failed for EDA service`)
+    log.error(err, `Failed to write entrypoint.sh for the eda${instanceSuffix} service`)
+    return false
   }
 
   return true

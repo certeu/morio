@@ -265,6 +265,26 @@ utils.getLeaderSerial = () => store.get('state.cluster.leader_serial', false)
 utils.getLeaderUuid = () => store.get('state.cluster.leader_uuid', false)
 
 /**
+ * A helper to figure out which service instances are local on an instances config object
+ * This is used by services that support multiple instances per node (like EdA)
+ *
+ * @param {string} serviceName - The name of the service
+ * @return {array|false} localInstances - False is this is not a multi-instance setup, or an array holding the IDs of local instances if it is (could be an empty array)
+ */
+utils.getLocalServiceInstances = (serviceName) => {
+  const local = []
+  const instances = utils.getSettings([serviceName, 'instances'], false)
+  if (!instances) return false
+  // It's a multi-instance setup, return local instances
+  const fqdn = utils.getNodeFqdn()
+  for (const [name, config] of Object.entries(instances)) {
+    if (config.nodes.includes(fqdn)) local.push(name)
+  }
+
+  return local
+}
+
+/**
  * Helper method to get the lowest serial among broker nodes
  *
  * @return {number} serial - The lowest broker node serial
@@ -293,8 +313,10 @@ utils.getLowestFlankingNodeSerial = () => {
  * @param {string} serviceName - The name of the service for which to retrieve the docker service configuration
  * @return {object} config - The docker service configuration
  */
-utils.getDockerServiceConfig = (serviceName) =>
-  store.get(['config', 'services', 'docker', serviceName])
+utils.getDockerServiceConfig = (serviceName, instanceName = false) =>
+  instanceName
+    ? store.get(['config', 'services', 'docker', serviceName, instanceName])
+    : store.get(['config', 'services', 'docker', serviceName])
 
 /**
  * Helper method to get the current ephemeral UUID of the state
@@ -392,7 +414,10 @@ utils.getServicesState = () => store.get(['state', 'services'])
  * @param {string} service - The name of the service for which to retrieve the state
  * @return {object} state - The service state
  */
-utils.getServiceState = (service) => store.get(['state', 'services', service], false)
+utils.getServiceState = (serviceName, instanceName = false) =>
+  instanceName
+    ? store.get(['state', 'services', serviceName, instanceName], false)
+    : store.get(['state', 'services', serviceName], false)
 
 /**
  * Helper method to get the services state age (time it was last updated)
@@ -405,8 +430,19 @@ utils.getServicesStateAge = () => store.get('state.services.updated', 172e10)
  * @param {string} serviceName - The name of the service for which to retrieve the configuration
  * @return {object} config - The service configuration
  */
-utils.getMorioServiceConfig = (serviceName) =>
-  store.get(['config', 'services', 'morio', serviceName])
+utils.getMorioServiceConfig = (serviceName, instanceName = false) =>
+  instanceName
+    ? store.get(['config', 'services', 'morio', serviceName, instanceName])
+    : store.get(['config', 'services', 'morio', serviceName])
+
+/**
+ * Helper method to get the service wanted state
+ * This is kept in memory as we need it an every heartbeat
+ *
+ * @param {string} serviceName - The name of the service
+ * @return {bool} wanted - True if it's wanted, false if not
+ */
+utils.getServiceWantedState = (serviceName) => store.get(['wanted_services', serviceName], false)
 
 /**
  * Helper method to get info on this node
@@ -687,11 +723,13 @@ utils.setCoreReady = (ready) => {
  * Helper method to store a Docker service configuration
  *
  * @param {string} serviceName - The name of the service
+ * @param {string} instanceName - The name of the service instance or false
  * @param {object} config - The docker configuration object to store
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setDockerServiceConfig = (serviceName, config) => {
-  store.set(['config', 'services', 'docker', serviceName], config)
+utils.setDockerServiceConfig = (serviceName, instanceName = false, config) => {
+  if (instanceName) store.set(['config', 'services', 'docker', serviceName, instanceName], config)
+  else store.set(['config', 'services', 'docker', serviceName], config)
   return utils
 }
 
@@ -906,11 +944,13 @@ utils.setLeading = (leading) => {
  * Helper method to store a service state
  *
  * @param {string} serviceName - The name of the service
+ * @param {string|false} instanceName - The name of the service or false if there's no multiple instances
  * @param {object} state - The service state from the Docker API
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setServiceState = (serviceName, state) => {
-  store.set(['state', 'services', serviceName], state)
+utils.setServiceState = (serviceName, instanceName, state) => {
+  if (instanceName) store.set(['state', 'services', serviceName, instanceName], state)
+  else store.set(['state', 'services', serviceName], state)
   return utils
 }
 
@@ -927,6 +967,18 @@ utils.setServiceStatus = (serviceName, status) => {
 }
 
 /**
+ * Helper method to set the service wanted state
+ * This is kept in memory as we need it an every heartbeat
+ *
+ * @param {string} serviceName - The name of the service
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setServiceWantedState = (serviceName, value) => {
+  store.set(['wanted_services', serviceName], value)
+  return utils
+}
+
+/**
  * Helper method to store a Morio service configuration
  *
  * @param {string} serviceName - The name of the service
@@ -934,7 +986,12 @@ utils.setServiceStatus = (serviceName, status) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setMorioServiceConfig = (serviceName, config) => {
-  store.set(['config', 'services', 'morio', serviceName], config)
+  // Handle multi-instance services
+  if (config.multiInstance) {
+    for (const [instanceName, instanceConfig] of Object.entries(config.instances)) {
+      store.set(['config', 'services', 'morio', serviceName, instanceName], instanceConfig)
+    }
+  } else store.set(['config', 'services', 'morio', serviceName], config)
   return utils
 }
 
@@ -1325,6 +1382,17 @@ utils.ensureTokenSecrecy = (secrets) => {
 
   return secrets
 }
+
+/**
+ * A little helper method to generate the full service name in case it's a multi-instance service
+ *
+ * @param {string} serviceName -  The service name
+ * @param {string} instanceName - The instance name or false for non-multi-instance services
+ * @return {string} fullServiceName - The full service name, including instance if relevant
+ */
+utils.instanceServiceName = (serviceName, instanceName = false) =>
+  instanceName ? `${serviceName}-${instanceName}` : serviceName
+
 /**
  * Used in resolveServiceConfiguration
  */

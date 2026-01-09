@@ -55,8 +55,19 @@ async function updateNodeState() {
    */
   const promises = []
   for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder) {
-    if (await runHook('wanted', service, { heartbeat: true }))
-      promises.push(runHook('heartbeat', service))
+    // Support multi-instance services
+    const instances = utils.getLocalServiceInstances(service)
+    if (instances === false) {
+      // Not a multi-instance service
+      if (utils.getServiceWantedState(service)) promises.push(runHook('heartbeat', service))
+    } else if (instances.length > 0) {
+      for (const instance of instances) {
+        const instanceServiceName = utils.instanceServiceName(service, instance)
+        if (utils.getServiceWantedState(instanceServiceName)) {
+          promises.push(runHook('heartbeat', instanceServiceName))
+        }
+      }
+    }
   }
   /*
    * Do the same for core as the final service

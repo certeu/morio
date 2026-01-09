@@ -17,6 +17,28 @@ export const pullConfig = {
  */
 export const resolveServiceConfiguration = ({ utils }) => {
   /*
+   * This service supports running multiple instances
+   * in which case the config holds eda.instances
+   */
+  const instances = utils.getLocalServiceInstances('eda')
+
+  if (!Array.isArray(instances)) return resolveServiceInstanceConfiguration(false, 0, utils)
+  else if (instances.length > 0) {
+    const multi = { multiInstance: true, instances: {} }
+    let i = 0
+    for (const instance of instances) {
+      multi.instances[instance] = resolveServiceInstanceConfiguration(instance, i, utils)
+      i++
+    }
+
+    return multi
+  }
+  else return false
+}
+
+
+export const resolveServiceInstanceConfiguration = (instance, instanceIndex, utils) => {
+  /*
    * Grab directories here to keep this DRY
    */
   const DIRS = {
@@ -25,50 +47,63 @@ export const resolveServiceConfiguration = ({ utils }) => {
   }
 
   /*
+   * Prepare some vars to help us
+   */
+  const instanceServiceName = utils.instanceServiceName('eda', instance)
+  const instanceSuffix = instance ? `-${instance}` : ''
+  const instanceTitle = `Morio EdA${instance ? ' ('+instance+')' : ''}`
+
+  /*
+   * We need a port per instance
+   */
+  const customPort = Number(utils.getFlag('MORIO_EDA_HTTP_PORT') || 1880) + instanceIndex
+
+  /*
    * Traefik (proxy) configuration for the EDA service
    */
-  const traefik = {
-    eda: generateTraefikConfig(utils, {
-      service: 'eda',
-      prefixes: [`/${utils.getPreset('MORIO_EDA_PREFIX')}`],
+  const traefik = {}
+  traefik[instanceServiceName] = generateTraefikConfig(utils, {
+      service: instanceServiceName,
+      prefixes: [`/${utils.getPreset('MORIO_EDA_PREFIX')}${instanceSuffix}`],
       priority: 666,
+      customPort,
     })
-      /*
-       * Middleware to add Morio service header
-       */
-      .set(
-        'http.middlewares.eda-service-header.headers.customRequestHeaders.X-Morio-Service',
-        'eda'
-      )
-      /*
-       * Middleware for central authentication/access control
-       */
-      .set(
-        'http.middlewares.eda-auth.forwardAuth.address',
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api.internal:${utils.getPreset('MORIO_API_PORT')}/auth`
-      )
-      .set('http.middlewares.eda-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
-      /*
-       * Add middleware to router
-       * The order in which middleware is loaded matters. Prefix shoud go first, auth last.
-       */
-      .set('http.routers.eda.middlewares', [
-        'eda-service-header@file',
-        'eda-auth@file',
-      ])
-  }
+    /*
+     * Middleware to add Morio service header
+     */
+    .set(
+      `http.middlewares.eda${instanceSuffix}-service-header.headers.customRequestHeaders.X-Morio-Service`,
+      'eda'
+    )
+    /*
+     * Middleware for central authentication/access control
+     */
+    .set(
+      `http.middlewares.eda${instanceSuffix}-auth.forwardAuth.address`,
+      `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api.internal:${utils.getPreset('MORIO_API_PORT')}/auth`
+    )
+    .set(`http.middlewares.eda${instanceSuffix}-auth.forwardAuth.authResponseHeadersRegex`, `^X-Morio-`)
+    /*
+     * Add middleware to router
+     * The order in which middleware is loaded matters. Prefix shoud go first, auth last.
+     */
+    .set(`http.routers.eda${instanceSuffix}.middlewares`, [
+      `eda${instanceSuffix}-service-header@file`,
+      `eda${instanceSuffix}-auth@file`,
+    ])
+
   const cors = utils.getSettings('eda.cors', false)
   if (cors && Array.isArray(cors.origins) && cors.origins.length > 0) {
-    const lead = 'http.middlewares.eda-cors-headers.headers'
-    traefik.eda.set(`${lead}.accessControlAllowMethods`, cors.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
-    traefik.eda.set(`${lead}.accessControlAllowHeaders`, cors.headers || ['*'])
-    traefik.eda.set(`${lead}.accessControlAllowOriginList`, cors.origins || ['*'])
-    traefik.eda.set(`${lead}.accessControlMAxAge`, 86400) // Cache preflight for 24 hours
-    traefik.eda.set(`${lead}.addVaryHeader`, true)
-    traefik.eda.set('http.routers.eda.middlewares', [
-      'eda-service-header@file',
-      'eda-cors-headers@file',
-      'eda-auth@file',
+    const lead = `http.middlewares.eda${instanceSuffix}-cors-headers.headers`
+    traefik[instanceServiceName].set(`${lead}.accessControlAllowMethods`, cors.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
+    traefik[instanceServiceName].set(`${lead}.accessControlAllowHeaders`, cors.headers || ['*'])
+    traefik[instanceServiceName].set(`${lead}.accessControlAllowOriginList`, cors.origins || ['*'])
+    traefik[instanceServiceName].set(`${lead}.accessControlMAxAge`, 86400) // Cache preflight for 24 hours
+    traefik[instanceServiceName].set(`${lead}.addVaryHeader`, true)
+    traefik[instanceServiceName].set(`http.routers.eda${instanceSuffix}.middlewares`, [
+      `eda${instanceSuffix}-service-header@file`,
+      `eda${instanceSuffix}-cors-headers@file`,
+      `eda${instanceSuffix}-auth@file`,
     ])
   }
 
@@ -78,7 +113,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
      */
     container: {
       // Name to use for the running container
-      container_name: 'eda',
+      container_name: `eda${instanceSuffix}`,
       // Image to run
       image: pullConfig.image,
       // Image tag (version) to run
@@ -89,9 +124,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
       network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: [
-        `${DIRS.conf}/eda:/etc/morio/eda`,
-        `${DIRS.data}/eda:/data`,
-        `${DIRS.data}/eda/entrypoint.sh:/usr/src/node-red/entrypoint.sh`,
+        `${DIRS.conf}/eda${instanceSuffix}:/etc/morio/eda`,
+        `${DIRS.data}/eda${instanceSuffix}:/data`,
+        `${DIRS.data}/eda${instanceSuffix}/entrypoint.sh:/usr/src/node-red/entrypoint.sh`,
       ],
       // Environment
       environment: {
@@ -110,7 +145,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
      */
     storage: {
       rqliteUrl: 'http://morio-db:4001',
-      tablePrefix: 'nodered_'
+      tablePrefix: `nodered_${instance ? instance : ''}`
     },
     /*
      * Node-Red settings
@@ -121,7 +156,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       /*
        * Set prefix for UI access. Node-RED makes this easy.
        */
-      httpAdminRoot: '/eda',
+      httpAdminRoot: `/eda${instanceSuffix}`,
       /*
        * Extra folder to scan for nodes, outside the container
        */
@@ -133,16 +168,16 @@ export const resolveServiceConfiguration = ({ utils }) => {
       /*
        * Port to listen on
        */
-      uiPort: utils.getFlag('MORIO_EDA_HTTP_PORT') || 1880,
+      uiPort: customPort,
       /*
        * Prefix for nodes that accept incoming HTTP
        */
-      httpNodeRoot: '/eda/webhooks',
+      httpNodeRoot: `/eda${instanceSuffix}/webhooks`,
       /*
        * Permissive CORS
        */
       httpNodeCors: {
-          erigin: "*",
+          origin: "*",
           methods: "GET,PUT,POST,DELETE"
       },
       /*
@@ -249,15 +284,15 @@ export const resolveServiceConfiguration = ({ utils }) => {
        */
       editorTheme: {
         page: {
-          title: "Morio EdA",
+          title: instanceTitle,
           favicon: "/favicon.svg",
           css: "",
           scripts: [],
         },
         header: {
-          title: "Morio EdA",
+          title: instanceTitle,
           image: null,
-          url: "/eda/",
+          url: `/eda${instanceSuffix}/`,
         },
         deployButton: {
           type: "simple",

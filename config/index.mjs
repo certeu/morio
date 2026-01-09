@@ -1,5 +1,6 @@
 import {
   resolveServiceConfiguration,
+  servicesToAwait,
   serviceOrder,
   ephemeralServiceOrder,
   optionalServices,
@@ -14,6 +15,7 @@ export {
   inProduction,
   loadAllPresets,
   resolveServiceConfiguration,
+  servicesToAwait,
   serviceOrder,
   ephemeralServiceOrder,
   optionalServices,
