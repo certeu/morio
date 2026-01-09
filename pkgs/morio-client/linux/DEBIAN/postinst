@@ -11,5 +11,4 @@ systemctl daemon-reload || true
 systemctl enable morio-audit
 systemctl enable morio-logs
 systemctl enable morio-metrics
-systemctl enable morio-listener
 
