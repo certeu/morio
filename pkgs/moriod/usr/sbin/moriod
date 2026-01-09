@@ -18,9 +18,11 @@ show_help() {
   echo    ""
   echo    "Commands:"
   echo    "  restart            Restart the moriod service"
+  echo    "  restartall         Stop all morio containers (except core) and restart moriod"
   echo    "  start              Start the moriod service"
   echo    "  status             Show the status of the moriod service"
   echo    "  stop               Stop the moriod service"
+  echo    "  stopall            Stop all morio containers (except core) and stop moriod"
   echo    ""
   echo    "Service Commands:"
   echo -e "  Note: Replace '$SRV' with the name of the service, eg: 'api' or 'broker'"
@@ -54,6 +56,22 @@ check_your_privilege() {
     echo "Morio requires elevated privileges."
     echo "Please use ${bold}sudo moriod $1 $2${base}, or run this command as root."
     exit 1
+  fi
+}
+
+stop_all_containers() {
+  echo "Stopping all morio containers (except core)..."
+  # Get all container names starting with morio- but not morio-core
+  local CONTAINERS=$(docker ps -a --filter "name=morio-*" --format "{{.Names}}" | grep -v "^morio-core$")
+
+  if [ -z "$CONTAINERS" ]; then
+    echo "No morio containers found to stop."
+  else
+    for CONTAINER in $CONTAINERS; do
+      echo "Stopping $CONTAINER..."
+      docker rm -f "$CONTAINER"
+    done
+    echo "All morio containers (except core) have been stopped."
   fi
 }
 
@@ -123,6 +141,18 @@ while [[ $# -gt 0 ]]; do
       change_core_state restart
       exit 0
       ;;
+    stopall)
+      check_your_privilege $@
+      stop_all_containers
+      change_core_state stop
+      exit 0
+      ;;
+    restartall)
+      check_your_privilege $@
+      stop_all_containers
+      change_core_state restart
+      exit 0
+      ;;
     status)
       check_your_privilege $@
       change_core_state status
@@ -152,4 +182,3 @@ done
 if [ $# -eq 0 ]; then
   show_help
 fi
-

@@ -58,27 +58,6 @@ ExecStart=/usr/bin/docker run --rm \
   -e "NODE_ENV=${NODE_ENV}" \
   itsmorio/core:${MORIO_CONTAINER_TAG}
 
-# When stopping, we stop & remove all containers as they are
-# ephemeral (their data is mounted from the host disk).
-# Core will recreate them when you start the service again.
-# We are listing all possible services. Some may not exist,
-# so we redirect stderr to /dev/null.
-ExecStop=/usr/bin/docker rm -f \
-  morio-api \
-  morio-broker \
-  morio-ca \
-  morio-cache \
-  morio-connector \
-  morio-console \
-  morio-db \
-  morio-eda \
-  morio-proxy \
-  morio-tap \
-  morio-ui \
-  morio-watcher \
-  morio-web \
-2> /dev/null
-
 # Always restart
 Restart=always
 
@@ -87,4 +66,9 @@ SyslogIdentifier=moriod
 
 [Install]
 WantedBy=default.target
+
+# Note that core will spawn containers that will not be
+# stopped (or removed) when stopping the moriod service.
+# If you want to stop all services, run:
+#   sudo /usr/sbin/moriod stopall
 
