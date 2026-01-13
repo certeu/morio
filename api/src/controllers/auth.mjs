@@ -254,7 +254,7 @@ Controller.prototype.authenticate = async function (req, res) {
 function createRequestContextForAccessPolicy(payload, req) {
   const context = {
     url: req.headers['x-replaced-path'],
-    method: req.method,
+    method: req.headers['x-forwarded-method'],
   }
   for (const field of ['user', 'provider', 'labels']) {
     if (payload[field]) context[field] = payload[field]
