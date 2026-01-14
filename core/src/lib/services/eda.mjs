@@ -184,7 +184,9 @@ async function ensureLocalPrerequisites({ instanceName = false }) {
         local: `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db.internal:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
         ccdb: `https://${utils.getLeaderFqdn() || utils.getCentralFqdns()[0]}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
         connection: utils.isBrokerNode() ? 'local' : 'ccdb',
-        tablePrefix: `${utils.getPreset('MORIO_EDA_TABLE_PREFIX')}${instanceSuffix}`,
+        tablePrefix: `${utils.getPreset('MORIO_EDA_TABLE_PREFIX')}${instanceSuffix}`
+          .split('-')
+          .join('_'),
       },
     }
 
