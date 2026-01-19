@@ -538,13 +538,54 @@ Controller.prototype.getCcdbToken = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getCustomToken = async function (req, res) {
+  /*
+   * People with access to EdA can configure the entire request.
+   * When running multiple EdA instances, this makes it impossible
+   * to know for certain from which instance this request comes
+   * and that in turn makes it impossible to write different Vault
+   * policies for each of them.
+   * For this reason, we grab the client IP address as it is the one
+   * thing that cannot be faked from within EdA. In addition, we attempt
+   * to match this to a running EdA instance and include this information
+   * in the token. This way, you can write your Vault policies and use this
+   * data to differentiate between EdA instances.
+   */
+  const ip = utils.getIpFromRequest(req)
+  const result = await utils.coreClient.get(`/docker/containers`)
+  const containers =
+    result && Array.isArray(result) && result[0] === 200
+      ? result[1]
+          .filter(
+            (container) =>
+              container.NetworkSettings?.Networks?.[utils.getNetworkName()]?.IPAddress === ip
+          )
+          .map((container) => {
+            const info = {
+              container_id: container.Id,
+              container_name: container.Names[0],
+              container_image: container.Image,
+              container_image_id: container.ImageID,
+            }
+            if (container.Labels?.['morio.service'])
+              info.container_morio_service = container.Labels['morio.service']
+
+            return info
+          })
+      : []
+  /*
+   * If there is one and only one match for this IP, we add the container info to the JWT
+   * In all other cases, we do not
+   */
+  const container = containers.length === 1 ? containers.pop() : {}
+
   const jwt = await generateJwt({
     data: {
+      ...req.body,
       user: 'eda',
       role: 'eda',
       node: utils.getNodeUuid(),
       cluster: utils.getClusterUuid(),
-      ...req.body,
+      ...container,
     },
     key: utils.getKeys().private,
     passphrase: utils.getKeys().unseal,

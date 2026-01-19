@@ -169,6 +169,22 @@ utils.getFlankingFqdns = () => utils.getSettings('cluster.flanking_nodes', [])
 utils.getInfo = () => store.get('info')
 
 /**
+ * Helper method to get the IP address from the request
+ *
+ * Note that this supports IPv4 and IPv4-mapped IPv6 addresses
+ * but won't handle real IPv6 addresses. Since this is only used
+ * on the internal Docker network, that is fine. But don't use this
+ * for something where the request might be from a real IPv6 address
+ *
+ * @param {object} req - The request object
+ * @return {string} ip - The IPv4 address
+ */
+utils.getIpFromRequest = (req) =>
+  req.socket.remoteAddress.startsWith('::ffff:')
+    ? req.socket.remoteAddress.substring(7)
+    : req.socket.remoteAddress
+
+/**
  * Helper method to het the keys
  *
  * @return {object} keys - The keys data
@@ -225,6 +241,13 @@ utils.getNodeFqdnFromSerial = (serial) =>
  *
  */
 utils.getAllNodesFqdns = () => [...utils.getBrokerFqdns(), ...utils.getFlankingFqdns()]
+
+/**
+ * Helper method to get the correct network name from presets
+ *
+ * @return {string} name - Name of the network
+ */
+utils.getNetworkName = () => utils.getPreset('MORIO_NETWORK')
 
 /**
  * Helper method to get the node_serial of the local node
