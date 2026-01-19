@@ -578,26 +578,35 @@ Controller.prototype.getCustomToken = async function (req, res) {
    */
   const container = containers.length === 1 ? containers.pop() : {}
 
+  // Prepare JWT
+  const data = {
+    ...req.body,
+    user: 'eda',
+    role: 'eda',
+    node: utils.getNodeUuid(),
+    cluster: utils.getClusterUuid(),
+    ...container,
+  }
+  const options = {
+    /*
+     * If this token expires, EdA will break.
+     * It is renewed at each init() command, so in priciple this
+     * should not be a problem. But let's make it longer than the
+     * default 4h anyway
+     */
+    expiresIn: '24h',
+  }
+  if (data.aud) {
+    // Custom audience, remove it from data and move to options
+    options.audience = data.aud
+    delete data.aud
+  }
+
   const jwt = await generateJwt({
-    data: {
-      ...req.body,
-      user: 'eda',
-      role: 'eda',
-      node: utils.getNodeUuid(),
-      cluster: utils.getClusterUuid(),
-      ...container,
-    },
+    data,
     key: utils.getKeys().private,
     passphrase: utils.getKeys().unseal,
-    options: {
-      /*
-       * If this token expires, EdA will break.
-       * It is renewed at each init() command, so in priciple this
-       * should not be a problem. But let's make it longer than the
-       * default 4h anyway
-       */
-      expiresIn: '24h',
-    },
+    options,
   })
 
   return res.send({ jwt })
