@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Create directories for logs and data
+mkdir -p /var/log/morio
+mkdir -p /var/lib/morio/filebeat
+mkdir -p /var/lib/morio/metricbeat
+chmod 755 /var/log/morio
+chmod 755 /var/lib/morio
+
+# Set permissions on binaries and config
+chmod -R 755 /opt/morio/bin
+chmod -R 644 /opt/morio/etc
+
+# Load filebeat and metricbeat via LaunchDaemons
+launchctl load /Library/LaunchDaemons/com.morio.filebeat.plist
+launchctl load /Library/LaunchDaemons/com.morio.metricbeat.plist
+
+exit 0

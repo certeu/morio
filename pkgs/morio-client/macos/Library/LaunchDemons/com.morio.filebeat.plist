@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.morio.logs</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/morio/bin/morio</string>
+        <string>logs</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/var/log/morio/logs/filebeat.log</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/morio/logs/filebeat.err</string>
+</dict>
+</plist>
