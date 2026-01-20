@@ -1118,7 +1118,7 @@ export const HostDataSummary = ({ data }) => {
         <div className="w-full">
           <h4 className="flex flex-row items-center flex-wrap gap-2 justify-between w-full mt-0 pt-0 w-full">
             <span className="flex flex-row gap-2 items-center">
-              <Hostname data={data} /> test
+              <Hostname data={data} />
             </span>
           </h4>
           <div className="flex flex-row flex-wrap gap-2">
