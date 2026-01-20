@@ -61,6 +61,7 @@
     "build:morio-repo.deb": "./scripts/build-morio-repo-deb.sh",
     "build:moriod.deb": "./scripts/build-moriod-deb.sh",
     "build:morio-client.deb": "./scripts/build-morio-client-deb.sh",
+    "build:morio-client.pkg": "./scripts/build-morio-client-pkg.sh",
     "build:pkgs.deb": "./scripts/build-pkgs-deb.sh",
     "cdp": "npm run check-docs-page",
     "check-docs-page": "./scripts/check-docs-page.sh",
