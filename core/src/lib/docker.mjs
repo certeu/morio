@@ -339,6 +339,11 @@ export function generateContainerConfig(serviceName, instanceName = false) {
    */
   if (config.container.command) opts.Cmd = config.container.command
 
+  /*
+   * Healthcheck
+   */
+  if (config.container.healthcheck) opts.Healthcheck = config.container.healthcheck
+
   return opts
 }
 
