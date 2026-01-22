@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"sort"
 	"strings"
@@ -164,7 +165,13 @@ func ShowModuleList(agent string) {
 
 func GetEnabledModules() []string {
 	// Gather all enabled modules
-	enabled, _ := ModuleList("audit/module-templates.d")
+	var enabled []string
+
+	// Only check audit on Linux
+	if runtime.GOOS == "linux" {
+		enabled, _ = ModuleList("audit/module-templates.d")
+	}
+
 	enabledLogs, _ := ModuleList("logs/module-templates.d")
 	enabledLogsInputs, _ := ModuleList("logs/input-templates.d")
 	enabledMetrics, _ := ModuleList("metrics/module-templates.d")
@@ -217,7 +224,9 @@ func ShowModuleListSummary(table bool) {
 func ShowModulesList(verbose bool, table bool) {
 	if verbose {
 		ShowModuleListSummary(table)
-		ShowModuleList("audit")
+		if runtime.GOOS == "linux" {
+			ShowModuleList("audit")
+		}
 		ShowModuleList("logs")
 		ShowModuleList("metrics")
 	} else {
@@ -228,11 +237,12 @@ func ShowModulesList(verbose bool, table bool) {
 func ModuleList(folder string) ([]string, []string) {
 	var enabled []string
 	var disabled []string
-	path := GetConfigPath(folder)
+	path := GetConfigFilePath(folder)
 	templates, err := os.ReadDir(path)
 	if err != nil {
-		fmt.Println("Unable to load template list from " + path)
-		panic(err)
+		// Don't panic if directory doesn't exist (e.g., audit on macOS)
+		// Just return empty lists silently
+		return enabled, disabled
 	}
 
 	for _, template := range templates {
@@ -251,7 +261,9 @@ func ModuleList(folder string) ([]string, []string) {
 }
 
 func enableModule(module string) {
-	enableAuditModule(module)
+	if runtime.GOOS == "linux" {
+		enableAuditModule(module)
+	}
 	enableLogsModule(module)
 	enableMetricsModule(module)
 }
@@ -274,13 +286,15 @@ func enableModuleFile(base, module string) {
 	for _, name := range disabled {
 		moduleName := ModuleNameFromFile(name)
 		if moduleName == module {
-			os.Rename(GetConfigPath(base+"/"+name), GetConfigPath(base+"/"+moduleName+".yml"))
+			os.Rename(GetConfigFilePath(base+"/"+name), GetConfigFilePath(base+"/"+moduleName+".yml"))
 		}
 	}
 }
 
 func disableModule(module string) {
-	disableAuditModule(module)
+	if runtime.GOOS == "linux" {
+		disableAuditModule(module)
+	}
 	disableLogsModule(module)
 	disableMetricsModule(module)
 }
@@ -303,7 +317,7 @@ func disableModuleFile(base, module string) {
 	for _, name := range enabled {
 		moduleName := ModuleNameFromFile(name)
 		if moduleName == module {
-			os.Rename(GetConfigPath(base+"/"+moduleName+".yml"), GetConfigPath(base+"/"+moduleName+".yml.disabled"))
+			os.Rename(GetConfigFilePath(base+"/"+moduleName+".yml"), GetConfigFilePath(base+"/"+moduleName+".yml.disabled"))
 		}
 	}
 }
@@ -320,9 +334,14 @@ func ModuleNameFromFile(file string) string {
 }
 
 func ModuleInfo(module string) {
-	AuditModuleInfo(module, true)
-	LogsModuleInfo(module, false)
-	MetricsModuleInfo(module, false)
+	if runtime.GOOS == "linux" {
+		AuditModuleInfo(module, true)
+		LogsModuleInfo(module, false)
+		MetricsModuleInfo(module, false)
+	} else {
+		LogsModuleInfo(module, true)
+		MetricsModuleInfo(module, false)
+	}
 }
 
 func AuditModuleInfo(module string, printHeader bool) {
@@ -431,8 +450,10 @@ func joinUnique(slice1, slice2 []string) []string {
 }
 
 func ClearModules() {
-	ClearModuleFiles("audit/module-templates.d")
-	ClearModuleFiles("audit/rule-templates.d")
+	if runtime.GOOS == "linux" {
+		ClearModuleFiles("audit/module-templates.d")
+		ClearModuleFiles("audit/rule-templates.d")
+	}
 	ClearModuleFiles("logs/module-templates.d")
 	ClearModuleFiles("logs/input-templates.d")
 	ClearModuleFiles("metrics/module-templates.d")
@@ -440,7 +461,7 @@ func ClearModules() {
 
 // FIXME: Make this platform agnostic
 func ClearModuleFiles(folder string) error {
-	matches, err := filepath.Glob(GetConfigPath(folder) + "/*")
+	matches, err := filepath.Glob(GetConfigFilePath(folder) + "/*")
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+  "runtime"
 )
 
 var configFile string
@@ -40,9 +41,17 @@ func init() {
 // Set up viper to manage the config file
 func initConfig() {
 	viper.SetEnvPrefix("morio")
-	viper.AddConfigPath("/etc/morio/")
+	viper.AddConfigPath(GetConfigPath())
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("morio")
 	viper.AutomaticEnv()
 	viper.ReadInConfig()
+}
+
+// Helper method to figure out the config path based on the OS
+func GetConfigPath() string {
+  if runtime.GOOS == "darwin" {
+    return "/opt/morio/etc"
+  }
+  return "/etc/morio"
 }

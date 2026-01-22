@@ -139,7 +139,7 @@ func PrintErrorResponse(errResp ErrorResponse) {
 
 func CreateHttpClient() (*http.Client, error) {
 	// Read the CA certificate from file
-	caCert, err := ioutil.ReadFile(GetConfigPath("ca.pem"))
+	caCert, err := ioutil.ReadFile(GetConfigFilePath("ca.pem"))
 	if err != nil {
 		return nil, err
 	}

@@ -29,5 +29,5 @@ echo "(skipped - not implemented yet)"
 cp ../local/builds/morio-linux-amd64 ../pkgs/morio-client/linux/usr/sbin/morio
 
 # Copy linux/amd64 client in place
-cp ../local/builds/morio-macos-arm64 ../pkgs/morio-client/macos/opt/morio/bin/morio
+cp ../local/builds/morio-macos-arm64 ../pkgs/morio-client/macos/bin/morio
 

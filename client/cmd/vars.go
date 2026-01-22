@@ -223,8 +223,8 @@ func init() {
 }
 
 // Location of the variables files
-const CustomVarFolder string = "/etc/morio/vars.d"
-const DefaultVarFolder string = "/etc/morio/default.vars.d"
+var CustomVarFolder = GetConfigPath() + "/vars.d"
+var DefaultVarFolder = GetConfigPath() + "/default.vars.d"
 
 // Helper for panic on error
 func check(e error) {

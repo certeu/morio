@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -28,7 +29,9 @@ func init() {
 }
 
 func EnsureTemplateVars() {
-	EnsureTemplateFolderVars("audit/module-templates.d")
+	if runtime.GOOS == "linux" {
+		EnsureTemplateFolderVars("audit/module-templates.d")
+	}
 	EnsureTemplateFolderVars("metrics/module-templates.d")
 	EnsureTemplateFolderVars("logs/module-templates.d")
 	EnsureTemplateFolderVars("logs/input-templates.d")
@@ -39,13 +42,18 @@ func TemplateConfig() {
 	EnsureTemplateVars()
 	// Then load the vars
 	context := GetVars()
-	// Audit
-	TemplateOutConfigFile("audit/config-template.yml", "audit/config.yml", context)
-	TemplateOutInputFolder("audit/module-templates.d", "audit/modules.d", context)
-	TemplateOutConfigFolder("audit/rule-templates.d", "audit/rules.d", context)
+
+	// Audit (Linux only)
+	if runtime.GOOS == "linux" {
+		TemplateOutConfigFile("audit/config-template.yml", "audit/config.yml", context)
+		TemplateOutInputFolder("audit/module-templates.d", "audit/modules.d", context)
+		TemplateOutConfigFolder("audit/rule-templates.d", "audit/rules.d", context)
+	}
+
 	// metrics
 	TemplateOutConfigFile("metrics/config-template.yml", "metrics/config.yml", context)
 	TemplateOutInputFolder("metrics/module-templates.d", "metrics/modules.d", context)
+
 	// logs
 	TemplateOutConfigFile("logs/config-template.yml", "logs/config.yml", context)
 	TemplateOutInputFolder("logs/module-templates.d", "logs/modules.d", context)
@@ -70,20 +78,20 @@ func EnsureTemplateFileVars(file string) {
 
 func TemplateOutConfigFile(from string, to string, context map[string]string) {
 	// Read the template from disk
-	template, err := os.ReadFile(GetConfigPath(from))
+	template, err := os.ReadFile(GetConfigFilePath(from))
 	if err != nil {
 		fmt.Printf("Failed to read config file: %v\n", err)
 		panic(err)
 	}
 
 	// Inject run-time vars
-	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigPath(from)
+	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigFilePath(from)
 
 	// Render with mustache
 	output, err := mustache.Render("{{={| |}=}}"+string(template), context)
 
 	// Open file
-	file, err := os.Create(GetConfigPath(to))
+	file, err := os.Create(GetConfigFilePath(to))
 	check(err)
 	defer file.Close()
 
@@ -102,14 +110,14 @@ func TemplateOutConfigFile(from string, to string, context map[string]string) {
 
 func TemplateOutInputFile(from string, to string, context map[string]string) {
 	// Read the template from disk
-	template, err := os.ReadFile(GetConfigPath(from))
+	template, err := os.ReadFile(GetConfigFilePath(from))
 	if err != nil {
 		fmt.Printf("Failed to read template file: %v\n", err)
 		panic(err)
 	}
 
 	// Inject run-time vars
-	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigPath(from)
+	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigFilePath(from)
 	context["MORIO_MODULE_NAME"] = ModuleNameFromFile(from)
 
 	// Render with mustache
@@ -137,17 +145,17 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 	}
 
 	// Open file
-	file, err := os.Create(GetConfigPath(to))
+	file, err := os.Create(GetConfigFilePath(to))
 	check(err)
 	defer file.Close()
 
 	// Write to disk
 	_, err = file.WriteString(string(yamlData))
 	if err != nil {
-		fmt.Println("Failed to write to " + GetConfigPath(to))
+		fmt.Println("Failed to write to " + GetConfigFilePath(to))
 		panic(err)
 	} else {
-		fmt.Println(GetConfigPath(to))
+		fmt.Println(GetConfigFilePath(to))
 	}
 
 	// Sync
@@ -169,11 +177,11 @@ func TemplateOutInputFolder(from string, to string, context map[string]string) {
 }
 
 func ClearFolder(folder string) {
-	path := GetConfigPath(folder)
+	path := GetConfigFilePath(folder)
 	files, err := os.ReadDir(path)
 	if err != nil {
-		fmt.Println("Unable to read files from folder at " + path)
-		panic(err)
+		// Gracefully handle missing directories (e.g., audit on macOS)
+		return
 	}
 
 	for _, file := range files {
@@ -189,22 +197,24 @@ func ClearFolder(folder string) {
 }
 
 func TemplateList(folder string) []string {
-	var files []string
-	path := filepath.Join([]string{"/etc", "morio", folder}...)
-	templates, err := ioutil.ReadDir(path)
-	if err != nil {
-		fmt.Println("Unable to load template list from " + path)
-		panic(err)
-	}
+        var files []string
+        // Grab the templates from disk
+        path := GetConfigFilePath(folder)
+        templates, err := ioutil.ReadDir(path)
+        if err != nil {
+                // Just return an empty list if we cannot find them
+                return files
+        }
 
-	for _, template := range templates {
-		suffix := filepath.Ext(template.Name())
-		if !template.IsDir() && suffix == ".yml" {
-			files = append(files, template.Name())
-		}
-	}
+        // Now build our list of template files
+        for _, template := range templates {
+                suffix := filepath.Ext(template.Name())
+                if !template.IsDir() && suffix == ".yml" {
+                        files = append(files, template.Name())
+                }
+        }
 
-	return files
+        return files
 }
 
 func ExtractTemplateDefaultVars(from string) map[string]string {
@@ -303,7 +313,7 @@ func isString(val interface{}) bool {
 
 // FIXME: Make this platform agnostic
 func TemplateDocsAsYaml(path string) map[string]interface{} {
-	template, err := os.ReadFile(GetConfigPath(path))
+	template, err := os.ReadFile(GetConfigFilePath(path))
 	if err != nil {
 		fmt.Println("Cannot read template file. Bailing out.")
 		panic(err)
@@ -368,8 +378,8 @@ func AddDefaultProcessorsToInputs(inputs []map[string]interface{}, from string) 
 		},
 		{
 			"add_id": map[string]string{
-        "target_field": "@metadata._id",
-      },
+				"target_field": "@metadata._id",
+			},
 		},
 	}
 
@@ -409,22 +419,22 @@ func AddDefaultProcessorsToInputs(inputs []map[string]interface{}, from string) 
 	return inputs
 }
 
-// FIXME: Make this platform agnostic
-func GetConfigPath(parts ...string) string {
-	return filepath.Join(append([]string{"/etc", "morio"}, parts...)...)
+// GetConfigFilePath returns the full path to a config file/folder
+func GetConfigFilePath(parts ...string) string {
+	return filepath.Join(append([]string{GetConfigPath()}, parts...)...)
 }
 
-// FIXME: Make this platform agnostic
+// WriteConfigFile writes content to a file in the config directory
 func WriteConfigFile(filename string, content string) error {
 	// Open file
-	file, err := os.Create(GetConfigPath(filename))
+	file, err := os.Create(GetConfigFilePath(filename))
 	check(err)
 	defer file.Close()
 
 	// Write value
 	_, err = file.WriteString(content)
 	if err != nil {
-		fmt.Println("Failed to write to " + GetConfigPath(filename))
+		fmt.Println("Failed to write to " + GetConfigFilePath(filename))
 		panic(err)
 	}
 
