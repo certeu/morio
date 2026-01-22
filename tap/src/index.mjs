@@ -18,8 +18,6 @@ process.on('SIGUSR2', exitGracefully.bind())
  */
 subscribe()
 
-
-
 /*
  * Subscribe to topics and dispatch messages
  *
@@ -152,4 +150,3 @@ async function exitGracefully() {
     process.exit()
   }
 }
-

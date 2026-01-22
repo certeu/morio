@@ -21,34 +21,37 @@ export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Figure out whether we need to add a proxy config
    */
-  const traefik = utils.getCacheNode() === utils.getNodeFqdn()
-    ? {
-      cache: {
-        tcp: {
-          routers: {
-            cache: {
-              entryPoints: ["cache"],
-              rule: "HostSNI(`*`)",
-              service: "cache",
-              tls: {
-                passthrough: false,
-                certResolver: "ca",
-              }
-            }
-          },
-          services: {
-            cache: {
-              loadBalancer: {
-                servers: [{
-                  address: `morio-cache.internal:${utils.getPreset('MORIO_CACHE_PORT')}`,
-                }],
+  const traefik =
+    utils.getCacheNode() === utils.getNodeFqdn()
+      ? {
+          cache: {
+            tcp: {
+              routers: {
+                cache: {
+                  entryPoints: ['cache'],
+                  rule: 'HostSNI(`*`)',
+                  service: 'cache',
+                  tls: {
+                    passthrough: false,
+                    certResolver: 'ca',
+                  },
+                },
+              },
+              services: {
+                cache: {
+                  loadBalancer: {
+                    servers: [
+                      {
+                        address: `morio-cache.internal:${utils.getPreset('MORIO_CACHE_PORT')}`,
+                      },
+                    ],
+                  },
+                },
               },
             },
           },
-        },
-      }
-    }
-    : null
+        }
+      : null
 
   return {
     traefik,
@@ -67,7 +70,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         ? [`${utils.getPreset('MORIO_CONFIG_ROOT')}/valkey:/usr/local/etc/valkey`]
         : [`${utils.getPreset('MORIO_GIT_ROOT')}/data/config/valkey:/usr/local/etc/valkey`],
       // Command
-      command: ["valkey-server", "/usr/local/etc/valkey/valkey.conf"],
+      command: ['valkey-server', '/usr/local/etc/valkey/valkey.conf'],
     },
     /*
      * Valkey configuration file

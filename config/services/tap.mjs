@@ -34,6 +34,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/tap:/morio/tap/config`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/shared/processors:/morio/tap/processors`,
           ],
-    }
+    },
   }
 }

@@ -68,7 +68,6 @@ const getHelpers = (env) => {
   return { store, utils }
 }
 
-
 const config = {
   core: {
     /*
@@ -106,8 +105,7 @@ const cliOptions = async (name, env) => {
       const extra = await readFile('./local/clioptions.dev')
       if (extra) extraCliOptions = extra
       else console.log('No lolca/clioptions.dev file found')
-    }
-    catch(err) {
+    } catch (err) {
       console.log('Error reading local/clioptions.dev', err)
     }
   }
@@ -210,7 +208,7 @@ ${name === 'core' && env === 'test' ? testFqdnCheck : ''}
 ${name === 'api' && env === 'test' ? testFqdnCheck : ''}
 ${name === 'api' ? preApiTest : ''}
 
-docker run ${(await cliOptions(name, env))}
+docker run ${await cliOptions(name, env)}
 ${name === 'api' ? postApiTest : ''}
 `
 for (const env of ['dev', 'test', 'prod']) {

@@ -11,19 +11,16 @@ import { getHostFqdn, getInventoryHosts } from 'components/boards/shared.mjs'
 export default function DashboardsShowMetricsPage({ cachekey }) {
   const { api } = useApi()
 
-  const type = cachekey.slice(0,11) === 'metric|top-'
-    ? "top"
-    : "dataset"
+  const type = cachekey.slice(0, 11) === 'metric|top-' ? 'top' : 'dataset'
 
-  const [host, module, dataset] = type === "dataset"
-    ? cachekey.split('|').slice(1)
-    : [false, false, false]
+  const [host, module, dataset] =
+    type === 'dataset' ? cachekey.split('|').slice(1) : [false, false, false]
 
   const [fqdn, setFqdn] = useState(host)
   const [inventory, setInventory] = useState(host)
   useEffect(() => {
-    if (type === "dataset") getHostFqdn(host, setFqdn, api)
-    else if (type === "top") getInventoryHosts(setInventory, api)
+    if (type === 'dataset') getHostFqdn(host, setFqdn, api)
+    else if (type === 'top') getInventoryHosts(setInventory, api)
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [host, api])
 
@@ -36,7 +33,7 @@ export default function DashboardsShowMetricsPage({ cachekey }) {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <ShowMetrics { ...{ host, module, dataset, cachekey, type, inventory }} hostname={fqdn} />
+        <ShowMetrics {...{ host, module, dataset, cachekey, type, inventory }} hostname={fqdn} />
       </ContentWrapper>
     </PageWrapper>
   )

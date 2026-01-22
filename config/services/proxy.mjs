@@ -23,7 +23,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Some helpers
    */
-  const nodes = utils.isEphemeral() ? [] : [ utils.getNodeFqdn() ]
+  const nodes = utils.isEphemeral() ? [] : [utils.getNodeFqdn()]
   if (utils.isBrokerNode()) nodes.push(utils.getClusterFqdn())
   const extraCliFlags = []
   const extraPorts = []
@@ -56,16 +56,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
       //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
       '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
       // Point to root CA (will only work after CA is initialized)
-      '--serversTransport.rootcas=/usr/local/share/ca-certificates/morio_root_ca.crt',
+      '--serversTransport.rootcas=/usr/local/share/ca-certificates/morio_root_ca.crt'
     )
-    extraPorts.push(
-      `${utils.getPreset('MORIO_CA_PORT')}:${utils.getPreset('MORIO_CA_PORT')}`,
-    )
+    extraPorts.push(`${utils.getPreset('MORIO_CA_PORT')}:${utils.getPreset('MORIO_CA_PORT')}`)
     traefik.proxy
       .set('tls.stores.default.defaultgeneratedcert.resolver', 'ca')
       .set(
         'tls.stores.default.defaultgeneratedcert.domain.main',
-        (utils.isDistributed() && utils.isBrokerNode()) ? utils.getClusterFqdn() : utils.getNodeFqdn()
+        utils.isDistributed() && utils.isBrokerNode() ? utils.getClusterFqdn() : utils.getNodeFqdn()
       )
       .set('tls.stores.default.defaultgeneratedcert.domain.sans', nodes.join(', '))
       .set(
@@ -91,10 +89,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
   if (utils.getFlankingCount() > 0 && utils.isBrokerNode()) {
     extraCliFlags.push(
       //  Create DB entrypoint for cross-node DB connections (HTTP to Rqlite)
-      `--entrypoints.ccdb.address=:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
+      `--entrypoints.ccdb.address=:${utils.getPreset('MORIO_DB_PROXY_PORT')}`
     )
     extraPorts.push(
-      `${utils.getPreset('MORIO_DB_PROXY_PORT')}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
+      `${utils.getPreset('MORIO_DB_PROXY_PORT')}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`
     )
   }
   // On the cache node, enforce TLS on the extra entrypoint
@@ -102,10 +100,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
   if (cacheNode && cacheNode === utils.getNodeFqdn()) {
     extraCliFlags.push(
       //  Create Cache entrypoint for cross-node cache connections (TCP to Valkey)
-      `--entrypoints.cache.address=:${utils.getPreset('MORIO_CACHE_PROXY_PORT')}`,
+      `--entrypoints.cache.address=:${utils.getPreset('MORIO_CACHE_PROXY_PORT')}`
     )
     extraPorts.push(
-      `${utils.getPreset('MORIO_CACHE_PROXY_PORT')}:${utils.getPreset('MORIO_CACHE_PROXY_PORT')}`,
+      `${utils.getPreset('MORIO_CACHE_PROXY_PORT')}:${utils.getPreset('MORIO_CACHE_PROXY_PORT')}`
     )
   }
 
@@ -127,11 +125,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports
-      ports: [
-        '80:80',
-        '443:443',
-        ...extraPorts,
-      ],
+      ports: ['80:80', '443:443', ...extraPorts],
       // Volumes
       volumes: PROD
         ? [
@@ -185,7 +179,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '--providers.file.watch=true',
         // TODO: Enable metrics
         ...extraCliFlags,
-      ]
+      ],
     },
     /*
      * Traefik (proxy) configuration for the proxy service

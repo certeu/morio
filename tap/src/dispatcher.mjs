@@ -67,7 +67,7 @@ function parseMessageData(message) {
  * @param {object} data - The data from the message
  * @return {string} module - The module name of '*' if it cannot be found
  */
-function getModuleName(data={}) {
+function getModuleName(data = {}) {
   return data?.labels?.['morio.module'] || '*'
 }
 
@@ -78,7 +78,7 @@ function getModuleName(data={}) {
  * @param {object} data - The data from the message
  * @return {string} module - The module name of '*' if it cannot be found
  */
-function getDatasetName(topic=false, data={}) {
+function getDatasetName(topic = false, data = {}) {
   if (!topic) return '*'
 
   // Explicit dataset
@@ -114,7 +114,8 @@ function getDatasetName(topic=false, data={}) {
   if (topic === 'events' && data.morio?.event?.type) return data.morio.event.type
 
   // Morio notifications
-  if (topic === 'notifications' && data.morio?.notification?.type) return data.morio.notification.type
+  if (topic === 'notifications' && data.morio?.notification?.type)
+    return data.morio.notification.type
 
   // Morio alarms
   if (topic === 'alarms' && data.morio?.alarm?.type) return data.morio.alarm.type
@@ -131,7 +132,7 @@ function getDatasetName(topic=false, data={}) {
  * @param {string} dataset - The name of the dataset
  * @return {Array} processors - The stream processors to run
  */
-function getProcessors(topic=false, module='*', dataset='*') {
+function getProcessors(topic = false, module = '*', dataset = '*') {
   const matches = []
   matches.push(...(processors[topic]?.[module]?.[dataset] || []))
   matches.push(...(processors[topic]?.[module]?.['*'] || []))
@@ -139,7 +140,5 @@ function getProcessors(topic=false, module='*', dataset='*') {
   matches.push(...(processors[topic]?.['*']?.['*'] || []))
 
   // Weed out double entries in the processor list
-  return [...new Set(matches.filter(m => typeof m.handler === 'function'))]
+  return [...new Set(matches.filter((m) => typeof m.handler === 'function'))]
 }
-
-

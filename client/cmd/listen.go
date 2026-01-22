@@ -58,9 +58,9 @@ func runListen(cmd *cobra.Command, args []string) error {
 
 	// Setup TLS configuration
 	tlsConfig, err := createTLSConfig(
-		"/etc/morio/cert.pem",
-		"/etc/morio/key.pem",
-		"/etc/morio/ca.pem",
+    GetConfigPath()+"/cert.pem",
+    GetConfigPath()+"/key.pem",
+    GetConfigPath()+"/ca.pem",
 	)
 	if err != nil {
 		return fmt.Errorf("Error creating TLS config: %v", err)

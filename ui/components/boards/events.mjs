@@ -53,10 +53,15 @@ const EventsTable = ({ data, paused, setPaused }) => {
   const { pushModal } = useContext(ModalContext)
 
   const sorted = data ? orderBy(data, `morio.event.${sort}`, desc ? 'desc' : 'asc') : false
-  const filtered = (search === '')
-    ? [...sorted].filter(item => !hidden.includes(item.morio.event.type))
-    : [...sorted].filter(item => item.morio.event.title.toLowerCase().includes(search.toLowerCase()) && !hidden.includes(item.morio.event.type))
-  const types = [...new Set(sorted.map(item => item.morio.event.type))]
+  const filtered =
+    search === ''
+      ? [...sorted].filter((item) => !hidden.includes(item.morio.event.type))
+      : [...sorted].filter(
+          (item) =>
+            item.morio.event.title.toLowerCase().includes(search.toLowerCase()) &&
+            !hidden.includes(item.morio.event.type)
+        )
+  const types = [...new Set(sorted.map((item) => item.morio.event.type))]
 
   const toggleOrder = (by) => {
     if (by === sort) setDesc(!desc)
@@ -73,8 +78,9 @@ const EventsTable = ({ data, paused, setPaused }) => {
     <>
       <div className="flex flex-row gap-2 items-center">
         <ToggleLiveButton {...{ paused, setPaused }} />
-        {types.map(type => (
-          <button key="type"
+        {types.map((type) => (
+          <button
+            key="type"
             className={`badge ${hidden.includes(type) ? 'badge-error' : 'badge-success'}`}
             onClick={() => toggleHidden(type)}
           >
@@ -99,7 +105,9 @@ const EventsTable = ({ data, paused, setPaused }) => {
                 onClick={() => toggleOrder('time')}
               >
                 Time
-                {sort === 'time' ? <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} /> : null}
+                {sort === 'time' ? (
+                  <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} />
+                ) : null}
               </button>
             </th>
             <th className="pr-4 text-left px-0 flex flex-row gap-4">
@@ -108,7 +116,9 @@ const EventsTable = ({ data, paused, setPaused }) => {
                 onClick={() => toggleOrder('title')}
               >
                 Title
-                {sort === 'title' ? <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} /> : null}
+                {sort === 'title' ? (
+                  <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} />
+                ) : null}
               </button>
             </th>
           </tr>
@@ -134,10 +144,11 @@ const EventsTable = ({ data, paused, setPaused }) => {
                     </button>
                   </td>
                   <td className="py-0">
-                    {evt.morio.event.md_title
-                      ? <Markdown>{evt.morio.event.md_title}</Markdown>
-                      : evt.morio.event.title
-                    }
+                    {evt.morio.event.md_title ? (
+                      <Markdown>{evt.morio.event.md_title}</Markdown>
+                    ) : (
+                      evt.morio.event.title
+                    )}
                   </td>
                 </tr>
               ))

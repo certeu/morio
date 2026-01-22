@@ -89,21 +89,23 @@ export function monitors(utils) {
     /*
      * UI Service
      */
-    ui: utils.getFlag('DISABLE_SERVICE_UI', false) ? undefined : {
-      ...imd,
-      type: 'http',
-      name: `Morio UI Service: UI on ${utils.getNodeFqdn()}`,
-      urls: [
-        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ui.internal:${utils.getPreset('MORIO_UI_PORT')}/favicon.svg`,
-      ],
-      check: {
-        response: {
-          status: [200],
-          body: ['viewBox'],
+    ui: utils.getFlag('DISABLE_SERVICE_UI', false)
+      ? undefined
+      : {
+          ...imd,
+          type: 'http',
+          name: `Morio UI Service: UI on ${utils.getNodeFqdn()}`,
+          urls: [
+            `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ui.internal:${utils.getPreset('MORIO_UI_PORT')}/favicon.svg`,
+          ],
+          check: {
+            response: {
+              status: [200],
+              body: ['viewBox'],
+            },
+          },
+          id: `morio.${cluster}.internal.ui`,
         },
-      },
-      id: `morio.${cluster}.internal.ui`,
-    },
     /*
      * Watcher Service
      */
@@ -122,7 +124,6 @@ export function monitors(utils) {
       },
       id: `morio.${cluster}.internal.watcher`,
     },
-
   }
 
   const broker = {
@@ -206,7 +207,5 @@ export function monitors(utils) {
     },
   }
 
-  return utils.isFlankingNode()
-    ? any
-    : { ...any, ...broker }
+  return utils.isFlankingNode() ? any : { ...any, ...broker }
 }

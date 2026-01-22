@@ -94,7 +94,8 @@ async function ensureDynamicStreamProcessorCode() {
           lut[topic]['*']['*'].push(id)
         }
       }
-      if (typeof imports[importedAs] === 'undefined') imports[importedAs] = { file: proc.file, processors: [] }
+      if (typeof imports[importedAs] === 'undefined')
+        imports[importedAs] = { file: proc.file, processors: [] }
       imports[importedAs].processors.push(id)
       processors[id] = {
         importedAs,
@@ -106,8 +107,7 @@ async function ensureDynamicStreamProcessorCode() {
         ...proc,
       }
       console.log(`Adding stream processor: ${id}`)
-    }
-    else console.log(`Skipping disabled stream processor: ${id}`)
+    } else console.log(`Skipping disabled stream processor: ${id}`)
   }
 
   /*
@@ -146,10 +146,10 @@ import { log } from './src/tools.mjs'
     for (const module of Object.keys(lut[topic])) {
       if (typeof lutData[topic][module] === 'undefined') lutData[topic][module] = {}
       for (const [dataset, d] of Object.entries(lut[topic][module])) {
-        if (typeof lutData[topic][module][dataset] === 'undefined') lutData[topic][module][dataset] = []
-        lutData[topic][module][dataset].push(typeof d.index === 'undefined'
-          ? `${d.importedAs}`
-          : `${d.importedAs}[${d.index}]`
+        if (typeof lutData[topic][module][dataset] === 'undefined')
+          lutData[topic][module][dataset] = []
+        lutData[topic][module][dataset].push(
+          typeof d.index === 'undefined' ? `${d.importedAs}` : `${d.importedAs}[${d.index}]`
         )
       }
     }
@@ -161,8 +161,8 @@ import { log } from './src/tools.mjs'
     for (const module of Object.keys(lut[topic])) {
       lutCode += `    "${module}": {${nl}`
       for (const [dataset, d] of Object.entries(lut[topic][module])) {
-        const h = d.map(handler => `code["${handler}"]`)
-        lutCode += `      "${dataset}": [${nl}        ${h.join(",\n        ")}${nl}      ],${nl}`
+        const h = d.map((handler) => `code["${handler}"]`)
+        lutCode += `      "${dataset}": [${nl}        ${h.join(',\n        ')}${nl}      ],${nl}`
       }
       lutCode += `    },${nl}`
     }
@@ -183,5 +183,3 @@ export const topics = ${JSON.stringify([...topics])}
  */
 if (config.tap?.imports) ensureDynamicStreamProcessorCode()
 else console.log(`No config with tap settings found on disk. Tap service cannot start.`)
-
-

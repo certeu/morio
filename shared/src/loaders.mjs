@@ -814,20 +814,20 @@ function reduceStreamProcessorSettings(processorId, processorSettings, morioSett
   for (const [key, val] of Object.entries(processorSettings)) {
     // These fields take an array and should use used as such
     if (['topics', 'modules', 'datasets'].includes(key) && typeof val !== 'undefined') {
-      reducedSettings[key] = typeof morioSettings.tap?.settings?.[processorId]?.[key] === 'undefined'
-        ? morioSettings.tap?.settings?.[processorId]?.[key] === 'undefined'
-        : val
+      reducedSettings[key] =
+        typeof morioSettings.tap?.settings?.[processorId]?.[key] === 'undefined'
+          ? morioSettings.tap?.settings?.[processorId]?.[key] === 'undefined'
+          : val
     }
     // These take a UI config object, with the default value stored in the `dflt` key
     else if (typeof val.dflt !== 'undefined') {
       reducedSettings[key] = morioSettings.tap?.settings?.[processorId]?.[key] || val.dflt
-    }
-    else if (typeof val === 'boolean') {
-      reducedSettings[key] = typeof morioSettings.tap?.settings?.[processorId]?.[key] === 'undefined'
-        ? morioSettings.tap?.settings?.[processorId]?.[key]
-        : val
-    }
-    else log.warn(`Unable to reduce stream processor config for: ${processorId}`)
+    } else if (typeof val === 'boolean') {
+      reducedSettings[key] =
+        typeof morioSettings.tap?.settings?.[processorId]?.[key] === 'undefined'
+          ? morioSettings.tap?.settings?.[processorId]?.[key]
+          : val
+    } else log.warn(`Unable to reduce stream processor config for: ${processorId}`)
   }
   // Enable if it is not explicitly configured
   if (![true, false].includes(processorSettings.enabled)) {
@@ -983,22 +983,20 @@ export async function applyOverlayFiles(settings, log) {
   const files = await getSettingsOverlayFiles()
 
   // JSON first
-  for (const file of (files.json || [])) {
+  for (const file of files.json || []) {
     const overlay = await readJsonFile(`/etc/morio/overlays.d/${file}`, (err) => log.warn(err))
     if (overlay) {
       log.debug(`Applying disk-based settings overlay: ${file}`)
       settings = applyOverlay(settings, overlay)
-    }
-    else log.debug(`Failed to load disk-based settings overlay: ${file}`)
+    } else log.debug(`Failed to load disk-based settings overlay: ${file}`)
   }
   // Then YAML
-  for (const file of (files.yaml || [])) {
+  for (const file of files.yaml || []) {
     const overlay = await readYamlFile(`/etc/morio/overlays.d/${file}`, (err) => log.warn(err))
     if (overlay) {
       log.debug(`Applying disk-based settings overlay: ${file}`)
       settings = applyOverlay(settings, overlay)
-    }
-    else log.debug(`Failed to load disk-based settings overlay: ${file}`)
+    } else log.debug(`Failed to load disk-based settings overlay: ${file}`)
   }
 
   return settings

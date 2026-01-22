@@ -74,17 +74,22 @@ export const tools = {
       },
     },
     md: {
-      to: (slug, txt=false) => `[${txt ? txt : slug}](${tools.link.raw.to(slug)})`,
+      to: (slug, txt = false) => `[${txt ? txt : slug}](${tools.link.raw.to(slug)})`,
       audit: {
-        host: (uuid, txt=false) => tools.link.md.to(`/boards/audit/host/${uuid}/`, txt ? txt : tools.shortUuid(id)),
-        log: (host, module, dataset, txt) => tools.link.md.to(`/boards/logs/show/log|${host}|${module}|${dataset}/`, txt),
-        user: (username, txt=false) => tools.link.md.to(`/boards/audit/user/${username}/`, txt ? txt : username),
+        host: (uuid, txt = false) =>
+          tools.link.md.to(`/boards/audit/host/${uuid}/`, txt ? txt : tools.shortUuid(id)),
+        log: (host, module, dataset, txt) =>
+          tools.link.md.to(`/boards/logs/show/log|${host}|${module}|${dataset}/`, txt),
+        user: (username, txt = false) =>
+          tools.link.md.to(`/boards/audit/user/${username}/`, txt ? txt : username),
       },
-      healthcheck: (id, name, txt=false) => `[${txt ? txt : name}](${tools.link.raw.to('/boards/checks/'+id)})`,
+      healthcheck: (id, name, txt = false) =>
+        `[${txt ? txt : name}](${tools.link.raw.to('/boards/checks/' + id)})`,
       inventory: {
-        host: (uuid, txt=false) => tools.link.md.to(`/inventory/hosts/${uuid}/`, txt ? txt : tools.shortUuid(uuid)),
+        host: (uuid, txt = false) =>
+          tools.link.md.to(`/inventory/hosts/${uuid}/`, txt ? txt : tools.shortUuid(uuid)),
       },
-    }
+    },
   },
   log,
   node,
@@ -315,9 +320,7 @@ async function cacheHealthcheck(data, settings = {}) {
   /*
    * Prepare ValKey commands
    */
-  const ops = valkey.pipeline()
-    .lpush(key, d)
-    .ltrim(key, 0, cap)
+  const ops = valkey.pipeline().lpush(key, d).ltrim(key, 0, cap)
 
   /*
    * Cache per host
@@ -343,16 +346,9 @@ async function cacheLogline(log, params, customset) {
   /*
    * Extract what we need  from params
    */
-  const {
-    module = "*",
-    hostId = "unknown-host",
-    settings = {},
-  } = params
-  const dataset = (customset) ? customset : (params.dataset || "*")
-  const {
-    cap = 50,
-    ttl = 4,
-  } = settings
+  const { module = '*', hostId = 'unknown-host', settings = {} } = params
+  const dataset = customset ? customset : params.dataset || '*'
+  const { cap = 50, ttl = 4 } = settings
 
   /*
    * Cache only stores strings, so stringify the data
@@ -377,7 +373,9 @@ async function cacheLogline(log, params, customset) {
   /*
    * Execute ValKey commands
    */
-  ops.exec((result) => logCacheErrors(result, { in: 'cachelog', dataset, log, settings, data: params.data }))
+  ops.exec((result) =>
+    logCacheErrors(result, { in: 'cachelog', dataset, log, settings, data: params.data })
+  )
 }
 
 /**
@@ -387,21 +385,13 @@ async function cacheLogline(log, params, customset) {
  * @param {object} metrics - The metrics data
  * @param {obhject} params - The full params passed to the processor
  */
-async function cacheMetricset(metrics, params, customset=false) {
+async function cacheMetricset(metrics, params, customset = false) {
   /*
    * Extract what we need  from params
    */
-  const {
-    module = "*",
-    hostId = "unknown-host",
-    settings = {},
-  } = params
-  const dataset = (customset) ? customset : (params.dataset || "*")
-  const {
-    cache = true,
-    cap = 150,
-    ttl = 1,
-  } = settings
+  const { module = '*', hostId = 'unknown-host', settings = {} } = params
+  const dataset = customset ? customset : params.dataset || '*'
+  const { cache = true, cap = 150, ttl = 1 } = settings
 
   /*
    * Don't bother if we do not have the metrics
@@ -428,7 +418,9 @@ async function cacheMetricset(metrics, params, customset=false) {
   /*
    * Execure ValKey commands
    */
-  ops.exec((result) => logCacheErrors(result, { in: 'cacheMetrics', dataset, metrics, data: params.data }))
+  ops.exec((result) =>
+    logCacheErrors(result, { in: 'cacheMetrics', dataset, metrics, data: params.data })
+  )
 }
 
 /**
@@ -438,14 +430,13 @@ async function cacheMetricset(metrics, params, customset=false) {
  * @param {Array} data - Either a [key, val] array, or an array of such arrays
  * @param {object} params - The full params passed to the processor
  */
-async function cacheTop(key, data, limit=10) {
+async function cacheTop(key, data, limit = 10) {
   if (!Array.isArray(data)) return cacheNote(`data passed to cacheTop needs to be an array`, data)
 
   const pipeline = valkey.pipeline()
   if (Array.isArray(data[0])) {
     for (const d of data) pipeline.zadd(key, Number(d[1]), d[0])
-  }
-  else pipeline.zadd(key, Number(data[1]), data[0])
+  } else pipeline.zadd(key, Number(data[1]), data[0])
   pipeline.zremrangebyrank(key, 0, -1 * limit - 1)
 
   return pipeline.exec((result) => logCacheErrors(result, { in: 'cacheTop', key, data }))
@@ -520,9 +511,9 @@ function produceStructuredMessage(msgType, msgData) {
     host: { id: host },
     tags,
     morio: {
-      uuid: tools.create.uuid()
+      uuid: tools.create.uuid(),
     },
-    "@timestamp": when(msgData)
+    '@timestamp': when(msgData),
   }
   msg.morio[msgType] = { context, data, time, title, type, hash: hash(type + context) }
   for (const key of ['md_title', 'msg', 'md_msg', 'reps']) {
@@ -561,8 +552,7 @@ function asString(input) {
   if (typeof input === 'object') {
     try {
       input = JSON.stringify(input)
-    }
-    catch(err) {
+    } catch (err) {
       input = `Input object cannot be serialized to JSON. Keys: ${Object.keys(input).join()}`
     }
   }
@@ -570,8 +560,8 @@ function asString(input) {
   return `${input}`
 }
 
-function debugHelper (id) {
-  if (id.length > 8) id = id.slice(0,8)
+function debugHelper(id) {
+  if (id.length > 8) id = id.slice(0, 8)
 
   return {
     start: () => cacheNote(`[${id}] Start event processor debug`),

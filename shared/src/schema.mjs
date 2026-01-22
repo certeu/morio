@@ -237,7 +237,7 @@ const accessPattern = Joi.object({
   glob: Joi.string(),
   glob_not: Joi.string(),
   regex: Joi.string(),
-  regex_not: Joi.string()
+  regex_not: Joi.string(),
 })
   .oxor('is', 'is_not', 'glob', 'glob_not', 'regex', 'regex_not') // Only one matcher type allowed
   .min(1)
@@ -256,28 +256,28 @@ const accessConditionValue = Joi.alternatives().try(
       Joi.array().items(Joi.string(), accessPattern).min(1),
       Joi.string(),
       accessPattern
-    )
+    ),
   }),
   Joi.object({
     and: Joi.alternatives().try(
       Joi.array().items(Joi.string(), accessPattern).min(1),
       Joi.string(),
       accessPattern
-    )
+    ),
   }),
   Joi.object({
     or_not: Joi.alternatives().try(
       Joi.array().items(Joi.string(), accessPattern).min(1),
       Joi.string(),
       accessPattern
-    )
+    ),
   }),
   Joi.object({
     and_not: Joi.alternatives().try(
       Joi.array().items(Joi.string(), accessPattern).min(1),
       Joi.string(),
       accessPattern
-    )
+    ),
   })
 )
 
@@ -288,13 +288,13 @@ const accessWhen = Joi.object({
   role: accessConditionValue,
   user: accessConditionValue,
   provider: accessConditionValue,
-  label: accessConditionValue
+  label: accessConditionValue,
 }).min(1) // At least one condition must be specified
 
 // A single access policy rule
 const accessRule = Joi.object({
   when: accessWhen.required(),
-  then: Joi.string().valid('allow', 'deny').required()
+  then: Joi.string().valid('allow', 'deny').required(),
 })
 
 /*

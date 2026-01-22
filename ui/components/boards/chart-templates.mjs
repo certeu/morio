@@ -156,7 +156,7 @@ export const markLine = {
   // Average
   avg: (data) => data.reduce((a, b) => a + b) / data.length,
   // Median
-  med: (data) => data.sort()[Math.round(data.length/2)],
+  med: (data) => data.sort()[Math.round(data.length / 2)],
   // 95th percentile
   p95: (data) => data.sort()[Math.ceil((95 / 100) * data.length) - 1],
 }
@@ -177,7 +177,7 @@ export const markLine = {
  * @param {number} config.series[0]valFmt - On optional transform method to apply to the value in the chart series
  * @return {object|array} options - The Echarts options object, or an array of them
  */
-export function lineChart(config, data=false) {
+export function lineChart(config, data = false) {
   if (!Array.isArray(config)) config = [config]
 
   // If we do not have data, return id: title object
@@ -194,12 +194,12 @@ export function lineChart(config, data=false) {
     charts[id] = {
       ...cloneAsPojo(chartTemplates.charts.line),
       id,
-      series: conf.series.map(sconf => {
-        const { div=1 } = sconf
+      series: conf.series.map((sconf) => {
+        const { div = 1 } = sconf
         const serie = {
           ...chartTemplates.series.line,
           name: sconf.name,
-          data: data.map((entry, i)  => {
+          data: data.map((entry, i) => {
             // If it's a simple value, return early
             if (div === 1) {
               let val = get(entry, sconf.path)
@@ -207,30 +207,26 @@ export function lineChart(config, data=false) {
               return [entry.timestamp, val]
             } else {
               // If it's a increasing counter, calculate delta
-              let val = (i === 0)
-                ? 0
-                : get(entry, sconf.path) - prev
+              let val = i === 0 ? 0 : get(entry, sconf.path) - prev
               if (sconf.valFmt) val = sconf.valFmt(val)
               prev = get(entry, sconf.path)
-              return [entry.timestamp, val/div]
+              return [entry.timestamp, val / div]
             }
-          })
+          }),
         }
         if (div === 30) serie.data[0][1] = serie.data[1][1]
         return serie
       }),
     }
-    if (charts[id].series.length === 1) charts[id].series[0].areaStyle = {
-      opacity: 0.2,
-      color: chartGradient('#1b88a2'),
-    }
+    if (charts[id].series.length === 1)
+      charts[id].series[0].areaStyle = {
+        opacity: 0.2,
+        color: chartGradient('#1b88a2'),
+      }
     charts[id].title.text = conf.title
     charts[id].yAxis.name = conf.yName
     if (conf.yFmt) charts[id].yAxis.axisLabel = { formatter: conf.yFmt }
   }
 
-  return (charts.length === 1)
-    ? Object.values(charts)[0]
-    : Object.values(charts)
+  return charts.length === 1 ? Object.values(charts)[0] : Object.values(charts)
 }
-

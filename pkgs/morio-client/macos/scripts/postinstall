@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# Create directories for logs and data
+mkdir -p /var/log/morio
+mkdir -p /var/lib/morio/filebeat
+mkdir -p /var/lib/morio/metricbeat
+chmod 755 /var/log/morio
+chmod 755 /var/lib/morio
+
+# Set permissions on binaries and config
+chmod -R 755 /opt/morio/bin
+chmod -R 644 /opt/morio/etc
+
+# Symlink the morio binary so it's in PATH
+ln -sf /opt/morio/bin/morio /usr/local/bin/morio
+
+# Installing software on MacOS is plenty of annoying for reasons
+# Creating the LaunchDeamons files in the postinstall script
+# makes them somewhat harder to discover in the repo, but is
+# required to get the install to work when the pacakge is
+# not notarized by Apple (something for which you have to pay)
+cat > /Library/LaunchDaemons/com.morio.logs.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.morio.logs</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/morio/bin/morio</string>
+        <string>logs</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/var/log/morio/logs/filebeat.log</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/morio/logs/filebeat.err</string>
+</dict>
+</plist>
+EOF
+cat > /Library/LaunchDaemons/com.morio.metrics.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.morio.metrics</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/morio/bin/morio</string>
+        <string>metrics</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/var/log/morio/metrics/metricbeat.log</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/morio/metrics/metricbeat.err</string>
+</dict>
+</plist>
+EOF
+
+# Load filebeat and metricbeat via LaunchDaemons
+launchctl load /Library/LaunchDaemons/com.morio.filebeat.plist
+launchctl load /Library/LaunchDaemons/com.morio.metricbeat.plist
+
+exit 0
