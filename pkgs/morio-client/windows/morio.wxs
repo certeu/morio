@@ -1,0 +1,259 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+  <Product Id='*'
+           Name='Morio Client'
+           Language='1033'
+           Version='MORIO_VERSION'
+           Manufacturer='Morio'
+           UpgradeCode='666d4e3f-8a2b-4f19-9f3e-7b5a1c8d9e0f'>
+
+    <Package InstallerVersion='200'
+             Compressed='yes'
+             InstallScope='perMachine'
+             Description='Morio - The morio client for shipping logs and metrics data'
+             Comments='Morio client for Windows' />
+
+    <MajorUpgrade DowngradeErrorMessage='A newer version of the Morio client is already installed.' />
+    <MediaTemplate EmbedCab='yes' />
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder'>
+        <Directory Id='INSTALLFOLDER' Name='Morio'>
+
+          <!-- Binary directory -->
+          <Directory Id='BinDir' Name='bin'>
+            <Component Id='MorioExe' Guid='*'>
+              <File Id='MorioExe' Source='bin/morio.exe' KeyPath='yes' />
+            </Component>
+
+            <Component Id='FilebeatExe' Guid='*'>
+              <File Id='FilebeatExe' Source='bin/filebeat.exe' KeyPath='yes' />
+
+              <ServiceInstall
+                Id='FilebeatService'
+                Name='MorioLogs'
+                DisplayName='Morio Logs'
+                Description='Morio logs shipping service'
+                Type='ownProcess'
+                Start='auto'
+                ErrorControl='normal'
+                Arguments='run -c &quot;[INSTALLFOLDER]etc\logs\config-template.yml&quot;' />
+
+              <ServiceControl
+                Id='FilebeatServiceControl'
+                Name='MorioLogs'
+                Start='install'
+                Stop='both'
+                Remove='uninstall' />
+            </Component>
+
+            <Component Id='MetricbeatExe' Guid='*'>
+              <File Id='MetricbeatExe' Source='bin/metricbeat.exe' KeyPath='yes' />
+
+              <ServiceInstall
+                Id='MetricbeatService'
+                Name='MorioMetrics'
+                DisplayName='Morio Metrics'
+                Description='Morio metrics shipping service'
+                Type='ownProcess'
+                Start='auto'
+                ErrorControl='normal'
+                Arguments='run -c &quot;[INSTALLFOLDER]etc\metrics\config-template.yml&quot;' />
+
+              <ServiceControl
+                Id='MetricbeatServiceControl'
+                Name='MorioMetrics'
+                Start='install'
+                Stop='both'
+                Remove='uninstall' />
+            </Component>
+
+            <Component Id='WinlogbeatExe' Guid='*'>
+              <File Id='WinlogbeatExe' Source='bin/winlogbeat.exe' KeyPath='yes' />
+
+              <ServiceInstall
+                Id='WinlogbeatService'
+                Name='MorioEventLogs'
+                DisplayName='Morio Event Logs'
+                Description='Morio event logs shipping service'
+                Type='ownProcess'
+                Start='auto'
+                ErrorControl='normal'
+                Arguments='run -c &quot;[INSTALLFOLDER]etc\logs\config-template.yml&quot;' />
+
+              <ServiceControl
+                Id='WinlogbeatServiceControl'
+                Name='MorioWinlogbeat'
+                Start='install'
+                Stop='both'
+                Remove='uninstall' />
+            </Component>
+          </Directory>
+
+          <!-- Config directory structure -->
+          <Directory Id='EtcDir' Name='etc'>
+
+            <!-- Main config file -->
+            <Component Id='MorioYml' Guid='*'>
+              <File Id='MorioYml' Source='etc/morio.yml' KeyPath='yes' />
+            </Component>
+
+            <!-- default.vars.d directory -->
+            <Directory Id='DefaultVarsDir' Name='default.vars.d'>
+              <Component Id='MorioTick' Guid='*'>
+                <File Id='MorioTick' Source='etc/default.vars.d/MORIO_TICK' KeyPath='yes' />
+              </Component>
+            </Directory>
+
+            <!-- vars.d directory (empty initially) -->
+            <Directory Id='VarsDir' Name='vars.d'>
+              <Component Id='CreateVarsDir' Guid='*'>
+                <CreateFolder />
+                <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+              </Component>
+            </Directory>
+
+            <!-- logs configuration -->
+            <Directory Id='LogsConfigDir' Name='logs'>
+              <Component Id='LogsConfigTemplate' Guid='*'>
+                <File Id='LogsConfigYml' Source='etc/logs/config-template.yml' KeyPath='yes' />
+              </Component>
+
+              <Directory Id='LogsInputsDir' Name='inputs.d'>
+                <Component Id='CreateLogsInputsDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
+
+              <Directory Id='LogsInputTemplatesDir' Name='input-templates.d'>
+                <Component Id='CreateLogsInputTemplatesDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
+
+              <Directory Id='LogsModulesDir' Name='modules.d'>
+                <Component Id='CreateLogsModulesDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
+
+              <Directory Id='LogsModuleTemplatesDir' Name='module-templates.d'>
+                <Component Id='CreateLogsModuleTemplatesDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
+            </Directory>
+
+            <!-- event logs configuration -->
+            <Directory Id='EventLogsConfigDir' Name='eventlogs'>
+              <Component Id='EventLogsConfigTemplate' Guid='*'>
+                <File Id='EventLogsConfigYml' Source='etc/eventlogs/config-template.yml' KeyPath='yes' />
+              </Component>
+
+              <Directory Id='EventLogsModulesDir' Name='modules.d'>
+                <Component Id='CreateEventLogsModulesDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
+
+              <Directory Id='EventLogsModuleTemplatesDir' Name='module-templates.d'>
+                <Component Id='CreateEventLogsModuleTemplatesDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
+            </Directory>
+
+            <!-- metrics configuration -->
+            <Directory Id='MetricsConfigDir' Name='metrics'>
+              <Component Id='MetricsConfigTemplate' Guid='*'>
+                <File Id='MetricsConfigYml' Source='etc/metrics/config-template.yml' KeyPath='yes' />
+              </Component>
+
+              <Directory Id='MetricsModulesDir' Name='modules.d'>
+                <Component Id='CreateMetricsModulesDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
+
+              <Directory Id='MetricsModuleTemplatesDir' Name='module-templates.d'>
+                <Component Id='CreateMetricsModuleTemplatesDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
+            </Directory>
+
+          </Directory>
+
+          <!-- Data directory for beats -->
+          <Directory Id='DataDir' Name='data'>
+            <Component Id='CreateDataDir' Guid='*'>
+              <CreateFolder />
+              <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+            </Component>
+          </Directory>
+
+          <!-- Logs directory -->
+          <Directory Id='LogsDir' Name='logs'>
+            <Component Id='CreateLogsDir' Guid='*'>
+              <CreateFolder />
+              <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+            </Component>
+          </Directory>
+
+        </Directory>
+      </Directory>
+
+      <!-- ProgramData for morio logs (matches your var/log/morio structure) -->
+      <Directory Id='CommonAppDataFolder'>
+        <Directory Id='MorioProgramDataDir' Name='Morio'>
+          <Directory Id='MorioLogsDataDir' Name='logs'>
+            <Component Id='CreateMorioLogsDataDir' Guid='*'>
+              <CreateFolder />
+              <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <!-- Feature definition - includes all components -->
+    <Feature Id='Complete' Level='1' Title='Morio Client' Description='Complete Morio Client installation'>
+      <!-- Binaries -->
+      <ComponentRef Id='MorioExe' />
+      <ComponentRef Id='FilebeatExe' />
+      <ComponentRef Id='MetricbeatExe' />
+      <ComponentRef Id='WinlogbeatExe' />
+
+      <!-- Config files -->
+      <ComponentRef Id='MorioYml' />
+      <ComponentRef Id='MorioTick' />
+      <ComponentRef Id='LogsConfigTemplate' />
+      <ComponentRef Id='EventLogsConfigTemplate' />
+      <ComponentRef Id='MetricsConfigTemplate' />
+
+      <!-- Directories -->
+      <ComponentRef Id='CreateVarsDir' />
+      <ComponentRef Id='CreateLogsInputsDir' />
+      <ComponentRef Id='CreateLogsInputTemplatesDir' />
+      <ComponentRef Id='CreateLogsModulesDir' />
+      <ComponentRef Id='CreateLogsModuleTemplatesDir' />
+      <ComponentRef Id='CreateEventLogsModulesDir' />
+      <ComponentRef Id='CreateEventLogsModuleTemplatesDir' />
+      <ComponentRef Id='CreateMetricsModulesDir' />
+      <ComponentRef Id='CreateMetricsModuleTemplatesDir' />
+      <ComponentRef Id='CreateDataDir' />
+      <ComponentRef Id='CreateLogsDir' />
+      <ComponentRef Id='CreateMorioLogsDataDir' />
+    </Feature>
+
+  </Product>
+</Wix>
+
