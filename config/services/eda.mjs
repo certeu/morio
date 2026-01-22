@@ -32,10 +32,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
     }
 
     return multi
-  }
-  else return false
+  } else return false
 }
-
 
 export const resolveServiceInstanceConfiguration = (instance, instanceIndex, utils) => {
   /*
@@ -51,7 +49,7 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
    */
   const instanceServiceName = utils.instanceServiceName('eda', instance)
   const instanceSuffix = instance ? `-${instance}` : ''
-  const instanceTitle = `Morio EdA${instance ? ' ('+instance+')' : ''}`
+  const instanceTitle = `Morio EdA${instance ? ' (' + instance + ')' : ''}`
 
   /*
    * We need a port per instance
@@ -63,11 +61,11 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
    */
   const traefik = {}
   traefik[instanceServiceName] = generateTraefikConfig(utils, {
-      service: instanceServiceName,
-      prefixes: [`/${utils.getPreset('MORIO_EDA_PREFIX')}${instanceSuffix}`],
-      priority: 666,
-      customPort,
-    })
+    service: instanceServiceName,
+    prefixes: [`/${utils.getPreset('MORIO_EDA_PREFIX')}${instanceSuffix}`],
+    priority: 666,
+    customPort,
+  })
     /*
      * Middleware to add Morio service header
      */
@@ -82,7 +80,10 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
       `http.middlewares.eda${instanceSuffix}-auth.forwardAuth.address`,
       `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api.internal:${utils.getPreset('MORIO_API_PORT')}/auth`
     )
-    .set(`http.middlewares.eda${instanceSuffix}-auth.forwardAuth.authResponseHeadersRegex`, `^X-Morio-`)
+    .set(
+      `http.middlewares.eda${instanceSuffix}-auth.forwardAuth.authResponseHeadersRegex`,
+      `^X-Morio-`
+    )
     /*
      * Add middleware to router
      * The order in which middleware is loaded matters. Prefix shoud go first, auth last.
@@ -95,7 +96,10 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
   const cors = utils.getSettings('eda.cors', false)
   if (cors && Array.isArray(cors.origins) && cors.origins.length > 0) {
     const lead = `http.middlewares.eda${instanceSuffix}-cors-headers.headers`
-    traefik[instanceServiceName].set(`${lead}.accessControlAllowMethods`, cors.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
+    traefik[instanceServiceName].set(
+      `${lead}.accessControlAllowMethods`,
+      cors.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+    )
     traefik[instanceServiceName].set(`${lead}.accessControlAllowHeaders`, cors.headers || ['*'])
     traefik[instanceServiceName].set(`${lead}.accessControlAllowOriginList`, cors.origins || ['*'])
     traefik[instanceServiceName].set(`${lead}.accessControlMAxAge`, 86400) // Cache preflight for 24 hours
@@ -145,7 +149,7 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
      */
     storage: {
       rqliteUrl: 'http://morio-db:4001',
-      tablePrefix: `nodered_${instance ? instance : ''}`
+      tablePrefix: `nodered_${instance ? instance : ''}`,
     },
     /*
      * Node-Red settings
@@ -164,7 +168,7 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
       /*
        * Listen on all interfaces
        */
-      uiHost: "0.0.0.0",
+      uiHost: '0.0.0.0',
       /*
        * Port to listen on
        */
@@ -177,23 +181,23 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
        * Permissive CORS
        */
       httpNodeCors: {
-          origin: "*",
-          methods: "GET,PUT,POST,DELETE"
+        origin: '*',
+        methods: 'GET,PUT,POST,DELETE',
       },
       /*
        * Logging configuration
        */
       logging: {
         console: {
-          level: "info",
+          level: 'info',
           metrics: false,
-          audit: true
-        }
+          audit: true,
+        },
       },
       /*
        * Global modules
        */
-      functionGlobalContext: { },
+      functionGlobalContext: {},
       /*
        * Allow modules
        */
@@ -207,13 +211,13 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
           allowList: ['*'],
           denyList: [],
           allowUpdateList: ['*'],
-          denyUpdateList: []
+          denyUpdateList: [],
         },
         modules: {
           allowInstall: true,
           allowList: [],
-          denyList: []
-        }
+          denyList: [],
+        },
       },
       /*
        * Key for encrypting credentials
@@ -232,7 +236,7 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
       /*
        * Language
        */
-      lang: "en-US",
+      lang: 'en-US',
       /*
        * Diagnostics
        */
@@ -252,7 +256,7 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
        */
       contextStorage: {
         default: {
-          module:"localfilesystem"
+          module: 'localfilesystem',
         },
       },
       /*
@@ -285,8 +289,8 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
       editorTheme: {
         page: {
           title: instanceTitle,
-          favicon: "/favicon.svg",
-          css: "",
+          favicon: '/favicon.svg',
+          css: '',
           scripts: [],
         },
         header: {
@@ -295,34 +299,43 @@ export const resolveServiceInstanceConfiguration = (instance, instanceIndex, uti
           url: `/eda${instanceSuffix}/`,
         },
         deployButton: {
-          type: "simple",
-          label: "Save",
+          type: 'simple',
+          label: 'Save',
           icon: null,
         },
         tours: false,
         palette: {
-          categories: ['common', 'function', 'morio', 'network', 'parser', 'sequence', 'storage', 'subflows'],
+          categories: [
+            'common',
+            'function',
+            'morio',
+            'network',
+            'parser',
+            'sequence',
+            'storage',
+            'subflows',
+          ],
         },
         projects: {
           enabled: false,
         },
         codeEditor: {
-          lib: "monaco",
+          lib: 'monaco',
           options: {
-            theme: "vs",
+            theme: 'vs',
             fontSize: 14,
             fontFamily: "Cascadia Code, Fira Code, Consolas, 'Courier New', monospace",
             fontLigatures: true,
-          }
+          },
         },
         markdownEditor: {
           mermaid: {
-            enabled: true
-          }
+            enabled: true,
+          },
         },
       },
     },
-    entrypoint : `#!/bin/bash
+    entrypoint: `#!/bin/bash
 
 trap stop SIGINT SIGTERM
 
@@ -342,6 +355,6 @@ cd -
 CHILD_PID="$!"
 
 wait "\${CHILD_PID}"
-`
+`,
   }
 }

@@ -64,13 +64,16 @@ export const resolveServiceConfiguration = ({ utils }) => {
         'api-prefix@file',
         'api-service-header@file',
         'api-auth@file',
-      ])
+      ]),
   }
   if (utils.getSettings) {
     const cors = utils.getSettings('api.cors', false)
     if (cors && Array.isArray(cors.origins) && cors.origins.length > 0) {
       const lead = 'http.middlewares.api-cors-headers.headers'
-      traefik.api.set(`${lead}.accessControlAllowMethods`, cors.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
+      traefik.api.set(
+        `${lead}.accessControlAllowMethods`,
+        cors.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+      )
       traefik.api.set(`${lead}.accessControlAllowHeaders`, cors.headers || ['*'])
       traefik.api.set(`${lead}.accessControlAllowOriginList`, cors.origins || ['*'])
       traefik.api.set(`${lead}.accessControlMAxAge`, 86400) // Cache preflight for 24 hours
@@ -133,13 +136,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
     pm2: {
       apps: [
         {
-          name: "api",
-          script: "./src/index.mjs",
-          cwd: "/morio/api",
-          max_memory_restart: "250M",
+          name: 'api',
+          script: './src/index.mjs',
+          cwd: '/morio/api',
+          max_memory_restart: '250M',
           watch: PROD ? false : ['./src'],
-        }
-      ]
-    }
+        },
+      ],
+    },
   }
 }

@@ -75,11 +75,21 @@ export const optionalServices = ['db', 'cache', 'ui', 'connector', 'tap', 'watch
  */
 export const generateTraefikConfig = (
   utils,
-  { service, prefixes = [], paths = [], priority = 666, backendTls = false, entrypoint='https', tls=true, router=false, customPort = false }
+  {
+    service,
+    prefixes = [],
+    paths = [],
+    priority = 666,
+    backendTls = false,
+    entrypoint = 'https',
+    tls = true,
+    router = false,
+    customPort = false,
+  }
 ) => {
   const port = customPort || getServicePort(service, utils)
   // Paths to save us from typing them too often
-  const ROUTER = ['http', 'routers', (router ? router : service)]
+  const ROUTER = ['http', 'routers', router ? router : service]
   const RULE = [...ROUTER, 'rule']
   const SERVICE = ['http', 'services', service]
   /*
@@ -172,5 +182,5 @@ export const hookMsg = {
     recreate: 'Service does not need to be recreated',
     restart: 'Service does not need to be restarted',
     reload: 'Service does not need to be reloaded',
-  }
+  },
 }

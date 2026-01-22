@@ -86,13 +86,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
       heartbeat: {
         config: {
           monitors: {
-            path: "/usr/share/heartbeat/monitors.d/*.yml",
+            path: '/usr/share/heartbeat/monitors.d/*.yml',
             reload: {
               enabled: true,
-              period: "30s",
-            }
-          }
-        }
+              period: '30s',
+            },
+          },
+        },
       },
 
       /*

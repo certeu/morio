@@ -10,7 +10,7 @@ import { useApi } from 'hooks/use-api.mjs'
 import Link from 'next/link'
 import { NoIcon, OkIcon, SearchIcon } from 'components/icons.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { Loading, Spinner } from 'components/animations.mjs'
+import { Spinner } from 'components/animations.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { ToggleGraphButton, ToggleLiveButton } from 'components/boards/shared.mjs'
@@ -24,7 +24,7 @@ import { Popout } from 'components/popout.mjs'
 export const ChecksTable = ({ glob = 'check|*' }) => {
   // State
   const [cache, setCache] = useState(false)
-  const [inventory, setInventory] = useState({})
+  const setInventory = useState({})[1]
   const [refresh, setRefresh] = useState(0)
   const [filter, setFilter] = useState('')
   const [loading, setLoading] = useState('Finding all active healthchecks')
@@ -62,7 +62,9 @@ export const ChecksTable = ({ glob = 'check|*' }) => {
   if (loading)
     return (
       <>
-        <div className="flex flex-row items-center gap-2 italic opacity-70 p-4 bg-secondary rounded-lg bg-opacity-40"><Spinner /> {loading}</div>
+        <div className="flex flex-row items-center gap-2 italic opacity-70 p-4 bg-secondary rounded-lg bg-opacity-40">
+          <Spinner /> {loading}
+        </div>
         <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
       </>
     )
@@ -117,7 +119,7 @@ const HealthChecksList = ({ checks, filter, showFailingFirst }) => {
 
   // Fetch data for all health checks
   useEffect(() => {
-    api.getCacheKeys(checks.map(check => check.key)).then((result) => {
+    api.getCacheKeys(checks.map((check) => check.key)).then((result) => {
       if (result[1] === 200 && typeof result[0] === 'object') {
         const data = {}
         for (const check of Object.values(result[0])) data[check.key] = check.value
@@ -317,16 +319,6 @@ const HealthCheckRow = ({ check, data }) => {
   )
 }
 
-async function runChecksTableApiCall(api, glob) {
-  const data = {}
-  let result = await api.listCacheKeys(glob)
-  if (Array.isArray(result) && result[1] === 200) data.cache = result[0]
-  result = await api.getInventoryHostsObject()
-  if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
-
-  return data
-}
-
 export const UpOrNot = ({ cacheKey, hideOnUp = false }) => {
   // State
   const [cache, setCache] = useState(false)
@@ -456,8 +448,8 @@ export const Check = ({ id = false, cacheKey = false }) => {
     }
     option.series[0].markLine = {
       type: 'line',
-      data: ['avg', 'med', 'p95'].map(name => ({
-        yAxis: markLine[name](option.series[0].data.map(d => d[1])),
+      data: ['avg', 'med', 'p95'].map((name) => ({
+        yAxis: markLine[name](option.series[0].data.map((d) => d[1])),
         name,
         lineStyle: {
           color: '#14b8a660',
@@ -471,8 +463,8 @@ export const Check = ({ id = false, cacheKey = false }) => {
           position: 'insideEnd',
           padding: [0, 16, 0, 0],
           color: '#14b8a6',
-        }
-      }))
+        },
+      })),
     }
   }
   const check = data[data.length - 1] // Get the latest check instead of shifting

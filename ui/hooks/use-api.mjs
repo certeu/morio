@@ -745,7 +745,7 @@ MorioClient.prototype.getCacheKey = async function (key) {
 MorioClient.prototype.getCacheKeys = async function (keys) {
   return await this.call(`${morioConfig.api}/cache/keys`, {
     headers: this.jsonHeaders,
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({ keys }),
   })
 }
@@ -759,7 +759,7 @@ MorioClient.prototype.getCacheKeys = async function (keys) {
 MorioClient.prototype.skimCacheKeys = async function (keys) {
   return await this.call(`${morioConfig.api}/cache/skimkeys`, {
     headers: this.jsonHeaders,
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({ keys }),
   })
 }

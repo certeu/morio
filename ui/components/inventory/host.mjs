@@ -66,14 +66,15 @@ export const HostsTable = () => {
   const { pushModal } = useContext(ModalContext)
 
   // Sort and filter
-  const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
-    .filter((host) => filter ? (
-      host.id.toLowerCase().includes(filter.toLowerCase()) ||
-      host.fqdn.toLowerCase().includes(filter.toLowerCase()) ||
-      host.name.toLowerCase().includes(filter.toLowerCase()) ||
-      (host.notes && host.notes.toLowerCase().includes(filter.toLowerCase())) ||
-      (host.tags && host.tags.toLowerCase().includes(filter.toLowerCase()))
-    ) : true)
+  const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc']).filter((host) =>
+    filter
+      ? host.id.toLowerCase().includes(filter.toLowerCase()) ||
+        host.fqdn.toLowerCase().includes(filter.toLowerCase()) ||
+        host.name.toLowerCase().includes(filter.toLowerCase()) ||
+        (host.notes && host.notes.toLowerCase().includes(filter.toLowerCase())) ||
+        (host.tags && host.tags.toLowerCase().includes(filter.toLowerCase()))
+      : true
+  )
 
   // Hooks
   const { api } = useApi()
@@ -1261,10 +1262,14 @@ export const HostDetail = ({ data, refresh, setRefresh }) => {
         {data.id ? <HostAudit uuid={data.id} /> : <p>One moment please...</p>}
       </Details>
       <Details summaryLeft="Logs">
-        {data.id ?  <LogsTable glob={`log|${data.id}|*`} hostView /> : <p>One moment please...</p>}
+        {data.id ? <LogsTable glob={`log|${data.id}|*`} hostView /> : <p>One moment please...</p>}
       </Details>
       <Details summaryLeft="Metrics">
-        {data.id ?  <MetricsTable glob={`metric|${data.id}|*`} hostView /> : <p>One moment please...</p>}
+        {data.id ? (
+          <MetricsTable glob={`metric|${data.id}|*`} hostView />
+        ) : (
+          <p>One moment please...</p>
+        )}
       </Details>
       <Details
         summaryLeft="IP Addresses"

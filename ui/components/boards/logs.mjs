@@ -26,7 +26,7 @@ import { StringInput } from 'components/inputs.mjs'
 /**
  * This compnent renders a table with the host for which we have cached logs
  */
-export const LogsTable = ({ glob = 'log|*', hostView=false }) => {
+export const LogsTable = ({ glob = 'log|*', hostView = false }) => {
   // State
   const [cache, setCache] = useState(false)
   const [inventory, setInventory] = useState({})
@@ -73,26 +73,26 @@ export const LogsTable = ({ glob = 'log|*', hostView=false }) => {
   return (
     <div>
       {hostView ? null : (
-      <div className="flex flex-row gap-2 items-center">
-        <b>Group&nbsp;by:</b>
-        {['host', 'module', 'dataset'].map((type) => (
-          <button
-            key={type}
-            className={`btn btn-primary btn-sm ${groupBy !== type ? 'btn-outline' : ''}`}
-            onClick={() => setGroupBy(type)}
-          >
-            {type}
-          </button>
-        ))}
-        <span className="grow"></span>
-        <b>Filter:</b>
-        <StringInput
-          update={setFilter}
-          valid={() => true}
-          current={filter}
-          placeholder="Enter a string to filter"
-        />
-      </div>
+        <div className="flex flex-row gap-2 items-center">
+          <b>Group&nbsp;by:</b>
+          {['host', 'module', 'dataset'].map((type) => (
+            <button
+              key={type}
+              className={`btn btn-primary btn-sm ${groupBy !== type ? 'btn-outline' : ''}`}
+              onClick={() => setGroupBy(type)}
+            >
+              {type}
+            </button>
+          ))}
+          <span className="grow"></span>
+          <b>Filter:</b>
+          <StringInput
+            update={setFilter}
+            valid={() => true}
+            current={filter}
+            placeholder="Enter a string to filter"
+          />
+        </div>
       )}
       {groupBy === 'host' ? <DataPerHost {...{ matches, inventory, filter }} type="logs" /> : null}
       {groupBy === 'module' ? (

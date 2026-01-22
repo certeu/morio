@@ -11,24 +11,24 @@ brings event-driven automation to Morio.
 
 ## The new EdA service for event-driven automation
 
-From the very start, we've used the __Connect | Stream | Observe 
-| Respond__ tag line to try and capture the essence of Morio in a few words,
+From the very start, we've used the **Connect | Stream | Observe
+| Respond** tag line to try and capture the essence of Morio in a few words,
 and we're happy to announce that with this release we're delivering the final
-step of that chain: __Respond__.
+step of that chain: **Respond**.
 
 Specifically, we've added a new event-driven automation (EdA) service to Morio
 that is backed by [Node-RED](https://nodered.org/). If you're unfamiliar with
-Node-RED, it is __a low-code programming environment for event-driven applications__,
-with a focus on real-time data.  Suffice to say it's an excellent fit with Morio and
+Node-RED, it is **a low-code programming environment for event-driven applications**,
+with a focus on real-time data. Suffice to say it's an excellent fit with Morio and
 we're really excited about this feature. As a matter of fact, in the short time
 since we've added it, we've already leveraged it for a number of our own
-internal automations. (At CERT-EU we run Morio's [canary 
+internal automations. (At CERT-EU we run Morio's [canary
 release](/docs/guides/install/client/#morio-release-channels) in production, so
 we've had access to this feature for a while now).
 
 As a new flanking service in Morio, we have ensured proper integration by
 writing our own storage adapter to store Node-RED data in Morio's database.
-We've also added custom nodes to facilitate working with Morio data, such 
+We've also added custom nodes to facilitate working with Morio data, such
 as nodes to read and write to Kafka topics in Morio, get or set data in
 the Morio KV store, or get a JSON Web Token signed by Morio to benefit
 from existing Morio integrations such as with Hashicorp Vault / OpenBao.
@@ -50,7 +50,7 @@ We've added support for setting up Morio as a subordinate Certificate Authority
 (CA).
 
 Morio comes with an on-board CA which is needs to generate certificates for
-clients and services.  If you already have an internal CA that is trusted by
+clients and services. If you already have an internal CA that is trusted by
 your clients, you can setup Morio as a subordinate CA. This way, you can
 benefit from the established trust for your internal CA when your clients
 access Morio.
@@ -62,12 +62,9 @@ internal Docker network. Which works fine, assuming that the service is running
 locally.
 
 However, flanking nodes do not run the database service, and the cache service
-only runs on a single node.  This release brings cross-cluster access to both
+only runs on a single node. This release brings cross-cluster access to both
 the database and cache service. It is fully transparent, reaching out to
 database or cache will now _just work_ no matter what cluster node you are on.
-
-
-
 
 ## And a bunch of other improvements
 
@@ -80,7 +77,7 @@ cross-container connections, thus making it easy to include a proxy exception fo
 **Endpoints for managing inventory assets**<br />
 We have added API endpoints for managing inventory assets, as well as UI integration for these.
 
-**Support for remapping OIDC label names**<br /> 
+**Support for remapping OIDC label names**<br />
 We already supported mapping
 OIDC attributes to labels, but we've added support for renaming attributes
 rather than using them as-is.
@@ -104,6 +101,7 @@ Both the API and Core service now run in the PM2 process manager and will
 automatically restart when memory use exceeds 250MB.
 
 **Upgraded various components**<br />
+
 - Upgraded Redpanda from v24.2.20 to v24.2.21
 - Upgraded StepCA from 0.28.2 to 0.28.3
 - Upgraded Vector from 0.45.0-debian to 0.46.1-debian
@@ -115,16 +113,15 @@ automatically restart when memory use exceeds 250MB.
 
 ## Caveats
 
-You may have noticed that our release cadence has slowed down since the 
-start of this year. This is due to legislative changes that impact the 
-priorities of CERT-EU, as well as organizational changes that have 
+You may have noticed that our release cadence has slowed down since the
+start of this year. This is due to legislative changes that impact the
+priorities of CERT-EU, as well as organizational changes that have
 resulted in resources taken away from Morio to shore up other endeavors.
 
 Nevertheless, we remain committed to [our long-term vision](/docs/guides/goals/),
 and keep moving forward. As a pragmatic choice under these circumstances,
-we have opted to prioritize features and bug fixes, which means that our 
+we have opted to prioritize features and bug fixes, which means that our
 documentation is somewhat lagging behind for the time being.
 
 If you have any questions about features that are not documented yet,
 don't hesitate to [reach out to us](https://github.com/certeu/morio/discussions).
-

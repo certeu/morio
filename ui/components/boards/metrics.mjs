@@ -32,12 +32,12 @@ import { MiniTip, MiniWarning } from 'components/mini.mjs'
 /**
  * This component renders a table with the host for which we have cached metrics
  */
-export const MetricsTable = ({ glob = 'metric|*', hostView=false }) => {
+export const MetricsTable = ({ glob = 'metric|*', hostView = false }) => {
   // State
   const [cache, setCache] = useState(false)
   const [inventory, setInventory] = useState({})
   const [refresh, setRefresh] = useState(0)
-  const [groupBy, setGroupBy] = useState(hostView ? 'module': 'host')
+  const [groupBy] = useState(hostView ? 'module' : 'host')
   const [filter, setFilter] = useState('')
 
   // Hooks
@@ -247,16 +247,22 @@ export const TopMetrics = () => {
       </>
     )
 
-  const topProps = { inventory, type: "top", module: "top" }
+  const topProps = { inventory, type: 'top', module: 'top' }
 
   return (
     <>
       <h2 id="cpu">CPU Pressure</h2>
       <MiniTip>Data will only show up if there are hosts under CPU pressure</MiniTip>
       <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-        <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-cpu-some300" /></Tab>
-        <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-cpu-some60" /></Tab>
-        <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-cpu-some10" /></Tab>
+        <Tab tabId="5 minutes">
+          <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-cpu-some300" />
+        </Tab>
+        <Tab tabId="1 minute">
+          <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-cpu-some60" />
+        </Tab>
+        <Tab tabId="10 seconds">
+          <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-cpu-some10" />
+        </Tab>
       </Tabs>
 
       <h2 id="io">IO Pressure</h2>
@@ -264,16 +270,28 @@ export const TopMetrics = () => {
       <Tabs tabs="full pressure, some pressure">
         <Tab tabId="full pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-full300" /></Tab>
-            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-full60" /></Tab>
-            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-full10" /></Tab>
+            <Tab tabId="5 minutes">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-full300" />
+            </Tab>
+            <Tab tabId="1 minute">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-full60" />
+            </Tab>
+            <Tab tabId="10 seconds">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-full10" />
+            </Tab>
           </Tabs>
         </Tab>
         <Tab tabId="some pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-some300" /></Tab>
-            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-some60" /></Tab>
-            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-some10" /></Tab>
+            <Tab tabId="5 minutes">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-some300" />
+            </Tab>
+            <Tab tabId="1 minute">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-some60" />
+            </Tab>
+            <Tab tabId="10 seconds">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-io-some10" />
+            </Tab>
           </Tabs>
         </Tab>
       </Tabs>
@@ -284,25 +302,43 @@ export const TopMetrics = () => {
       <Tabs tabs="full pressure, some pressure">
         <Tab tabId="full pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-full300" /></Tab>
-            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-full60" /></Tab>
-            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-full10" /></Tab>
+            <Tab tabId="5 minutes">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-full300" />
+            </Tab>
+            <Tab tabId="1 minute">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-full60" />
+            </Tab>
+            <Tab tabId="10 seconds">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-full10" />
+            </Tab>
           </Tabs>
         </Tab>
         <Tab tabId="some pressure">
           <Tabs tabs="5 minutes, 1 minute, 10 seconds">
-            <Tab tabId="5 minutes"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-some300" /></Tab>
-            <Tab tabId="1 minute"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-some60" /></Tab>
-            <Tab tabId="10 seconds"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-some10" /></Tab>
+            <Tab tabId="5 minutes">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-some300" />
+            </Tab>
+            <Tab tabId="1 minute">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-some60" />
+            </Tab>
+            <Tab tabId="10 seconds">
+              <ShowMetrics {...topProps} cachekey="metric|-|top|linux-pressure-memory-some10" />
+            </Tab>
           </Tabs>
         </Tab>
       </Tabs>
 
       <h2 id="load">System Load</h2>
       <Tabs tabs="Load-15, Load-5, Load-1">
-        <Tab tabId="Load-15"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-load15" /></Tab>
-        <Tab tabId="Load-5"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-load5" /></Tab>
-        <Tab tabId="Load-1"><ShowMetrics {...topProps} cachekey="metric|-|top|linux-load1" /></Tab>
+        <Tab tabId="Load-15">
+          <ShowMetrics {...topProps} cachekey="metric|-|top|linux-load15" />
+        </Tab>
+        <Tab tabId="Load-5">
+          <ShowMetrics {...topProps} cachekey="metric|-|top|linux-load5" />
+        </Tab>
+        <Tab tabId="Load-1">
+          <ShowMetrics {...topProps} cachekey="metric|-|top|linux-load1" />
+        </Tab>
       </Tabs>
 
       <h2 id="storage">Storage Used</h2>
@@ -341,19 +377,29 @@ export const ShowMetrics = (props) => (
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
 const transformMetrics = (params) => {
-  const transformParams = {...params, chartGradient, clone, formatBytes, formatNumber, get, orderBy, lineChart }
+  const transformParams = {
+    ...params,
+    chartGradient,
+    clone,
+    formatBytes,
+    formatNumber,
+    get,
+    orderBy,
+    lineChart,
+  }
   if (typeof window?.morio?.charts?.metrics?.[params.module]?.[params.dataset] === 'function') {
-    return  window.morio.charts.metrics[params.module][params.dataset](transformParams)
+    return window.morio.charts.metrics[params.module][params.dataset](transformParams)
   }
   if (params.cachekey) {
     // Handle 'top' metrics
     const [topic, host, module, id] = params.cachekey.split('|')
     if (
-      topic === "metric" &&
-      host === "-" &&
-      module === "top" &&
+      topic === 'metric' &&
+      host === '-' &&
+      module === 'top' &&
       typeof window?.morio?.charts?.metrics?.top?.[id] === 'function'
-    ) return window.morio.charts.metrics.top[id](transformParams)
+    )
+      return window.morio.charts.metrics.top[id](transformParams)
   }
 
   return { err: 'noTransformAvailable', data: params.data }
@@ -363,7 +409,16 @@ const transformMetrics = (params) => {
  * This component renders visualisations for all cached
  * metrics for a given host/module/dataset
  */
-const ShowMetricsInner = ({ host, module, dataset, hostname, show=true, type="dataset", cachekey, inventory }) => {
+const ShowMetricsInner = ({
+  host,
+  module,
+  dataset,
+  hostname,
+  show = true,
+  type = 'dataset',
+  cachekey,
+  inventory,
+}) => {
   // State
   const [cache, setCache] = useState(false)
   const [paused, setPaused] = useState(false)
@@ -372,48 +427,64 @@ const ShowMetricsInner = ({ host, module, dataset, hostname, show=true, type="da
   useQuery({
     queryKey: type === 'dataset' ? [`${host}|${module}|${dataset}`] : [cachekey],
     queryFn: () => {
-      if (type === "dataset") runShowMetricsApiCall(api, host, module, dataset).then((result) => {
-        if (result) setCache(result)
-        return result
-      })
-      else if (type === "top") runCacheKeyApiCall(api, cachekey).then((result) => {
-        if (result) setCache(result)
-        return result
-      })
+      if (type === 'dataset')
+        runShowMetricsApiCall(api, host, module, dataset).then((result) => {
+          if (result) setCache(result)
+          return result
+        })
+      else if (type === 'top')
+        runCacheKeyApiCall(api, cachekey).then((result) => {
+          if (result) setCache(result)
+          return result
+        })
     },
     refetchInterval: paused ? false : 15000,
     refetchIntervalInBackground: false,
   })
 
   // Don't bother if there's nothing in the cache
-  if (!cache || cache.length < 1) return <MiniWarning>No relevant data was found in the cache.</MiniWarning>
+  if (!cache || cache.length < 1)
+    return <MiniWarning>No relevant data was found in the cache.</MiniWarning>
 
   // Defer to chart transformer
   const data = parseCachedMetrics(cache)
 
-  return <EchartWrapper {...{ data, host, module, dataset, paused, setPaused, hostname, show, type, cachekey, inventory }} />
+  return (
+    <EchartWrapper
+      {...{
+        data,
+        host,
+        module,
+        dataset,
+        paused,
+        setPaused,
+        hostname,
+        show,
+        type,
+        cachekey,
+        inventory,
+      }}
+    />
+  )
 }
 
 async function runShowMetricsApiCall(api, host, module, dataset) {
   let result
   try {
     result = await api.getCacheKey(`metric|${host}|${module}|${dataset}`)
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
   }
 
-  return (Array.isArray(result) && result[1] === 200)
-    ? result[0]
-    : false
+  return Array.isArray(result) && result[1] === 200 ? result[0] : false
 }
 
 const EchartWrapper = (props) => {
-  const { show=true } = props
+  const { show = true } = props
   const [enabled, setEnabled] = useState(show)
   // We are memoizing option to avoid re-renders
   const option = useMemo(
-    () => transformMetrics({...props, templates: cloneAsPojo(chartTemplates) }),
+    () => transformMetrics({ ...props, templates: cloneAsPojo(chartTemplates) }),
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [props.host, props.module, props.dataset, props.data, props.cachekey]
   )
@@ -426,23 +497,33 @@ const EchartWrapper = (props) => {
     setEnabled(newEnabled)
   }
 
-  const isEnabled = (opt, i) => (
+  const isEnabled = (opt, i) =>
     enabled === true ||
     (i === 0 && option.length === 1) ||
     (enabled && (enabled[i] || enabled[opt?.id]))
-  ) ? true : false
+      ? true
+      : false
 
   if (option === null) return <MiniTip>No relevant data was found in the cache</MiniTip>
   if (!option || option.err === 'noTransformAvailable')
     return (
       <Popout note>
         <h5>No visualisations available</h5>
-        <p>No charts are loaded for the
-        {props.dataset && props.module
-          ? <span> <code>{props.dataset}</code> dataset of the{' '} <code>{props.module}</code> module</span>
-          : <span> <code>{props.cachekey}</code> cache key</span>
-        }
-        .</p>
+        <p>
+          No charts are loaded for the
+          {props.dataset && props.module ? (
+            <span>
+              {' '}
+              <code>{props.dataset}</code> dataset of the <code>{props.module}</code> module
+            </span>
+          ) : (
+            <span>
+              {' '}
+              <code>{props.cachekey}</code> cache key
+            </span>
+          )}
+          .
+        </p>
         <p>You may need to preseed a chart handler for metrics of type s.</p>
       </Popout>
     )
@@ -476,9 +557,10 @@ const EchartWrapper = (props) => {
             <SingleEchart
               key={i}
               option={opt}
-              href={props.type === "dataset"
-                ? `/boards/metrics/${props.host}/${props.module}/${props.dataset}/${opt.id || i}`
-                : `/boards/metrics/show/${props.cachekey}/`
+              href={
+                props.type === 'dataset'
+                  ? `/boards/metrics/${props.host}/${props.module}/${props.dataset}/${opt.id || i}`
+                  : `/boards/metrics/show/${props.cachekey}/`
               }
             />
           )
@@ -486,9 +568,10 @@ const EchartWrapper = (props) => {
       ) : (
         <SingleEchart
           option={option}
-          href={props.type === "dataset"
-            ? `/boards/metrics/${props.host}/${props.module}/${props.dataset}/}`
-            : `/boards/metrics/show/${props.cachekey}/`
+          href={
+            props.type === 'dataset'
+              ? `/boards/metrics/${props.host}/${props.module}/${props.dataset}/}`
+              : `/boards/metrics/show/${props.cachekey}/`
           }
         />
       )}
@@ -518,20 +601,21 @@ export const SingleEchart = ({ option, href = false }) => {
  */
 export function parseCachedMetrics(data) {
   if (!data || !data.type || !data.value) return data
-  if (data.type.toLowerCase() === "zset") {
+  if (data.type.toLowerCase() === 'zset') {
     const scores = []
     let i = 0
     while (i < data.value.length) {
-      scores.push({ entry: data.value[i], value: Number(data.value[Number(i)+1]) })
+      scores.push({ entry: data.value[i], value: Number(data.value[Number(i) + 1]) })
       i += 2
     }
     return orderBy(scores, 'value', 'desc')
   }
-  if (data.type.toLowerCase() === "list") return orderBy(
-    data.value.map((entry) => parseJson(entry)),
-    'timestamp',
-    'ASC'
-  )
+  if (data.type.toLowerCase() === 'list')
+    return orderBy(
+      data.value.map((entry) => parseJson(entry)),
+      'timestamp',
+      'ASC'
+    )
 
   console.log('Metrics data was not a type we know how to handle. This is unexpected', data)
   return []
@@ -542,10 +626,10 @@ export async function loadMetricsChartTitles(type, matches, api, setMatches) {
    * First construct a list of all cache keys along with their module/dataset
    */
   const keys = new Set()
-  for (const [host, match] of Object.entries(matches)) {
-    for (const module in match) {
-      for (const dataset in match[module]) {
-        keys.add(match[module][dataset].key)
+  for (const match of Object.values(matches)) {
+    for (const mod in match) {
+      for (const dataset in match[mod]) {
+        keys.add(match[mod][dataset].key)
       }
     }
   }
@@ -558,8 +642,7 @@ export async function loadMetricsChartTitles(type, matches, api, setMatches) {
   const data = {}
   try {
     result = await api.skimCacheKeys([...keys])
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
   }
   if (result[1] === 200 && result[0]) {
@@ -575,17 +658,17 @@ export async function loadMetricsChartTitles(type, matches, api, setMatches) {
    * This ensures we have all charts, even those that depend on runtime data.
    */
   for (const [host, match] of Object.entries(matches)) {
-    for (const module in match) {
-      for (const dataset in match[module]) {
-        //console.log(match[module][dataset].key)
+    for (const mod in match) {
+      for (const dataset in match[mod]) {
+        //console.log(match[mod][dataset].key)
         if (
-          typeof window.morio?.charts?.[type]?.[module]?.[dataset] === 'function' &&
-          data[match[module][dataset].key]
+          typeof window.morio?.charts?.[type]?.[mod]?.[dataset] === 'function' &&
+          data[match[mod][dataset].key]
         ) {
           try {
             // We need to mimic all props passed to charts when they are getting the full data
-            const charts = window.morio.charts[type][module][dataset]({
-              data: data[match[module][dataset].key],
+            const charts = window.morio.charts[type][mod][dataset]({
+              data: data[match[mod][dataset].key],
               chartGradient: () => {},
               clone: cloneAsPojo,
               formatBytes,
@@ -594,15 +677,16 @@ export async function loadMetricsChartTitles(type, matches, api, setMatches) {
               orderBy,
               templates: chartTemplates,
               inventory: {},
-              lineChart
+              lineChart,
             })
             // Array of charts
             if (Array.isArray(charts)) {
               const chartIds = {}
-              for (const chart of charts) chartIds[chart.id] = chart.title?.subtext
-                ? chart.title.text + ' - ' + chart.title.subtext
-                : chart.title.text
-              matches[host][module][dataset].charts = chartIds
+              for (const chart of charts)
+                chartIds[chart.id] = chart.title?.subtext
+                  ? chart.title.text + ' - ' + chart.title.subtext
+                  : chart.title.text
+              matches[host][mod][dataset].charts = chartIds
             }
             // Single chart
             else if (charts?.id && charts?.title?.text) {
@@ -610,15 +694,15 @@ export async function loadMetricsChartTitles(type, matches, api, setMatches) {
               chart[charts.id] = charts.title?.subtext
                 ? charts.title.text + ' - ' + charts.title.subtext
                 : charts.title.text
-              matches[host][module][dataset].charts = chart
+              matches[host][mod][dataset].charts = chart
             }
             // Something else?
             else console.log('Returned chart data lacks id or title', charts)
-          } catch(err) {
+          } catch (err) {
             console.log(err)
           }
         } else {
-          console.log(`No chart for ${type}.${module}.${dataset}`)
+          console.log(`No chart for ${type}.${mod}.${dataset}`)
         }
       }
     }

@@ -4,6 +4,8 @@ docs/.docusaurus/*
 pkgs/morio-client/linux/etc/morio/audit/config-template.yml
 pkgs/morio-client/linux/etc/morio/logs/config-template.yml
 pkgs/morio-client/linux/etc/morio/metrics/config-template.yml
+pkgs/morio-client/macos/etc/logs/config-template.yml
+pkgs/morio-client/macos/etc/metrics/config-template.yml
 # Need to setup proper remark linting one day.
 # Something like: "remark . --frail --output --quiet && remark . --ext mdx --frail --output --quiet --use remark-mdx && prettier . --log-level warn --write && xo --fix"
 docs/docs/*

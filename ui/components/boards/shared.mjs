@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { Link, linkClasses } from 'components/link.mjs'
 import { Details } from 'components/details.mjs'
-import orderBy from 'lodash/orderBy.js'
-import get from 'lodash/get.js'
 import { loadMetricsChartTitles } from './metrics.mjs'
 
 /**
@@ -69,7 +67,7 @@ export const DataPerHost = ({ type = 'logs', matches, inventory, filter = false 
   // Effect
   useEffect(() => {
     if (type === 'metrics') loadMetricsChartTitles(type, matches, api, setEnrichedMatches)
-  },[type, matches])
+  }, [api, type, matches])
 
   const list = Object.keys(matches)
     .sort()
@@ -91,18 +89,26 @@ export const DataPerHost = ({ type = 'logs', matches, inventory, filter = false 
                 .sort()
                 .map((dataset) => (
                   <li key={dataset}>
-                    <Link href={`/boards/${type}/show/${enrichedMatches[host][module][dataset].key}/`} className={linkClasses}>
+                    <Link
+                      href={`/boards/${type}/show/${enrichedMatches[host][module][dataset].key}/`}
+                      className={linkClasses}
+                    >
                       <b>{dataset}</b>
                       <span className="opacity-75"> dataset</span>
                     </Link>
                     <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
-                      {Object.entries(enrichedMatches[host][module]?.[dataset].charts || {}).map(([key, title]) => (
-                        <li key={key}>
-                          <Link href={`/boards/${type}/${host}/${module}/${dataset}/${key}/`} className={linkClasses}>
-                            {title}
-                          </Link>
-                        </li>
-                      ))}
+                      {Object.entries(enrichedMatches[host][module]?.[dataset].charts || {}).map(
+                        ([key, title]) => (
+                          <li key={key}>
+                            <Link
+                              href={`/boards/${type}/${host}/${module}/${dataset}/${key}/`}
+                              className={linkClasses}
+                            >
+                              {title}
+                            </Link>
+                          </li>
+                        )
+                      )}
                     </ul>
                   </li>
                 ))}
@@ -113,98 +119,114 @@ export const DataPerHost = ({ type = 'logs', matches, inventory, filter = false 
   ))
 }
 
-export const DataPerModule = ({ type = 'logs', matches, inventory, filter = false, hostView = false }) =>
+export const DataPerModule = ({
+  type = 'logs',
+  matches,
+  inventory,
+  filter = false,
+  hostView = false,
+}) =>
   Object.keys(matches)
     .sort()
     .filter((module) => (filter ? module.toLowerCase().includes(filter.toLowerCase()) : true))
-    .map((module) => hostView ? (
-      <div key={module}>
-        <b>{module}</b>
-        {Object.keys(matches[module])
-          .sort()
-          .map((host) => (
-            <div key={host}>
-              <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
-                {Object.keys(matches[module][host])
-                  .sort()
-                  .map((dataset) => (
-                    <li key={dataset}>
-                      <Link href={`/boards/${type}/show/${matches[module][host][dataset].key}/`}>
-                        {dataset}
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          ))}
-      </div>
+    .map((module) =>
+      hostView ? (
+        <div key={module}>
+          <b>{module}</b>
+          {Object.keys(matches[module])
+            .sort()
+            .map((host) => (
+              <div key={host}>
+                <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
+                  {Object.keys(matches[module][host])
+                    .sort()
+                    .map((dataset) => (
+                      <li key={dataset}>
+                        <Link href={`/boards/${type}/show/${matches[module][host][dataset].key}/`}>
+                          {dataset}
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
+        </div>
       ) : (
-      <Details summaryLeft={module} key={module}>
-        {Object.keys(matches[module])
-          .sort()
-          .map((host) => (
-            <details key={host}>
-              <summary className="text-bold hover:cursor-pointer">
-                {inventory[host]?.fqdn || host}
-              </summary>
-              <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
-                {Object.keys(matches[module][host])
-                  .sort()
-                  .map((dataset) => (
-                    <li key={dataset}>
-                      <Link href={`/boards/${type}/show/${matches[module][host][dataset].key}/`}>
-                        {dataset}
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-            </details>
-          ))}
-      </Details>
-    ))
+        <Details summaryLeft={module} key={module}>
+          {Object.keys(matches[module])
+            .sort()
+            .map((host) => (
+              <details key={host}>
+                <summary className="text-bold hover:cursor-pointer">
+                  {inventory[host]?.fqdn || host}
+                </summary>
+                <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc">
+                  {Object.keys(matches[module][host])
+                    .sort()
+                    .map((dataset) => (
+                      <li key={dataset}>
+                        <Link href={`/boards/${type}/show/${matches[module][host][dataset].key}/`}>
+                          {dataset}
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              </details>
+            ))}
+        </Details>
+      )
+    )
 
-export const DataPerDataset = ({ type = 'logs', matches, inventory, filter = false, hostView = false }) =>
+export const DataPerDataset = ({
+  type = 'logs',
+  matches,
+  inventory,
+  filter = false,
+  hostView = false,
+}) =>
   Object.keys(matches)
     .sort()
     .filter((dataset) => (filter ? dataset.toLowerCase().includes(filter.toLowerCase()) : true))
-    .map((dataset) => hostView ? (
-      <div key={dataset}>
-        {Object.keys(matches[dataset])
-          .sort()
-          .map((host) => (
-            <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc" key={host}>
-              {Object.keys(matches[dataset][host])
-                .sort()
-                .map((module) => (
-                  <li key={module}>
-                    <Link href={`/boards/${type}/show/${matches[dataset][host][module].key}/`}>
-                      {dataset}
-                    </Link>
-                    &nbsp;({module})
-                  </li>
-                ))}
-            </ul>
-          ))}
-      </div>
-    ) : (
-      <Details summaryLeft={dataset} key={dataset}>
-        {Object.keys(matches[dataset])
-          .sort()
-          .map((host) => (
-            <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc" key={host}>
-              {Object.keys(matches[dataset][host])
-                .sort()
-                .map((module) => (
-                  <li key={module}>
-                    <Link href={`/boards/${type}/show/${matches[dataset][host][module].key}/`}>
-                      {dataset} @ {inventory[host]?.fqdn || host}
-                    </Link>
-                  </li>
-                ))}
-            </ul>
-          ))}
-      </Details>
-    ))
+    .map((dataset) =>
+      hostView ? (
+        <div key={dataset}>
+          {Object.keys(matches[dataset])
+            .sort()
+            .map((host) => (
+              <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc" key={host}>
+                {Object.keys(matches[dataset][host])
+                  .sort()
+                  .map((module) => (
+                    <li key={module}>
+                      <Link href={`/boards/${type}/show/${matches[dataset][host][module].key}/`}>
+                        {dataset}
+                      </Link>
+                      &nbsp;({module})
+                    </li>
+                  ))}
+              </ul>
+            ))}
+        </div>
+      ) : (
+        <Details summaryLeft={dataset} key={dataset}>
+          {Object.keys(matches[dataset])
+            .sort()
+            .map((host) => (
+              <ul className="ml-4 border-l-2 pl-2 list list-inside list-disc" key={host}>
+                {Object.keys(matches[dataset][host])
+                  .sort()
+                  .map((module) => (
+                    <li key={module}>
+                      <Link href={`/boards/${type}/show/${matches[dataset][host][module].key}/`}>
+                        {dataset} @ {inventory[host]?.fqdn || host}
+                      </Link>
+                    </li>
+                  ))}
+              </ul>
+            ))}
+        </Details>
+      )
+    )
 
 export async function getHostFqdn(host, setFqdn, api) {
   let result
@@ -226,4 +248,3 @@ export async function getInventoryHosts(setInventory, api) {
   }
   if (Array.isArray(result) && result[1] === 200) setInventory(result[0])
 }
-

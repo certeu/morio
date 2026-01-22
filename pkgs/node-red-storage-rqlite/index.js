@@ -58,7 +58,7 @@ function RqliteStorage() {
 /*
  * Initialize the storage - create tables if they don't exist
  */
-RqliteStorage.prototype.init = async function() {
+RqliteStorage.prototype.init = async function () {
   if (this.initialized) return
 
   console.log(`[morio-storage] Initializing Morio storage driver for node-red`)
@@ -129,7 +129,9 @@ RqliteStorage.prototype.init = async function() {
    * Always wrap your async code in try...catch kids
    */
   try {
-    console.log(`[morio-storage] Will create node-red tables. Table prefix is '${this.tablePrefix}'.`)
+    console.log(
+      `[morio-storage] Will create node-red tables. Table prefix is '${this.tablePrefix}'.`
+    )
     await this._write(createTableQueries)
     this.initialized = true
     console.log(`[morio-storage] Initialized with table prefix: ${this.tablePrefix}`)
@@ -143,19 +145,15 @@ RqliteStorage.prototype.init = async function() {
  * Grab JWT for cross-cluster database connection
  * Note that this is always loaded from the local API
  */
-RqliteStorage.prototype._getCcdbToken = async function() {
+RqliteStorage.prototype._getCcdbToken = async function () {
   /*
    * Perhaps the token we have is still ok?
    * Note that we change for tokens older than 5 hours here
    * (18 million milliseconds) since ccdb tokens have a 6-hour
    * expiry, this should be fine
    */
-  if (
-    this.token &&
-    this.token.jwt &&
-    this.token.iat &&
-    (Date.now() - this.token.iat < 18000000)
-  ) return this.token.jwt
+  if (this.token && this.token.jwt && this.token.iat && Date.now() - this.token.iat < 18000000)
+    return this.token.jwt
   // Nope, let's get a new one
   let token = false
   console.log(`[morio-storage] Requesting authentication token for cross-cluster database access`)
@@ -179,18 +177,21 @@ RqliteStorage.prototype._getCcdbToken = async function() {
 /*
  * This will add extra headers if we are using CCDB
  */
-RqliteStorage.prototype._ccdbHeaders = async function() {
+RqliteStorage.prototype._ccdbHeaders = async function () {
   const headers = {}
   if (this.connection === 'ccdb') {
     let token
     try {
       token = await this._getCcdbToken()
-    }
-    catch (err) {
+    } catch (err) {
       console.log(`[morio-storage] Token request error:`, err)
     }
     if (typeof token === 'string' && token.length > 0) headers.authorization = `Bearer ${token}`
-    else console.log(`[morio-storage] Loaded token, but its format was unexpected. Please escalate to a human.`, { token })
+    else
+      console.log(
+        `[morio-storage] Loaded token, but its format was unexpected. Please escalate to a human.`,
+        { token }
+      )
   }
 
   return headers
@@ -208,10 +209,8 @@ RqliteStorage.prototype._ccdbHeaders = async function() {
  *
  * Or it can be just a string holding SQL.
  */
-RqliteStorage.prototype._structureQueryData = function(queries) {
-  return (Array.isArray(queries) && Array.isArray(queries[0]))
-    ? [...queries]
-    : [queries]
+RqliteStorage.prototype._structureQueryData = function (queries) {
+  return Array.isArray(queries) && Array.isArray(queries[0]) ? [...queries] : [queries]
 }
 
 /*
@@ -224,29 +223,24 @@ RqliteStorage.prototype._structureQueryData = function(queries) {
  *
  * In the latter case, we need extraHeaders for authentication.
  */
-RqliteStorage.prototype._query = async function(type='read', queries) {
+RqliteStorage.prototype._query = async function (type = 'read', queries) {
   const extraHeaders = await this._ccdbHeaders()
   let result = false
   try {
-    const response = await fetch(
-      `${this.baseUrl}/db/${type === 'read' ? 'query' : 'execute'}`,
-      {
-        method: 'POST',
-        headers: {
-          ...extraHeaders,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(this._structureQueryData(queries))
-      }
-    )
+    const response = await fetch(`${this.baseUrl}/db/${type === 'read' ? 'query' : 'execute'}`, {
+      method: 'POST',
+      headers: {
+        ...extraHeaders,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(this._structureQueryData(queries)),
+    })
     try {
       result = await response.json()
-    }
-    catch (err) {
+    } catch (err) {
       console.log('[morio-storage]', err)
     }
-  }
-  catch (err) {
+  } catch (err) {
     console.log('[morio-storage]', err)
   }
 
@@ -256,21 +250,21 @@ RqliteStorage.prototype._query = async function(type='read', queries) {
 /*
  * Read-only query method
  */
-RqliteStorage.prototype._read = async function(queries) {
+RqliteStorage.prototype._read = async function (queries) {
   return await this._query('read', queries)
 }
 
 /*
  * Read/Write query method
  */
-RqliteStorage.prototype._write = async function(queries) {
+RqliteStorage.prototype._write = async function (queries) {
   return await this._query('write', queries)
 }
 
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagegetflows
  */
-RqliteStorage.prototype.getFlows = async function() {
+RqliteStorage.prototype.getFlows = async function () {
   await this.init()
 
   const query = `SELECT flows FROM ${this.tables.flows} ORDER BY id DESC LIMIT 1`
@@ -292,7 +286,7 @@ RqliteStorage.prototype.getFlows = async function() {
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagesaveflowsflows
  */
-RqliteStorage.prototype.saveFlows = async function(flows, flowsRev) {
+RqliteStorage.prototype.saveFlows = async function (flows, flowsRev) {
   await this.init()
 
   const revision = flowsRev || Date.now().toString()
@@ -319,7 +313,7 @@ RqliteStorage.prototype.saveFlows = async function(flows, flowsRev) {
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagegetcredentials
  */
-RqliteStorage.prototype.getCredentials = async function() {
+RqliteStorage.prototype.getCredentials = async function () {
   await this.init()
 
   const query = `SELECT node_id, credentials FROM ${this.tables.credentials}`
@@ -340,7 +334,7 @@ RqliteStorage.prototype.getCredentials = async function() {
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagesavecredentialscredentials
  */
-RqliteStorage.prototype.saveCredentials = async function(credentials) {
+RqliteStorage.prototype.saveCredentials = async function (credentials) {
   await this.init()
 
   // Clear existing credentials
@@ -364,7 +358,7 @@ RqliteStorage.prototype.saveCredentials = async function(credentials) {
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagegetsettings
  */
-RqliteStorage.prototype.getSettings = async function() {
+RqliteStorage.prototype.getSettings = async function () {
   await this.init()
 
   const query = `SELECT key, value, type FROM ${this.tables.settings}`
@@ -391,7 +385,7 @@ RqliteStorage.prototype.getSettings = async function() {
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagesavesettingssettings
  */
-RqliteStorage.prototype.saveSettings = async function(settings) {
+RqliteStorage.prototype.saveSettings = async function (settings) {
   await this.init()
 
   const queries = []
@@ -416,15 +410,13 @@ RqliteStorage.prototype.saveSettings = async function(settings) {
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagegetsettings
  */
-RqliteStorage.prototype.getSessions = async function() {
+RqliteStorage.prototype.getSessions = async function () {
   await this.init()
 
   /*
    * Clean up expired sessions prior to loading the sessions
    */
-  await this._write(
-    `DELETE FROM ${this.tables.sessions} WHERE expires_at < CURRENT_TIMESTAMP`
-  )
+  await this._write(`DELETE FROM ${this.tables.sessions} WHERE expires_at < CURRENT_TIMESTAMP`)
 
   /*
    * Now grab the sessions and format them
@@ -450,7 +442,7 @@ RqliteStorage.prototype.getSessions = async function() {
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagesavesettingssettings
  */
-RqliteStorage.prototype.saveSessions = async function(sessions) {
+RqliteStorage.prototype.saveSessions = async function (sessions) {
   await this.init()
 
   /*
@@ -480,7 +472,7 @@ RqliteStorage.prototype.saveSessions = async function(sessions) {
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagegetlibraryentrytypename
  */
-RqliteStorage.prototype.getLibraryEntry = async function(type, path) {
+RqliteStorage.prototype.getLibraryEntry = async function (type, path) {
   await this.init()
 
   const query = `SELECT body FROM ${this.tables.library} WHERE type = ? AND path = ?`
@@ -502,7 +494,7 @@ RqliteStorage.prototype.getLibraryEntry = async function(type, path) {
 /*
  * See: https://nodered.org/docs/api/storage/methods/#storagesavelibraryentrytypenamemetabody
  */
-RqliteStorage.prototype.saveLibraryEntry = async function(type, path, meta, body) {
+RqliteStorage.prototype.saveLibraryEntry = async function (type, path, meta, body) {
   await this.init()
 
   const name = path.split('/').pop() || path
