@@ -79,7 +79,7 @@ const client = Joi.object({
     .items(
       Joi.object({
         name: Joi.string(),
-        version: Joi.string(),
+        version: Joi.string().allow(''),
       })
     )
     .required(),
