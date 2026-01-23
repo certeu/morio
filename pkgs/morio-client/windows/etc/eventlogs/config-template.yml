@@ -4,26 +4,20 @@ features:
   fqdn:
     enabled: true
 path:
-  home: /var/lib/morio/filebeat
-  config: /opt/morio/etc/logs
-  data: /var/lib/morio/filebeat/data
-  logs: /var/log/morio/logs
+  home: "{| BEATS_HOME_DIR |}"
+  config: "{| MORIO_CONFIG_DIR |}\eventlogs"
+  data: "{| BEATS_DATA_DIR |}\winlogbeat"
+  logs: "{| MORIO_LOGS_DIR |}"
 processors:
   - drop_fields:
       fields:
         - agent
       ignore_missing: true
-filebeat:
+winlogbeat:
   config:
     modules:
       enabled: true
-      path: /opt/morio/etc/logs/modules.d/*.yml
-      reload:
-        enabled: true
-        period: 30s
-    inputs:
-      enabled: true
-      path: /opt/morio/etc/logs/inputs.d/*.yml
+      path: "{| MORIO_CONFIG_DIR |}\eventlogs\modules.d\*.yml"
       reload:
         enabled: true
         period: 30s
@@ -37,18 +31,18 @@ output:
     ssl:
       enabled: true
       certificate_authorities:
-        - /opt/morio/etc/ca.pem
+        - "{| MORIO_CONFIG_DIR |}\ca.pem"
       verification_mode: full
-      certificate: /opt/morio/etc/cert.pem
-      key: /opt/morio/etc/key.pem
+      certificate: "{|{ MORIO_CONFIG_DIR }|}\cert.pem"
+      key: "{| MORIO_CONFIG_DIR |}\key.pem"
     topic: logs
     version: 2.0.0
 logging:
   level: "{|#MORIO_DEBUG|}debug{|/MORIO_DEBUG|}{|^MORIO_DEBUG|}warning{|/MORIO_DEBUG|}"
   to_files: true
   files:
-    path: /var/log/morio
-    name: logs
+    path: "{| MORIO_LOGS_DIR }}"
+    name: eventlogs
     rotateeverybytes: 10485760
     keepfiles: 5
     permissions: "0600"

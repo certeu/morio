@@ -30,11 +30,14 @@ func init() {
 
 func EnsureTemplateVars() {
 	if runtime.GOOS == "linux" {
-		EnsureTemplateFolderVars("audit/module-templates.d")
+		EnsureTemplateFolderVars(filepath.Join("audit", "module-templates.d"))
 	}
-	EnsureTemplateFolderVars("metrics/module-templates.d")
-	EnsureTemplateFolderVars("logs/module-templates.d")
-	EnsureTemplateFolderVars("logs/input-templates.d")
+	EnsureTemplateFolderVars(filepath.Join("metrics", "module-templates.d"))
+	EnsureTemplateFolderVars(filepath.Join("logs", "module-templates.d"))
+	EnsureTemplateFolderVars(filepath.Join("logs", "input-templates.d"))
+	if runtime.GOOS == "windows" {
+		EnsureTemplateFolderVars(filepath.Join("eventlogs", "module-templates.d"))
+	}
 }
 
 func TemplateConfig() {
@@ -45,25 +48,30 @@ func TemplateConfig() {
 
 	// Audit (Linux only)
 	if runtime.GOOS == "linux" {
-		TemplateOutConfigFile("audit/config-template.yml", "audit/config.yml", context)
-		TemplateOutInputFolder("audit/module-templates.d", "audit/modules.d", context)
-		TemplateOutConfigFolder("audit/rule-templates.d", "audit/rules.d", context)
+		TemplateOutConfigFile(filepath.Join("audit", "config-template.yml"), filepath.Join("audit", "config.yml"), context)
+		TemplateOutInputFolder(filepath.Join("audit", "module-templates.d"), filepath.Join("audit", "modules.d"), context)
+		TemplateOutConfigFolder(filepath.Join("audit", "rule-templates.d"), filepath.Join("audit", "rules.d"), context)
 	}
 
-	// metrics
-	TemplateOutConfigFile("metrics/config-template.yml", "metrics/config.yml", context)
-	TemplateOutInputFolder("metrics/module-templates.d", "metrics/modules.d", context)
+	// Metrics
+	TemplateOutConfigFile(filepath.Join("metrics", "config-template.yml"), filepath.Join("metrics", "config.yml"), context)
+	TemplateOutInputFolder(filepath.Join("metrics", "module-templates.d"), filepath.Join("metrics", "modules.d"), context)
 
-	// logs
-	TemplateOutConfigFile("logs/config-template.yml", "logs/config.yml", context)
-	TemplateOutInputFolder("logs/module-templates.d", "logs/modules.d", context)
-	TemplateOutInputFolder("logs/input-templates.d", "logs/inputs.d", context)
+	// Logs
+	TemplateOutConfigFile (filepath.Join("logs", "config-template.yml"), filepath.Join("logs", "config.yml"), context)
+	TemplateOutInputFolder(filepath.Join("logs", "module-templates.d" ), filepath.Join("logs", "modules.d"), context)
+	TemplateOutInputFolder(filepath.Join("logs", "input-templates.d"  ), filepath.Join("logs", "inputs.d"), context)
+
+  // Eventlogs (windows only)
+	if runtime.GOOS == "windows" {
+	  TemplateOutConfigFile (filepath.Join("eventlogs", "config-template.yml"), filepath.Join("eventlogs", "config.yml"), context)
+	  TemplateOutInputFolder(filepath.Join("eventlogs", "module-templates.d" ), filepath.Join("eventlogs", "modules.d"), context)
+  }
 }
 
-// FIXME: make this platform agnostic
 func EnsureTemplateFolderVars(folder string) {
 	for _, file := range TemplateList(folder) {
-		EnsureTemplateFileVars(folder + "/" + file)
+		EnsureTemplateFileVars(filepath.Join(folder, file))
 	}
 }
 
@@ -89,6 +97,10 @@ func TemplateOutConfigFile(from string, to string, context map[string]string) {
 
 	// Render with mustache
 	output, err := mustache.Render("{{={| |}=}}"+string(template), context)
+  if err != nil {
+    fmt.Printf("Failed to render config file from %s: %v\n", from, err)
+    panic(err)
+  }
 
 	// Open file
 	file, err := os.Create(GetConfigFilePath(to))
@@ -122,6 +134,10 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 
 	// Render with mustache
 	templated, err := mustache.Render("{{={| |}=}}"+string(template), context)
+  if err != nil {
+    fmt.Printf("Failed to render input file from %s: %v\n", from, err)
+    panic(err)
+  }
 
 	// Convert back to Yaml
 	var result []map[string]interface{}
@@ -165,14 +181,14 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 func TemplateOutConfigFolder(from string, to string, context map[string]string) {
 	ClearFolder(to)
 	for _, file := range TemplateList(from) {
-		TemplateOutConfigFile(from+"/"+file, to+"/"+file, context)
+		TemplateOutConfigFile(filepath.Join(from, file), filepath.Join(to, file), context)
 	}
 }
 
 func TemplateOutInputFolder(from string, to string, context map[string]string) {
 	ClearFolder(to)
 	for _, file := range TemplateList(from) {
-		TemplateOutInputFile(from+"/"+file, to+"/"+file, context)
+		TemplateOutInputFile(filepath.Join(from, file), filepath.Join(to, file), context)
 	}
 }
 
@@ -323,6 +339,10 @@ func TemplateDocsAsYaml(path string) map[string]interface{} {
 	// and we are only interested in extracting the moriodata
 	context := GetVars()
 	cleanTemplate, err := mustache.Render("{{={| |}=}}"+string(template), context)
+  if err != nil {
+    fmt.Printf("Failed to render file from %s: %v\n", path, err)
+    panic(err)
+  }
 
 	// Now parse the cleaned template as YAML
 	var result []map[string]interface{}
@@ -421,7 +441,7 @@ func AddDefaultProcessorsToInputs(inputs []map[string]interface{}, from string) 
 
 // GetConfigFilePath returns the full path to a config file/folder
 func GetConfigFilePath(parts ...string) string {
-	return filepath.Join(append([]string{GetConfigPath()}, parts...)...)
+	return filepath.Join(append([]string{GetMorioConfigDir()}, parts...)...)
 }
 
 // WriteConfigFile writes content to a file in the config directory

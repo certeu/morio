@@ -35,14 +35,13 @@
                 DisplayName='Morio Logs'
                 Description='Morio logs shipping service'
                 Type='ownProcess'
-                Start='auto'
+                Start='demand'
                 ErrorControl='normal'
                 Arguments='run -c &quot;[INSTALLFOLDER]etc\logs\config-template.yml&quot;' />
 
               <ServiceControl
                 Id='FilebeatServiceControl'
                 Name='MorioLogs'
-                Start='install'
                 Stop='both'
                 Remove='uninstall' />
             </Component>
@@ -56,14 +55,13 @@
                 DisplayName='Morio Metrics'
                 Description='Morio metrics shipping service'
                 Type='ownProcess'
-                Start='auto'
+                Start='demand'
                 ErrorControl='normal'
                 Arguments='run -c &quot;[INSTALLFOLDER]etc\metrics\config-template.yml&quot;' />
 
               <ServiceControl
                 Id='MetricbeatServiceControl'
                 Name='MorioMetrics'
-                Start='install'
                 Stop='both'
                 Remove='uninstall' />
             </Component>
@@ -77,14 +75,13 @@
                 DisplayName='Morio Event Logs'
                 Description='Morio event logs shipping service'
                 Type='ownProcess'
-                Start='auto'
+                Start='demand'
                 ErrorControl='normal'
                 Arguments='run -c &quot;[INSTALLFOLDER]etc\logs\config-template.yml&quot;' />
 
               <ServiceControl
                 Id='WinlogbeatServiceControl'
                 Name='MorioWinlogbeat'
-                Start='install'
                 Stop='both'
                 Remove='uninstall' />
             </Component>
@@ -211,17 +208,6 @@
         </Directory>
       </Directory>
 
-      <!-- ProgramData for morio logs (matches your var/log/morio structure) -->
-      <Directory Id='CommonAppDataFolder'>
-        <Directory Id='MorioProgramDataDir' Name='Morio'>
-          <Directory Id='MorioLogsDataDir' Name='logs'>
-            <Component Id='CreateMorioLogsDataDir' Guid='*'>
-              <CreateFolder />
-              <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
-            </Component>
-          </Directory>
-        </Directory>
-      </Directory>
     </Directory>
 
     <!-- Feature definition - includes all components -->
@@ -251,7 +237,6 @@
       <ComponentRef Id='CreateMetricsModuleTemplatesDir' />
       <ComponentRef Id='CreateDataDir' />
       <ComponentRef Id='CreateLogsDir' />
-      <ComponentRef Id='CreateMorioLogsDataDir' />
     </Feature>
 
   </Product>
