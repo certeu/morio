@@ -23,13 +23,13 @@ cp -R $PKG_SRC/* $PKG_ROOT
 cp $PKG_ROOT/../../morio-macos-arm64 $PKG_ROOT/bin/morio
 
 # Download and extract Elastic beats
-echo "Downloading Filebeat from Elatic.co..."
+echo "Downloading Filebeat from elastic.co..."
 curl -L -o "$PKG_BUILD/filebeat.tar.gz" \
     "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-darwin-x86_64.tar.gz"
 tar -xzf "$PKG_BUILD/filebeat.tar.gz" -C "$PKG_BUILD"
 cp "$PKG_BUILD/filebeat-${BEATS_VERSION}-darwin-x86_64/filebeat" "$PKG_ROOT/bin/"
 
-echo "Downloading Metricbeat from Elatic.co..."
+echo "Downloading Metricbeat from elastic.co..."
 curl -L -o "$PKG_BUILD/metricbeat.tar.gz" \
     "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-${BEATS_VERSION}-darwin-x86_64.tar.gz"
 tar -xzf "$PKG_BUILD/metricbeat.tar.gz" -C "$PKG_BUILD"
