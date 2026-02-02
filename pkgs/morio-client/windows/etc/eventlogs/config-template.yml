@@ -4,23 +4,22 @@ features:
   fqdn:
     enabled: true
 path:
+  # Beats wants / as a path seperator, even on windows
   home: "{| BEATS_HOME_DIR |}"
-  config: "{| MORIO_CONFIG_DIR |}\eventlogs"
-  data: "{| BEATS_DATA_DIR |}\winlogbeat"
+  config: "{| MORIO_CONFIG_DIR |}/eventlogs"
+  data: "{| BEATS_DATA_DIR |}/winlogbeat"
   logs: "{| MORIO_LOGS_DIR |}"
 processors:
   - drop_fields:
       fields:
         - agent
       ignore_missing: true
-winlogbeat:
-  config:
-    modules:
-      enabled: true
-      path: "{| MORIO_CONFIG_DIR |}\eventlogs\modules.d\*.yml"
-      reload:
-        enabled: true
-        period: 30s
+
+{|#MORIO_WINLOGBEAT_TEMPLATED_MODULES|}
+winlogbeat.event_logs:
+{|{ MORIO_WINLOGBEAT_TEMPLATED_MODULES }|}
+{|/MORIO_WINLOGBEAT_TEMPLATED_MODULES|}
+
 output:
   kafka:
     client_id: {| MORIO_CLIENT_UUID |}
@@ -31,17 +30,17 @@ output:
     ssl:
       enabled: true
       certificate_authorities:
-        - "{| MORIO_CONFIG_DIR |}\ca.pem"
+        - "{| MORIO_CONFIG_DIR |}/ca.pem"
       verification_mode: full
-      certificate: "{|{ MORIO_CONFIG_DIR }|}\cert.pem"
-      key: "{| MORIO_CONFIG_DIR |}\key.pem"
+      certificate: "{|{ MORIO_CONFIG_DIR }|}/cert.pem"
+      key: "{| MORIO_CONFIG_DIR |}/key.pem"
     topic: logs
     version: 2.0.0
 logging:
   level: "{|#MORIO_DEBUG|}debug{|/MORIO_DEBUG|}{|^MORIO_DEBUG|}warning{|/MORIO_DEBUG|}"
   to_files: true
   files:
-    path: "{| MORIO_LOGS_DIR }}"
+    path: "{| MORIO_LOGS_DIR |}"
     name: eventlogs
     rotateeverybytes: 10485760
     keepfiles: 5

@@ -1,6 +1,8 @@
 module morio
 
-go 1.23.2
+go 1.24.0
+
+toolchain go1.24.12
 
 require (
 	github.com/IBM/sarama v1.45.1
@@ -51,6 +53,6 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
 )

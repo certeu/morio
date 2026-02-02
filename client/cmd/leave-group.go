@@ -15,9 +15,9 @@ func init() {
 }
 
 var leaveGroupCmd = &cobra.Command{
-	Use:   "leave-group",
-	Short: "Remove this client from an inventory group",
-	Long:  `This removes the local client from an inventory group.`,
+	Use:     "leave-group",
+	Short:   "Remove this client from an inventory group",
+	Long:    `This removes the local client from an inventory group.`,
 	Example: `  morio leave-group webservers`,
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -43,8 +43,8 @@ func RemoveClientFromGroup(group string) error {
 
 	// Create request payload
 	payload := struct {
-		Uuid    string     `json:"uuid"`
-		Cluster string     `json:"cluster"`
+		Uuid    string `json:"uuid"`
+		Cluster string `json:"cluster"`
 		Group   string `json:"group"`
 	}{
 		Uuid:    uuid,

@@ -58,15 +58,21 @@ func TemplateConfig() {
 	TemplateOutInputFolder(filepath.Join("metrics", "module-templates.d"), filepath.Join("metrics", "modules.d"), context)
 
 	// Logs
-	TemplateOutConfigFile (filepath.Join("logs", "config-template.yml"), filepath.Join("logs", "config.yml"), context)
-	TemplateOutInputFolder(filepath.Join("logs", "module-templates.d" ), filepath.Join("logs", "modules.d"), context)
-	TemplateOutInputFolder(filepath.Join("logs", "input-templates.d"  ), filepath.Join("logs", "inputs.d"), context)
+	TemplateOutConfigFile(filepath.Join("logs", "config-template.yml"), filepath.Join("logs", "config.yml"), context)
+	TemplateOutInputFolder(filepath.Join("logs", "module-templates.d"), filepath.Join("logs", "modules.d"), context)
+	TemplateOutInputFolder(filepath.Join("logs", "input-templates.d"), filepath.Join("logs", "inputs.d"), context)
 
-  // Eventlogs (windows only)
+	// Eventlogs (windows only)
 	if runtime.GOOS == "windows" {
-	  TemplateOutConfigFile (filepath.Join("eventlogs", "config-template.yml"), filepath.Join("eventlogs", "config.yml"), context)
-	  TemplateOutInputFolder(filepath.Join("eventlogs", "module-templates.d" ), filepath.Join("eventlogs", "modules.d"), context)
-  }
+		TemplateOutInputFolder(filepath.Join("eventlogs", "module-templates.d"), filepath.Join("eventlogs", "modules.d"), context)
+		// Winlogbeat does not support modules like filebeat and metricbeat do
+		// Instead, the config needs to go in the main file
+		// We emulate the module support in the Morio client by
+		// loading the various modules files and then injecting them
+		// into the main winlogbeat config file
+		context["MORIO_WINLOGBEAT_TEMPLATED_MODULES"] = LoadWinlogbeatModules(filepath.Join("eventlogs", "modules.d"))
+		TemplateOutConfigFile(filepath.Join("eventlogs", "config-template.yml"), filepath.Join("eventlogs", "config.yml"), context)
+	}
 }
 
 func EnsureTemplateFolderVars(folder string) {
@@ -97,10 +103,10 @@ func TemplateOutConfigFile(from string, to string, context map[string]string) {
 
 	// Render with mustache
 	output, err := mustache.Render("{{={| |}=}}"+string(template), context)
-  if err != nil {
-    fmt.Printf("Failed to render config file from %s: %v\n", from, err)
-    panic(err)
-  }
+	if err != nil {
+		fmt.Printf("Failed to render config file from %s: %v\n", from, err)
+		panic(err)
+	}
 
 	// Open file
 	file, err := os.Create(GetConfigFilePath(to))
@@ -134,10 +140,10 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 
 	// Render with mustache
 	templated, err := mustache.Render("{{={| |}=}}"+string(template), context)
-  if err != nil {
-    fmt.Printf("Failed to render input file from %s: %v\n", from, err)
-    panic(err)
-  }
+	if err != nil {
+		fmt.Printf("Failed to render input file from %s: %v\n", from, err)
+		panic(err)
+	}
 
 	// Convert back to Yaml
 	var result []map[string]interface{}
@@ -149,9 +155,6 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 
 	// Filter out moriodata
 	var inputs = AddDefaultProcessorsToInputs(StripMoriodataFromInputs(result), from)
-
-	// Add default processors
-	//fmt.Printf("Inputs: %v", inputs)
 
 	// Convert back to a YAML string
 	yamlData, err := yaml.Marshal(inputs)
@@ -170,8 +173,6 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 	if err != nil {
 		fmt.Println("Failed to write to " + GetConfigFilePath(to))
 		panic(err)
-	} else {
-		fmt.Println(GetConfigFilePath(to))
 	}
 
 	// Sync
@@ -213,24 +214,24 @@ func ClearFolder(folder string) {
 }
 
 func TemplateList(folder string) []string {
-        var files []string
-        // Grab the templates from disk
-        path := GetConfigFilePath(folder)
-        templates, err := ioutil.ReadDir(path)
-        if err != nil {
-                // Just return an empty list if we cannot find them
-                return files
-        }
+	var files []string
+	// Grab the templates from disk
+	path := GetConfigFilePath(folder)
+	templates, err := ioutil.ReadDir(path)
+	if err != nil {
+		// Just return an empty list if we cannot find them
+		return files
+	}
 
-        // Now build our list of template files
-        for _, template := range templates {
-                suffix := filepath.Ext(template.Name())
-                if !template.IsDir() && suffix == ".yml" {
-                        files = append(files, template.Name())
-                }
-        }
+	// Now build our list of template files
+	for _, template := range templates {
+		suffix := filepath.Ext(template.Name())
+		if !template.IsDir() && suffix == ".yml" {
+			files = append(files, template.Name())
+		}
+	}
 
-        return files
+	return files
 }
 
 func ExtractTemplateDefaultVars(from string) map[string]string {
@@ -327,7 +328,6 @@ func isString(val interface{}) bool {
 	return ok
 }
 
-// FIXME: Make this platform agnostic
 func TemplateDocsAsYaml(path string) map[string]interface{} {
 	template, err := os.ReadFile(GetConfigFilePath(path))
 	if err != nil {
@@ -339,10 +339,10 @@ func TemplateDocsAsYaml(path string) map[string]interface{} {
 	// and we are only interested in extracting the moriodata
 	context := GetVars()
 	cleanTemplate, err := mustache.Render("{{={| |}=}}"+string(template), context)
-  if err != nil {
-    fmt.Printf("Failed to render file from %s: %v\n", path, err)
-    panic(err)
-  }
+	if err != nil {
+		fmt.Printf("Failed to render file from %s: %v\n", path, err)
+		panic(err)
+	}
 
 	// Now parse the cleaned template as YAML
 	var result []map[string]interface{}
@@ -462,4 +462,92 @@ func WriteConfigFile(filename string, content string) error {
 	file.Sync()
 
 	return err
+}
+
+// Windows is the bane of my existence
+func LoadWinlogbeatModules(folder string) string {
+	var allEventLogs []map[string]interface{}
+
+	// Process the list of (already templated) module files
+	files := TemplateList(folder)
+	for _, file := range files {
+		// Read file
+		filePath := GetConfigFilePath(filepath.Join(folder, file))
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			fmt.Printf("Failed to read winlogbeat module file %s: %v\n", file, err)
+			continue
+		}
+
+		// Parse YAML array
+		var modules []map[string]interface{}
+		err = yaml.Unmarshal(content, &modules)
+		if err != nil {
+			fmt.Printf("Failed to parse YAML in winlogbeat module file %s: %v\n", file, err)
+			continue
+		}
+
+		// Process each entry in the module
+		for _, module := range modules {
+			// Convert event_id array to comma-separated string
+			if eventID, hasEventID := module["event_id"]; hasEventID {
+				if eventIDArray, ok := eventID.([]interface{}); ok {
+					var eventIDStrings []string
+					for _, id := range eventIDArray {
+						eventIDStrings = append(eventIDStrings, fmt.Sprintf("%v", id))
+					}
+					// Replace array with comma-separated string
+					module["event_id"] = strings.Join(eventIDStrings, ", ")
+				}
+			}
+
+			// Check if this entry has a dataset property
+			if dataset, hasDataset := module["dataset"]; hasDataset {
+				// Extract dataset value as string
+				datasetStr := fmt.Sprintf("%v", dataset)
+
+				// Find and modify the add_labels processor to include morio.dataset
+				if processors, hasProcessors := module["processors"]; hasProcessors {
+					if processorsList, ok := processors.([]interface{}); ok {
+						for _, proc := range processorsList {
+							if procMap, ok := proc.(map[string]interface{}); ok {
+								// Look for add_labels processor
+								if addLabels, hasAddLabels := procMap["add_labels"]; hasAddLabels {
+									if addLabelsMap, ok := addLabels.(map[string]interface{}); ok {
+										if labels, hasLabels := addLabelsMap["labels"]; hasLabels {
+											if labelsMap, ok := labels.(map[string]interface{}); ok {
+												// Add the morio.dataset label
+												labelsMap["morio.dataset"] = datasetStr
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				// Remove the dataset property from the entry
+				delete(module, "dataset")
+			}
+
+			// Add to collection
+			allEventLogs = append(allEventLogs, module)
+		}
+	}
+
+	// If no event logs found, return empty string
+	// This will cause the mustache conditional to not render
+	if len(allEventLogs) == 0 {
+		return ""
+	}
+
+	// Marshal back to YAML
+	yamlData, err := yaml.Marshal(allEventLogs)
+	if err != nil {
+		fmt.Printf("Failed to marshal winlogbeat event_logs to YAML: %v\n", err)
+		panic(err)
+	}
+
+	return string(yamlData)
 }

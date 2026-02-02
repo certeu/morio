@@ -4,9 +4,10 @@ features:
   fqdn:
     enabled: true
 path:
+  # Beats wants / as a path seperator, even on windows
   home: "{| BEATS_HOME_DIR |}"
-  config: "{| MORIO_CONFIG_DIR |}\metrics"
-  data: "{| BEATS_DATA_DIR |}\metricbeat"
+  config: "{| MORIO_CONFIG_DIR |}/metrics"
+  data: "{| BEATS_DATA_DIR |}/metricbeat"
   logs: "{| MORIO_LOGS_DIR |}"
 processors:
   - drop_fields:
@@ -17,7 +18,7 @@ metricbeat:
   config:
     modules:
       enabled: true
-      path: "{| MORIO_CONFIG_DIR |}\metrics\modules.d\*.yml"
+      path: "{| MORIO_CONFIG_DIR |}/metrics/modules.d/*.yml"
       reload:
         enabled: true
         period: 30s
@@ -31,17 +32,17 @@ output:
     ssl:
       enabled: true
       certificate_authorities:
-        - "{| MORIO_CONFIG_DIR |}\ca.pem"
+        - "{| MORIO_CONFIG_DIR |}/ca.pem"
       verification_mode: full
-      certificate: "{|{ MORIO_CONFIG_DIR }|}\cert.pem"
-      key: "{| MORIO_CONFIG_DIR |}\key.pem"
+      certificate: "{|{ MORIO_CONFIG_DIR }|}/cert.pem"
+      key: "{| MORIO_CONFIG_DIR |}/key.pem"
     topic: metrics
     version: 2.0.0
 logging:
   level: "{|#MORIO_DEBUG|}debug{|/MORIO_DEBUG|}{|^MORIO_DEBUG|}warning{|/MORIO_DEBUG|}"
   to_files: true
   files:
-    path: "{| MORIO_LOGS_DIR }}"
+    path: "{| MORIO_LOGS_DIR |}"
     name: metrics
     rotateeverybytes: 10485760
     keepfiles: 5

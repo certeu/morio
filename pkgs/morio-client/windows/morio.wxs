@@ -37,7 +37,7 @@
                 Type='ownProcess'
                 Start='demand'
                 ErrorControl='normal'
-                Arguments='run -c &quot;[INSTALLFOLDER]etc\logs\config-template.yml&quot;' />
+                Arguments='run -c &quot;[INSTALLFOLDER]etc\logs\config.yml&quot;' />
 
               <ServiceControl
                 Id='FilebeatServiceControl'
@@ -57,7 +57,7 @@
                 Type='ownProcess'
                 Start='demand'
                 ErrorControl='normal'
-                Arguments='run -c &quot;[INSTALLFOLDER]etc\metrics\config-template.yml&quot;' />
+                Arguments='run -c &quot;[INSTALLFOLDER]etc\metrics\config.yml&quot;' />
 
               <ServiceControl
                 Id='MetricbeatServiceControl'
@@ -77,11 +77,11 @@
                 Type='ownProcess'
                 Start='demand'
                 ErrorControl='normal'
-                Arguments='run -c &quot;[INSTALLFOLDER]etc\logs\config-template.yml&quot;' />
+                Arguments='run -c &quot;[INSTALLFOLDER]etc\eventlogs\config.yml&quot;' />
 
               <ServiceControl
                 Id='WinlogbeatServiceControl'
-                Name='MorioWinlogbeat'
+                Name='MorioEventLogs'
                 Stop='both'
                 Remove='uninstall' />
             </Component>
@@ -89,11 +89,6 @@
 
           <!-- Config directory structure -->
           <Directory Id='EtcDir' Name='etc'>
-
-            <!-- Main config file -->
-            <Component Id='MorioYml' Guid='*'>
-              <File Id='MorioYml' Source='etc/morio.yml' KeyPath='yes' />
-            </Component>
 
             <!-- default.vars.d directory -->
             <Directory Id='DefaultVarsDir' Name='default.vars.d'>
@@ -191,10 +186,31 @@
 
           <!-- Data directory for beats -->
           <Directory Id='DataDir' Name='data'>
-            <Component Id='CreateDataDir' Guid='*'>
-              <CreateFolder />
-              <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
-            </Component>
+
+            <!-- filebeat directory -->
+            <Directory Id='FilebeatDir' Name='filebeat'>
+              <Component Id='CreateFilebeatDir' Guid='*'>
+                <CreateFolder />
+                <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+              </Component>
+            </Directory>
+
+            <!-- metricbeat directory -->
+            <Directory Id='MetricbeatDir' Name='metricbeat'>
+              <Component Id='CreateMetricbeatDir' Guid='*'>
+                <CreateFolder />
+                <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+              </Component>
+            </Directory>
+
+            <!-- winlogbeat directory -->
+            <Directory Id='WinlogbeatDir' Name='winlogbeat'>
+              <Component Id='CreateWinlogbeatDir' Guid='*'>
+                <CreateFolder />
+                <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+              </Component>
+            </Directory>
+
           </Directory>
 
           <!-- Logs directory -->
@@ -219,7 +235,6 @@
       <ComponentRef Id='WinlogbeatExe' />
 
       <!-- Config files -->
-      <ComponentRef Id='MorioYml' />
       <ComponentRef Id='MorioTick' />
       <ComponentRef Id='LogsConfigTemplate' />
       <ComponentRef Id='EventLogsConfigTemplate' />
@@ -235,10 +250,11 @@
       <ComponentRef Id='CreateEventLogsModuleTemplatesDir' />
       <ComponentRef Id='CreateMetricsModulesDir' />
       <ComponentRef Id='CreateMetricsModuleTemplatesDir' />
-      <ComponentRef Id='CreateDataDir' />
+      <ComponentRef Id='CreateFilebeatDir' />
+      <ComponentRef Id='CreateMetricbeatDir' />
+      <ComponentRef Id='CreateWinlogbeatDir' />
       <ComponentRef Id='CreateLogsDir' />
     </Feature>
 
   </Product>
 </Wix>
-

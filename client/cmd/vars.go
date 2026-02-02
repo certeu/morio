@@ -278,12 +278,12 @@ func GetVars() map[string]string {
 		}
 	}
 
-  // Add the various paths
-  // In GetVars() function
-  found["BEATS_HOME_DIR"] = GetBeatsHomeDir()
-  found["BEATS_DATA_DIR"] = GetBeatsDataDir()
-  found["MORIO_CONFIG_DIR"] = GetMorioConfigDir()
-  found["MORIO_LOGS_DIR"] = GetMorioLogsDir()
+	// Add the various paths
+	// We convert to / as path seperator as it's what Beats expects, even on windows
+	found["BEATS_HOME_DIR"] = filepath.ToSlash(GetBeatsHomeDir())
+	found["BEATS_DATA_DIR"] = filepath.ToSlash(GetBeatsDataDir())
+	found["MORIO_CONFIG_DIR"] = filepath.ToSlash(GetMorioConfigDir())
+	found["MORIO_LOGS_DIR"] = filepath.ToSlash(GetMorioLogsDir())
 
 	return found
 }

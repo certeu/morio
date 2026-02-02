@@ -459,7 +459,6 @@ func ClearModules() {
 	ClearModuleFiles("metrics/module-templates.d")
 }
 
-// FIXME: Make this platform agnostic
 func ClearModuleFiles(folder string) error {
 	matches, err := filepath.Glob(filepath.Join(GetConfigFilePath(folder), "*"))
 	if err != nil {

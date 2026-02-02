@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
-  "path/filepath"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -113,7 +113,6 @@ func FetchConfig() error {
 		fmt.Printf("Setting var: %s\n", variable.Key)
 		SetVar(variable.Key, variable.Val)
 	}
-	// Write files (FIXME: Make this platform agnostic)
 	for _, file := range successResp.Files {
 		WriteConfigFile(filepath.Join(file.Folder, file.File), file.Content)
 		fmt.Printf("Writing file: %s/%s\n", file.Folder, file.File)
