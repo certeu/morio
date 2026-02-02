@@ -223,8 +223,8 @@ func init() {
 }
 
 // Location of the variables files
-var CustomVarFolder = GetConfigPath() + "/vars.d"
-var DefaultVarFolder = GetConfigPath() + "/default.vars.d"
+var CustomVarFolder = filepath.Join(GetMorioConfigDir(), "vars.d")
+var DefaultVarFolder = filepath.Join(GetMorioConfigDir(), "default.vars.d")
 
 // Helper for panic on error
 func check(e error) {
@@ -236,10 +236,10 @@ func check(e error) {
 // Read the value of a variable (always returns a string)
 func GetVar(key string) string {
 	// Read entire file in one gulp
-	value, err := os.ReadFile(CustomVarFolder + "/" + key)
+	value, err := os.ReadFile(filepath.Join(CustomVarFolder, key))
 
 	if err != nil {
-		value, err = os.ReadFile(DefaultVarFolder + "/" + key)
+		value, err = os.ReadFile(filepath.Join(DefaultVarFolder, key))
 		if err != nil {
 			return ""
 		}
@@ -277,6 +277,13 @@ func GetVars() map[string]string {
 			}
 		}
 	}
+
+	// Add the various paths
+	// We convert to / as path seperator as it's what Beats expects, even on windows
+	found["BEATS_HOME_DIR"] = filepath.ToSlash(GetBeatsHomeDir())
+	found["BEATS_DATA_DIR"] = filepath.ToSlash(GetBeatsDataDir())
+	found["MORIO_CONFIG_DIR"] = filepath.ToSlash(GetMorioConfigDir())
+	found["MORIO_LOGS_DIR"] = filepath.ToSlash(GetMorioLogsDir())
 
 	return found
 }
@@ -327,7 +334,7 @@ func parseYAMLValue(input string) (interface{}, error) {
 // Write a value to a variable
 func SetVar(key string, value string) {
 	// Open file with 0600 permissions (read/write for owner only)
-	file, err := os.OpenFile(CustomVarFolder+"/"+key, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	file, err := os.OpenFile(filepath.Join(CustomVarFolder, key), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	check(err)
 	defer file.Close()
 
@@ -342,7 +349,7 @@ func SetVar(key string, value string) {
 // Write a value to a default variable
 func SetDefaultVar(key string, value string) {
 	// Open file
-	file, err := os.Create(DefaultVarFolder + "/" + key)
+	file, err := os.Create(filepath.Join(DefaultVarFolder, key))
 	check(err)
 	defer file.Close()
 
@@ -357,7 +364,7 @@ func SetDefaultVar(key string, value string) {
 // Remove a (custom) variable
 func RmVar(key string) {
 	// Remove file
-	err := os.Remove(CustomVarFolder + "/" + key)
+	err := os.Remove(filepath.Join(CustomVarFolder, key))
 	// Swallow errors if the file does not exist
 	if err != nil && !strings.Contains(err.Error(), "no such file or directory") {
 		check(err)
@@ -370,7 +377,7 @@ func ClearVars() error {
 	 * The vars named MORIO_ are needed for the join/rejoin flow
 	 * so we do not remove them
 	 */
-	matches, err := filepath.Glob(CustomVarFolder + "/*")
+	matches, err := filepath.Glob(filepath.Join(CustomVarFolder, "*"))
 	if err != nil {
 		return err
 	}

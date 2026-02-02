@@ -55,12 +55,15 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Healthcheck is broker by default so we override it
       // See: https://github.com/smallstep/certificates/issues/1909#issuecomment-3778458142
       healthcheck: {
-        Test: ['CMD-SHELL', 'step ca health --root /home/step/certs/intermediate_ca.crt 2>/dev/null | grep "^ok" >/dev/null'],
+        Test: [
+          'CMD-SHELL',
+          'step ca health --root /home/step/certs/intermediate_ca.crt 2>/dev/null | grep "^ok" >/dev/null',
+        ],
         Interval: 30000000000,
         Timeout: 1000000000,
         Retries: 3,
         StartPeriod: 60000000000,
-      }
+      },
     },
     /*
      * Traefik (proxy) configuration for the CA service

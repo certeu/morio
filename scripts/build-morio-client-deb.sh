@@ -28,6 +28,8 @@ sudo rm -rf build-context
 mkdir build-context
 cp -R pkgs/morio-client/linux/* build-context
 rm build-context/usr/sbin/.gitkeep
+# Also copy client binary
+cp local/builds/morio-linux-amd64 build-context/usr/sbin
 
 # Update version control file
 sed -i "s/__MORIO_VERSION__/${MORIO_VERSION}/g" ./build-context/DEBIAN/control

@@ -15,9 +15,9 @@ func init() {
 }
 
 var joinGroupCmd = &cobra.Command{
-	Use:   "join-group",
-	Short: "Join this client to an inventory group",
-	Long:  `This adds this local client to a (pre-existing) inventory group.`,
+	Use:     "join-group",
+	Short:   "Join this client to an inventory group",
+	Long:    `This adds this local client to a (pre-existing) inventory group.`,
 	Example: `  morio join-group webservers`,
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -43,8 +43,8 @@ func JoinClientToGroup(group string) error {
 
 	// Create request payload
 	payload := struct {
-		Uuid    string     `json:"uuid"`
-		Cluster string     `json:"cluster"`
+		Uuid    string `json:"uuid"`
+		Cluster string `json:"cluster"`
 		Group   string `json:"group"`
 	}{
 		Uuid:    uuid,

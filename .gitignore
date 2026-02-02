@@ -12,7 +12,8 @@ local/
 
 # Auto-generated client files
 pkgs/morio-client/linux/usr/sbin/morio
-pkgs/morio-client/macos/opt/morio/bin/morio
+pkgs/morio-client/macos/bin/morio
+pkgs/morio-client/windows/bin/morio.exe
 
 # Auto-generated scripts
 core/run-dev-container.sh

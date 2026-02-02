@@ -138,9 +138,9 @@ func init() {
 }
 
 func ShowModuleList(agent string) {
-	enabled, disabled := ModuleList(agent + "/module-templates.d")
+	enabled, disabled := ModuleList(filepath.Join(agent, "module-templates.d"))
 	if agent == "logs" {
-		enabledInputs, disabledInputs := ModuleList(agent + "/input-templates.d")
+		enabledInputs, disabledInputs := ModuleList(filepath.Join(agent, "input-templates.d"))
 		enabled = joinUnique(enabled, enabledInputs)
 		disabled = joinUnique(disabled, disabledInputs)
 	}
@@ -286,7 +286,7 @@ func enableModuleFile(base, module string) {
 	for _, name := range disabled {
 		moduleName := ModuleNameFromFile(name)
 		if moduleName == module {
-			os.Rename(GetConfigFilePath(base+"/"+name), GetConfigFilePath(base+"/"+moduleName+".yml"))
+			os.Rename(GetConfigFilePath(filepath.Join(base, name)), GetConfigFilePath(filepath.Join(base, moduleName+".yml")))
 		}
 	}
 }
@@ -317,7 +317,7 @@ func disableModuleFile(base, module string) {
 	for _, name := range enabled {
 		moduleName := ModuleNameFromFile(name)
 		if moduleName == module {
-			os.Rename(GetConfigFilePath(base+"/"+moduleName+".yml"), GetConfigFilePath(base+"/"+moduleName+".yml.disabled"))
+			os.Rename(GetConfigFilePath(filepath.Join(base, moduleName+".yml")), GetConfigFilePath(filepath.Join(base, moduleName+".yml.disabled")))
 		}
 	}
 }
@@ -358,7 +358,7 @@ func MetricsModuleInfo(module string, printHeader bool) {
 }
 
 func ModuleFileInfo(agent, folder, module string, printHeader bool) {
-	enabled, disabled := ModuleList(agent + "/" + folder)
+	enabled, disabled := ModuleList(filepath.Join(agent, folder))
 	for _, name := range enabled {
 		moduleName := ModuleNameFromFile(name)
 		if moduleName == module {
@@ -387,7 +387,7 @@ func PrintModuleInfoHeader(module, status string) {
 }
 
 func PrintModuleInfoData(agent, folder, file string) {
-	moriodata := TemplateDocsAsYaml(agent + "/" + folder + "/" + file)
+	moriodata := TemplateDocsAsYaml(filepath.Join(agent, folder, file))
 
 	// We want this in alphabetical order
 	sorted := make([]string, 0, len(moriodata))
@@ -459,9 +459,8 @@ func ClearModules() {
 	ClearModuleFiles("metrics/module-templates.d")
 }
 
-// FIXME: Make this platform agnostic
 func ClearModuleFiles(folder string) error {
-	matches, err := filepath.Glob(GetConfigFilePath(folder) + "/*")
+	matches, err := filepath.Glob(filepath.Join(GetConfigFilePath(folder), "*"))
 	if err != nil {
 		return err
 	}

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"log"
+	"net/http"
 
 	"github.com/spf13/cobra"
 )
