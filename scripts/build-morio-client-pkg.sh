@@ -13,7 +13,7 @@ PKG_SRC="./pkgs/morio-client/macos"
 # Clean and create directories
 rm -rf "$PKG_ROOT"
 rm -rf "$PKG_BUILD"
-mkdir -p "$PKG_ROOT"
+mkdir -p "$PKG_ROOT/bin"
 mkdir -p "$PKG_BUILD"
 
 # Copy package source files
