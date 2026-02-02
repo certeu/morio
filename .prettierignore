@@ -6,6 +6,11 @@ pkgs/morio-client/linux/etc/morio/logs/config-template.yml
 pkgs/morio-client/linux/etc/morio/metrics/config-template.yml
 pkgs/morio-client/macos/etc/logs/config-template.yml
 pkgs/morio-client/macos/etc/metrics/config-template.yml
+pkgs/morio-client/windows/etc/eventlogs/config-template.yml
+pkgs/morio-client/windows/etc/logs/config-template.yml
+pkgs/morio-client/windows/etc/metrics/config-template.yml
+# Windows wxs
+pkgs/morio-client/windows/morio.wxs
 # Need to setup proper remark linting one day.
 # Something like: "remark . --frail --output --quiet && remark . --ext mdx --frail --output --quiet --use remark-mdx && prettier . --log-level warn --write && xo --fix"
 docs/docs/*
