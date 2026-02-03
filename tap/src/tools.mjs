@@ -100,6 +100,16 @@ export const tools = {
     notification: (data) => produceStructuredMessage('notification', data),
   },
   shortUuid: (uuid) => (typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'),
+  status: {
+    consumer: {
+      connected: false,
+      crashed: false,
+    },
+    producer: {
+      connected: false,
+      crashed: false,
+    },
+  },
   stringify: asString,
   time: {
     ms2s,

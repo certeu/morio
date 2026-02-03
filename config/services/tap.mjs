@@ -22,7 +22,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports
-      ports: [],
+      ports: [
+        `${utils.getPreset('MORIO_TAP_HTTP_PORT')}:${utils.getPreset('MORIO_TAP_HTTP_PORT')}`,
+      ],
       // Volumes
       volumes: PROD
         ? [

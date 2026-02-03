@@ -3,6 +3,7 @@ import { Kafka, logLevel } from 'kafkajs'
 import { log, tools } from './tools.mjs'
 import { topics } from '../loader.mjs'
 import { dispatch } from './dispatcher.mjs'
+import { startMetrics, consumerHeartbeatHandler } from './metrics.mjs'
 import { config, node } from '../config/tap.mjs' // Needs to be mounted in the container
 
 /*
@@ -30,6 +31,9 @@ export async function subscribe() {
   if (!config.kafka?.brokers || !Array.isArray(config.kafka.brokers))
     throw new Error('Invalid broker configuration')
 
+  /*
+   * Connect to Kafka
+   */
   const clientId = `${config.kafka.clientId}.${node.uuid}`
   const client = createClient(clientId)
   const consumer = await createConsumer(client, topics)
@@ -38,12 +42,18 @@ export async function subscribe() {
   /*
    * Extend tools object
    */
+  tools.kafkaClient = client // Required for lag check
   tools.consumer = consumer // Low-level consumer access
   tools.producer = producer // Low-level producer access
   tools.config = config // Tap configuration
   tools.node = node // Morio node info
   tools.settings = config.tap // Morio settings
   tools.getSettings = (path, dflt) => tools.get(tools.config, path, dflt) // Morio settings getter
+
+  /*
+   * Start metrics/healthcheck listener
+   */
+  startMetrics(tools)
 
   /*
    * Invoke dispatch method on each message
@@ -85,12 +95,23 @@ async function createConsumer(client, topics) {
   /*
    * Add logging on specific events emitted by the consumer
    */
-  consumer.on(consumer.events.CONNECT, () => log.info('Kafka consumer connected'))
-  consumer.on(consumer.events.DISCONNECT, () => log.info('Kafka consumer disconnected'))
-  consumer.on(consumer.events.CRASH, (err) => log.warn(err, 'Kafka consumer crash'))
+  consumer.on(consumer.events.CONNECT, () => {
+    tools.status.consumer.connected = true
+    return log.info('Kafka consumer connected')
+  })
+  consumer.on(consumer.events.DISCONNECT, () => {
+    tools.status.consumer.connected = false
+    log.info('Kafka consumer disconnected')
+  })
+  consumer.on(consumer.events.CRASH, (err) => {
+    tools.status.consumer.connected = false
+    tools.status.consumer.crashed = true
+    log.warn(err, 'Kafka consumer crash')
+  })
   consumer.on(consumer.events.REQUEST_TIMEOUT, (err) =>
     log.warn(err, 'Kafka consumer request timeout')
   )
+  consumer.on(consumer.events.HEARTBEAT, () => consumerHeartbeatHandler(tools))
   /*
    * This would be hard to debug if we do not log it
    * It happens when a consumer group has multiple consumers subscribing
@@ -127,8 +148,14 @@ async function createProducer(client, clientId, topics) {
   /*
    * Let people know when the Kafka consumer is connected & ready
    */
-  producer.on(producer.events.CONNECT, () => log.info('Kafka producer connected'))
-  producer.on(producer.events.DISCONNECT, () => log.info('Kafka producer disconnected'))
+  producer.on(producer.events.CONNECT, () => {
+    tools.status.producer.connected = true
+    return log.info('Kafka producer connected')
+  })
+  producer.on(producer.events.DISCONNECT, () => {
+    tools.status.producer.connected = false
+    return log.info('Kafka producer disconnected')
+  })
   producer.on(producer.events.REQUEST_TIMEOUT, () => log.warn('Kafka producer request timeout'))
 
   return producer

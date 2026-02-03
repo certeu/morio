@@ -7,6 +7,8 @@ import { config } from '../config/tap.mjs'
  * that have subscribed to them
  */
 export function dispatch({ topic, message }, tools) {
+  tools.count(['total', 'messages'])
+  tools.count(['topics', topic, 'messages'])
   /*
    * Extract message data from raw RedPanda message
    */
@@ -15,7 +17,11 @@ export function dispatch({ topic, message }, tools) {
   /*
    * Return early if there's no data
    */
-  if (!parsedMessage.data) return
+  if (!parsedMessage.data) {
+    tools.count(['total', 'noData'])
+    tools.count(['topics', topic, 'noData'])
+    return
+  }
 
   /*
    * Attempt to determine the module and dataset
@@ -27,6 +33,7 @@ export function dispatch({ topic, message }, tools) {
    * Dispatch to stream processors subscribed to this topic/module/dataset
    */
   for (const processor of getProcessors(topic, module, dataset)) {
+    tools.count(['processors', processor.id])
     processor.handler({
       tools,
       settings: config.tap.settings?.[processor.id] || {},

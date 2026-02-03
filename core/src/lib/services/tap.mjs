@@ -125,6 +125,7 @@ async function ensureLocalPrerequisites() {
     tap: {
       settings: utils.getSettings('tap.settings'),
       imports: utils.getSettings('tap.imports'),
+      metricsPort: utils.getPreset('MORIO_TAP_HTTP_PORT'),
     },
   }
 

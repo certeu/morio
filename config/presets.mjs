@@ -405,6 +405,9 @@ presets.MORIO_PROXY_LOG_FORMAT = 'json'
  * Tap presets
  */
 
+predocs.MORIO_TAP_HTTP_PORT = 'TCP port for the _Tap service_ metrics endpoint to listen on'
+presets.MORIO_TAP_HTTP_PORT = 9666
+
 predocs.MORIO_TAP_LOG_LEVEL = `Log level of the Tap service.
 One of \`trace\`, \`debug\`, \`info\`, \`warn\`, \`error\`, \`fatal\`, or
 \`silent\`.
