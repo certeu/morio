@@ -8,7 +8,7 @@ import { config } from '../config/tap.mjs'
  */
 export function dispatch({ topic, message }, tools) {
   tools.count(['total', 'messages'])
-  tools.count(['topics', topic, 'messages'])
+  tools.count(['topics', topic])
   /*
    * Extract message data from raw RedPanda message
    */
@@ -19,7 +19,6 @@ export function dispatch({ topic, message }, tools) {
    */
   if (!parsedMessage.data) {
     tools.count(['total', 'noData'])
-    tools.count(['topics', topic, 'noData'])
     return
   }
 

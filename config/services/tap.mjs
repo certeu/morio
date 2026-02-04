@@ -9,6 +9,42 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const PROD = utils.isProduction()
 
+  /*
+   * Set up PM2 defaults
+   */
+  const pm2Defaults = {
+    name: 'tap',
+    script: './src/index.mjs',
+    instances: 1,
+    max_memory_restart: utils.getPreset('MORIO_TAP_MAX_MEMORY'),
+    watch: false,
+  }
+
+  /*
+   * This service supports running multiple instances
+   * in which case the config holds eda.instances
+   */
+  const instances = utils.getLocalServiceInstances('tap')
+  console.log(instances)
+  // There should only be 1 matching instance
+  if (instances.length === 1) {
+    const iconfig = utils.getSettings(
+      ['tap', 'instances', instances[0]],
+      { threads: 1, max_memory_restart: utils.getPreset('MORIO_TAP_MAX_MEMORY') }
+    )
+    const threads = iconfig.threads
+    if (
+      iconfig.threads &&
+      typeof iconfig.threads === 'number' &&
+      iconfig.threads > 0 &&
+      iconfig.threads <= utils.getPreset('MORIO_TAP_MAX_THREADS')
+    ) pm2Defaults.instances = threads
+    if (
+      iconfig.max_memory_restart &&
+      typeof iconfig.max_memory_restart === 'string'
+    ) pm2Defaults.max_memory_restart = mmr
+  }
+
   return {
     container: {
       // Image to run
@@ -36,6 +72,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/tap:/morio/tap/config`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/shared/processors:/morio/tap/processors`,
           ],
+    },
+    /*
+     * PM2 (node process manager) configuration
+     */
+    pm2: {
+      apps: [ { ...pm2Defaults } ]
     },
   }
 }

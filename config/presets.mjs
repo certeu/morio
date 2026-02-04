@@ -419,6 +419,12 @@ presets.MORIO_TAP_LOG_LEVEL = 'trace'
 predocs.MORIO_TAP_UID = 'User ID (UID) of the user running the Tap service'
 presets.MORIO_TAP_UID = 2112
 
+predocs.MORIO_TAP_MAX_MEMORY = 'The maximum memory a tap instance can consumer before it is restarted'
+presets.MORIO_TAP_MAX_MEMORY = '250M'
+
+predocs.MORIO_TAP_MAX_THREADS = 'The maximum of threads a tap instance will accept in its configuration'
+presets.MORIO_TAP_MAX_THREADS = 256
+
 /*
  * UI presets
  */

@@ -795,7 +795,9 @@ export async function loadStreamProcessors(settings, log) {
    */
   await writeJsonFile('/etc/morio/overlays.d/__morio.tap.json', {
     set: {
-      tap: tapSettings,
+      "tap.processors": tapSettings.processors,
+      "tap.imports": tapSettings.imports,
+      "tap.settings": tapSettings.settings,
     },
   })
 

@@ -266,7 +266,10 @@ utils.getLeaderUuid = () => store.get('state.cluster.leader_uuid', false)
 
 /**
  * A helper to figure out which service instances are local on an instances config object
- * This is used by services that support multiple instances per node (like EdA)
+ * This is used by services that support multiple instances per node, although there's a difference
+ * the config structure is slightly different
+ * - EdA: Multiple instances means multiple containers on 1 node
+ * - Tap: Multiple instances means multiple threads in 1 container
  *
  * @param {string} serviceName - The name of the service
  * @return {array|false} localInstances - False is this is not a multi-instance setup, or an array holding the IDs of local instances if it is (could be an empty array)
@@ -275,10 +278,19 @@ utils.getLocalServiceInstances = (serviceName) => {
   const local = []
   const instances = utils.getSettings([serviceName, 'instances'], false)
   if (!instances) return false
-  // It's a multi-instance setup, return local instances
+
   const fqdn = utils.getNodeFqdn()
-  for (const [name, config] of Object.entries(instances)) {
-    if (config.nodes.includes(fqdn)) local.push(name)
+  // Multiple container services
+  if (['eda'].includes(serviceName)) {
+    for (const [name, config] of Object.entries(instances)) {
+      if (config.nodes.includes(fqdn)) local.push(name)
+    }
+  }
+  // Multiple thread services
+  else if (['tap'].includes(serviceName)) {
+    for (const node of Object.keys(instances)) {
+      if (node === fqdn) local.push(node)
+    }
   }
 
   return local

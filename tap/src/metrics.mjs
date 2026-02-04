@@ -4,18 +4,27 @@ import { promisify } from 'node:util'
 import get from 'lodash/get.js'
 import set from 'lodash/set.js'
 
-// Async exec
+// Add async exec
 const execAsync = promisify(exec)
 
 // Keep track of message counts
 const counters = {}
 const increaseCounter = (path) => set(counters, path, get(counters, path, 0) + 1)
 
+// Figure out how many instances/threads are running
+const instance = {
+  count: parseInt(process.env.instances || 1),
+  id: parseInt(process.env.pm_id || 0),
+}
+
+/*
+ * Starts a HTTP listener for the health and metrics endpoints
+ *
+ * @param {object} tools - The tools helper object
+ * @return {object} server - The server object
+ */
 export function startMetrics(tools) {
-  /*
-   * Start HTTP server for metrics
-   */
-  const metricsPort = tools.config?.tap?.metricsPort || 9666
+  const metricsPort = (tools.config?.tap?.metricsPort || 9666) + instance.id
   const server = http.createServer((req, res) => handleMetricsRequest(req, res, tools))
   server.listen(metricsPort, () => {
     tools.log.info(`Metrics endpoint listening on http://localhost:${metricsPort}/metrics`)
@@ -28,19 +37,24 @@ export function startMetrics(tools) {
 }
 
 /*
- * Handle HTTP requests for metrics
+ * Handle HTTP requests for metrics - Typical NodeJS request handler
+ *
+ * @param {object} req - The NodeJS request object
+ * @param {object} res - The NodeJS response object
+ * @param {object} tools - The tools helper object
  */
 async function handleMetricsRequest(req, res, tools) {
   const url = new URL(req.url, `http://${req.headers.host}`)
 
+  // Metrics endpoint
   if (url.pathname === '/metrics') {
-    // Collect metrics
-    const metrics = await loadMetrics(tools)
+    const metrics = await getLocalMetrics(tools)
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(JSON.stringify(metrics))
-  } else if (url.pathname === '/health') {
+  }
+  // Health endpoint
+  else if (url.pathname === '/health') {
     const lhb = Date.now() - tools.status.consumer.heartbeat
-    // Simple health check
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(
       JSON.stringify({
@@ -52,32 +66,46 @@ async function handleMetricsRequest(req, res, tools) {
         producer: tools.status.producer,
       })
     )
-  } else {
+  }
+  // Consolidated metrics endpoint (consolidated for all instances/threads)
+  else if (url.pathname === '/metrics/all') {
+    const metrics = await getAllMetrics(tools)
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify(metrics))
+  }
+  // 404 for everything else
+  else {
     res.writeHead(404, { 'Content-Type': 'text/plain' })
     res.end('Not Found')
   }
 }
 
 /*
- * Format metrics in Prometheus exposition format
+ * Gets the local metrics (this thread)
+ *
+ * @param {object} tools - The tools helper object
+ * @return {object} metrics - The local metrics
  */
-async function loadMetrics(tools) {
+async function getLocalMetrics(tools) {
   const pm2 = await getPM2Stats(tools)
 
-  return { counters, pm2 }
+  return { counters, pm2, instance }
 }
 
 /*
- * Grab the output of `pm2 jlist` and parse it
+ * Grabs the output of `pm2 jlist` and parse it
+ * This gives us metrics of the process.
+ *
+ * @param {object} tools - The tools helper object
+ * @return {object} metrics - The pm2 metrics
  */
 async function getPM2Stats(tools) {
   try {
     const { stdout } = await execAsync('pm2 jlist')
     const processes = JSON.parse(stdout)
 
-    // Find our process
-    const processName = tools.config.tap?.processName || 'tap'
-    const proc = processes.find((p) => p.name === processName)
+    // Find our instance/thread
+    const proc = processes.find((p) => p.pm2_env.pm_id === instance.id)
 
     if (!proc) return null
 
@@ -110,8 +138,58 @@ async function getPM2Stats(tools) {
   }
 }
 
+/*
+ * It's easier to allow people to fetch metrics for all
+ * threads/instances from a single endpoint, rather than
+ * having to combine them themselves.
+ * So this function connects to the metrics listener for
+ * threads that are not this one.
+ *
+ * @param {number} instanceId - The id of the instance to target
+ * @param {object} tools - The tools helper object
+ * @return {object} metrics - The metrics of that instance
+ */
+async function getRemoteMetrics(instanceId, tools) {
+  let result
+  try {
+    result = await tools.axios.get(
+      `http://localhost:${(tools.config?.tap?.metricsPort || 9666) + instanceId}/metrics`,
+      { timeout: 3000 }
+    )
+    if (result.data?.pm2) return result.data
+  }
+  catch (err) {
+    tools.log.warn(err, `Failed to load metrics from tap instance ${instanceId}`)
+  }
+
+  return false
+}
+
+/*
+ * Aggregate metrics from all instances
+ *
+ * @param {number} instanceId - The id of the instance to target
+ * @param {object} tools - The tools helper object
+ * @return {object} metrics - The metrics of that instance
+ */
+async function getAllMetrics(tools) {
+  const metrics = { instance, instances: {} }
+  for (let i = 0; i < instance.count; i++) metrics.instances[i] = (i === instance.id)
+    ? await getLocalMetrics(tools)
+    : await getRemoteMetrics(i, tools)
+
+  return metrics
+}
+
+/*
+ * Heartbeat happens every 3 seconds. We use this to check lag
+ * although doing so every 3 seconds would be a bit much, so
+ * instead we do it ever 30s.
+ *
+ * Using this lifecycle event prevents us from having to run
+ * an interval for this.
+ */
 export async function consumerHeartbeatHandler(tools) {
-  // Heartbeat happens ever 3s, but we check lag every 30s
   const now = Date.now()
   tools.status.consumer.heartbeat = now
   if (now - (counters.lag?.lastUpdate || 0) < 30000) return false

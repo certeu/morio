@@ -28,9 +28,5 @@ export KAFKAJS_NO_PARTITIONER_WARNING=1
 
 #
 # Start the Tap instance
-# We limit the memory here meaning pm2 will restart the service
-# when we exceed this memory use. This is to guard against
-# memory leaks, which is especially pertinent since tap will
-# run code outside our control.
 #
-pm2-runtime --name tap --namespace morio --log-type json --max-memory-bytes 250000000 ./src/index.mjs
+pm2-runtime start /morio/tap/config/pm2.config.js

@@ -375,6 +375,30 @@ const settings = Joi.object({
       headers: Joi.array().items(Joi.string()),
       origins: Joi.array().items(Joi.string()),
     }),
+    instances: Joi.object().pattern(
+      Joi.string(),
+      Joi.object({
+        description: Joi.string().optional(),
+        nodes: Joi.array().items(Joi.string())
+      })
+    ).optional()
+  }).optional(),
+  tap: Joi.object({
+    instances: Joi.object().pattern(
+      Joi.string(),
+      Joi.object({
+        threads: Joi.number().integer().optional(),
+        max_memory_restart: Joi.string().optional(),
+      })
+    ).optional(),
+    settings: Joi.object().optional(),
+    imports: Joi.object().optional(),
+    processors: Joi.object().optional(),
+  }).optional(),
+  watcher: Joi.object({
+    monitor_inventory: Joi.boolean().optional(),
+    ca_list: Joi.array().items(Joi.string()).optional(),
+    monitors: Joi.object().optional(),
   }).optional(),
 }).required()
 

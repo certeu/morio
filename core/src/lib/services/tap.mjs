@@ -151,5 +151,15 @@ async function ensureLocalPrerequisites() {
     ].join('\n')
   )
 
+  /*
+   * Write PM2 config file
+   */
+  const serviceConfig = utils.getMorioServiceConfig('tap')
+  if (serviceConfig?.pm2)
+    await writeFile(
+      `/etc/morio/tap/pm2.config.js`,
+      `module.exports=${JSON.stringify(serviceConfig.pm2, null, 2)}`
+    )
+
   return
 }
