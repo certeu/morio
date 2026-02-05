@@ -45,7 +45,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
     if (
       iconfig.max_memory_restart &&
       typeof iconfig.max_memory_restart === 'string'
-    ) pm2Defaults.max_memory_restart = mmr
+    ) pm2Defaults.max_memory_restart = iconfig.max_memory_restart
   }
 
   return {
