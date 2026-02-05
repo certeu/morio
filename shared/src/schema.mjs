@@ -359,7 +359,6 @@ const settings = Joi.object({
   vault: vaultInstance,
   preseed,
   client,
-  tap: Joi.object().optional(),
   subca: Joi.object().optional(),
   env,
   api: Joi.object({
