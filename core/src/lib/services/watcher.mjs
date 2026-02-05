@@ -1,3 +1,4 @@
+import dns from 'node:dns'
 import { writeYamlFile, chown, mkdir, cp } from '#shared/fs'
 import { ensureServiceCertificate } from '#lib/tls'
 // Default hooks
@@ -85,15 +86,23 @@ async function ensureMonitors() {
     if (utils.getSettings(`watcher.monitor_inventory`, false)) {
       const fqdns = await getInventoryFqdns()
       if (Array.isArray(fqdns)) {
-        monitors.push(
-          ...fqdns.map((fqdn) => ({
-            type: 'icmp',
-            id: `${fqdn}/ping`,
-            name: `Ping ${fqdn}`,
-            hosts: [fqdn],
-            schedule: '@every 30s',
-          }))
-        )
+        for (const fqdn of fqdns) {
+          // Only add a healthcheck if we can resolve the FQDN
+          let resolved = false
+          try {
+            resolved = await dns.resolve(fqdn)
+          } catch (error) {
+            // this is fine
+          }
+          if (resolved)
+            monitors.push({
+              type: 'icmp',
+              id: `${fqdn}/ping`,
+              name: `Ping ${fqdn}`,
+              hosts: [fqdn],
+              schedule: '@every 30s',
+            })
+        }
       }
     }
 
