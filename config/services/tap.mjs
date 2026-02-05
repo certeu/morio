@@ -25,7 +25,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * in which case the config holds eda.instances
    */
   const instances = utils.getLocalServiceInstances('tap')
-  console.log(instances)
   // There should only be 1 matching instance
   if (instances.length === 1) {
     const iconfig = utils.getSettings(
@@ -66,6 +65,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         ? [
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/tap:/morio/tap/config`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared/processors:/morio/tap/processors`,
+            `${utils.getPreset('MORIO_LOGS_ROOT')}/tap:/home/morio/.pm2/logs`,
           ]
         : [
             `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,
