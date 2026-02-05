@@ -14,10 +14,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const pm2Defaults = {
     name: 'tap',
+    namespace: 'morio',
     script: './src/index.mjs',
     instances: 1,
     max_memory_restart: utils.getPreset('MORIO_TAP_MAX_MEMORY'),
     watch: false,
+    error_file: `/morio/tap/logs/error.log`,
+    out_file: `/morio/tap/logs/tap.log`,
+    log_type: 'json',
   }
 
   /*
@@ -65,7 +69,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         ? [
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/tap:/morio/tap/config`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared/processors:/morio/tap/processors`,
-            `${utils.getPreset('MORIO_LOGS_ROOT')}/tap:/home/morio/.pm2/logs`,
+            `${utils.getPreset('MORIO_LOGS_ROOT')}/tap:/morio/tap/logs`,
           ]
         : [
             `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,

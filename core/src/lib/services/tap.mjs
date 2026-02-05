@@ -1,4 +1,4 @@
-import { readFile, writeFile } from '#shared/fs'
+import { readFile, writeFile, mkdir, chown } from '#shared/fs'
 import { ensureServiceCertificate } from '#lib/tls'
 import { hash } from '#shared/crypto'
 // Default hooks
@@ -160,6 +160,14 @@ async function ensureLocalPrerequisites() {
       `/etc/morio/tap/pm2.config.js`,
       `module.exports=${JSON.stringify(serviceConfig.pm2, null, 2)}`
     )
+
+  /*
+   * Create the directory to hold the logs
+   */
+  const uid = utils.getPreset('MORIO_TAP_UID')
+  const dir = `${utils.getPreset('MORIO_LOGS_ROOT')}/tap`
+  await mkdir(dir)
+  await chown(dir, uid, uid)
 
   return
 }
