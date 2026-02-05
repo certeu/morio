@@ -275,7 +275,7 @@ export const ShowLogs = ({ cachekey }) => {
   // Can we figure out the field names?
   let fields = false
   try {
-    fields = Object.keys(JSON.parse(cache[0]))
+    fields = Object.keys(JSON.parse(cache.filter(entry => entry)[0]))
   } catch (err) {
     // ah well
   }
@@ -404,6 +404,9 @@ const LogMessage = ({ entry, field }) => {
   if (field === 'msg' && typeof entry === 'string') return entry
   if (typeof entry[field] === 'undefined') return '-'
   if (field === 'time') return timeAgo(entry[field], true, '')
+
+  // Handle nested JSON
+  if (typeof entry[field] === 'object') return <pre>{JSON.stringify(entry[field], null ,2)}</pre>
 
   return entry[field]
 }
