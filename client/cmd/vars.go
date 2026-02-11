@@ -245,7 +245,14 @@ func GetVar(key string) string {
 		}
 	}
 
-	return strings.TrimSpace(string(value))
+	trimmed := strings.TrimSpace(string(value))
+
+	// Treat "false" as empty for Mustache compatibility
+	if trimmed == "false" {
+		return ""
+	}
+
+	return trimmed
 }
 
 // Read the value of all variables
