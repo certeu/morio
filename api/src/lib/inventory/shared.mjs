@@ -128,7 +128,14 @@ export async function getHostnames(hostIds = []) {
 
 export function unwrapVar(key, val) {
   let nval = false
-  if (key.slice(-6) === 'SECRET') val = utils.decrypt(val)
+  if (key.slice(-6) === 'SECRET') {
+    try {
+      // Don't assume it it valid data
+      val = utils.decrypt(val)
+    } catch (err) {
+      // This is fine
+    }
+  }
   try {
     nval = JSON.parse(val)
   } catch (err) {

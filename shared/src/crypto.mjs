@@ -502,10 +502,17 @@ export function encryptionMethods(stringKey, salt, logger) {
       })
     },
     decrypt: (data) => {
-      if (data === null || data === '') return ''
       /*
        * Don't blindly assume this data is properly formatted ciphertext
        */
+      if (!data) {
+        log.warn(`Data passed to decrypt() was falsy`)
+        return ''
+      }
+      if (typeof data !== 'string') {
+        log.warn(`Data passed to decrypt() was not a string`)
+        return ''
+      }
       try {
         data = JSON.parse(data)
       } catch (err) {
