@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"os"
 	"os/exec"
+	"runtime"
 )
 
 // morio audit
@@ -17,9 +16,8 @@ var auditCmd = &cobra.Command{
 Any parameters after this command will be passed to auditbeat.`,
 	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Get path to auditbeat from config (and make sure it is set)
-		EnsureBeatPath("auditbeat", "audit")
-		path := viper.GetString("agents.audit")
+		// Get path to the auditbeat binary
+		path := GetBeatsBinDir() + "/auditbeat"
 
 		// Pass all arguments (after audit) to the auditbeat binary
 		// but also add the location of the Morio-specific config
@@ -40,6 +38,35 @@ Any parameters after this command will be passed to auditbeat.`,
 }
 
 // morio logs
+var eventlogsCmd = &cobra.Command{
+	Use:   "eventlogs",
+	Short: "Invoke the eventlogs agent",
+	Long: `Invokes the eventlogs agent.
+Any parameters after this command will be passed to winlogbeat.`,
+	Args: cobra.ArbitraryArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get path to the wiblogbeat binary
+		path := GetBeatsBinDir() + "/winlogbeat"
+
+		// Pass all arguments (after eventlogs) to the winlogbeat binary
+		// but also add the location of the Morio-specific config
+		configFlag := []string{"-c", GetMorioConfigDir() + "/eventlogs/config.yml"}
+		winlogbeat := exec.Command(path, append(configFlag, args...)...)
+
+		// Re-use I/O streams
+		winlogbeat.Stdout = os.Stdout
+		winlogbeat.Stderr = os.Stderr
+		winlogbeat.Stdin = os.Stdin
+
+		// Run the command and capture any error
+		if err := winlogbeat.Run(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+	},
+}
+
+// morio logs
 var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Invoke the logs agent",
@@ -47,9 +74,8 @@ var logsCmd = &cobra.Command{
 Any parameters after this command will be passed to filebeat.`,
 	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Get path to filebeat from config (and make sure it is set)
-		EnsureBeatPath("filebeat", "logs")
-		path := viper.GetString("agents.logs")
+		// Get path to the filebeat binary
+		path := GetBeatsBinDir() + "/filebeat"
 
 		// Pass all arguments (after logs) to the filebeat binary
 		// but also add the location of the Morio-specific config
@@ -77,9 +103,8 @@ var metricsCmd = &cobra.Command{
 Any parameters after this command will be passed to metricbeat.`,
 	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Get path to metricbeat from config (and make sure it is set)
-		EnsureBeatPath("metricbeat", "metrics")
-		path := viper.GetString("agents.metrics")
+		// Get path to the metricbeat binary
+		path := GetBeatsBinDir() + "/metricbeat"
 
 		// Pass all arguments (after logs) to the metricbeat binary
 		// but also add the location of the Morio-specific config
@@ -102,42 +127,17 @@ Any parameters after this command will be passed to metricbeat.`,
 func init() {
 	// Disable Cobra's flag parsing for what we pass to the agent
 	auditCmd.DisableFlagParsing = true
+	if runtime.GOOS == "windows" {
+	  eventlogsCmd.DisableFlagParsing = true
+  }
 	logsCmd.DisableFlagParsing = true
 	metricsCmd.DisableFlagParsing = true
 
 	// Add the commands
 	RootCmd.AddCommand(auditCmd)
+	if runtime.GOOS == "windows" {
+	  RootCmd.AddCommand(eventlogsCmd)
+  }
 	RootCmd.AddCommand(logsCmd)
 	RootCmd.AddCommand(metricsCmd)
-}
-
-// Makes sure that the path to the agent is set in the config
-func EnsureBeatPath(beat string, dataType string) {
-	key := "agents." + dataType
-	if !viper.IsSet(key) {
-		// Not set, prompt the user for the path
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Please provide the path to " + beat + ": ")
-		path, _ := reader.ReadString('\n')
-
-		// Trim newline characters from the input
-		path = path[:len(path)-1]
-
-		// Set the value in Viper
-		viper.Set(key, path)
-
-		// Save the updated configuration to the file
-		if err := viper.WriteConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-				// If no config file exists, create one
-				if err := viper.SafeWriteConfig(); err != nil {
-					fmt.Println("Failed to create config file:", err)
-					os.Exit(1)
-				}
-			} else {
-				fmt.Println("Failed to write to config file:", err)
-				os.Exit(1)
-			}
-		}
-	}
 }

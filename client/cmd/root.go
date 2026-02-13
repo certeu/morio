@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"morio/version"
 	"os"
 	"path/filepath"
@@ -33,21 +32,6 @@ func Execute() {
 	if err != nil {
 		os.Exit(1)
 	}
-}
-
-// When starting up, initialize the config file
-func init() {
-	cobra.OnInitialize(initConfig)
-}
-
-// Set up viper to manage the config file
-func initConfig() {
-	viper.SetEnvPrefix("morio")
-	viper.AddConfigPath(GetMorioConfigDir())
-	viper.SetConfigType("yaml")
-	viper.SetConfigName("morio")
-	viper.AutomaticEnv()
-	viper.ReadInConfig()
 }
 
 // Because on windows the install can go in a user-chosen folder
@@ -87,6 +71,17 @@ func GetBeatsDataDir() string {
 	// Linux and MacOS use the same path
 	default:
 		return "/var/lib/morio"
+	}
+}
+
+func GetBeatsBinDir() string {
+	switch runtime.GOOS {
+	case "windows":
+		return filepath.Join(getWindowsBasePath(), "bin")
+	case "darwin":
+		return "/opt/morio/bin"
+	default:
+		return "/usr/sbin/morio"
 	}
 }
 
