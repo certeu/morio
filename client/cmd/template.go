@@ -29,9 +29,7 @@ func init() {
 }
 
 func EnsureTemplateVars() {
-	if runtime.GOOS == "linux" {
-		EnsureTemplateFolderVars(filepath.Join("audit", "module-templates.d"))
-	}
+	EnsureTemplateFolderVars(filepath.Join("audit", "module-templates.d"))
 	EnsureTemplateFolderVars(filepath.Join("metrics", "module-templates.d"))
 	EnsureTemplateFolderVars(filepath.Join("logs", "module-templates.d"))
 	EnsureTemplateFolderVars(filepath.Join("logs", "input-templates.d"))
@@ -46,12 +44,10 @@ func TemplateConfig() {
 	// Then load the vars
 	context := GetVars()
 
-	// Audit (Linux only)
-	if runtime.GOOS == "linux" {
-		TemplateOutConfigFile(filepath.Join("audit", "config-template.yml"), filepath.Join("audit", "config.yml"), context)
-		TemplateOutInputFolder(filepath.Join("audit", "module-templates.d"), filepath.Join("audit", "modules.d"), context)
-		TemplateOutConfigFolder(filepath.Join("audit", "rule-templates.d"), filepath.Join("audit", "rules.d"), context)
-	}
+	// Audit
+	TemplateOutConfigFile(filepath.Join("audit", "config-template.yml"), filepath.Join("audit", "config.yml"), context)
+	TemplateOutInputFolder(filepath.Join("audit", "module-templates.d"), filepath.Join("audit", "modules.d"), context)
+	TemplateOutConfigFolder(filepath.Join("audit", "rule-templates.d"), filepath.Join("audit", "rules.d"), context)
 
 	// Metrics
 	TemplateOutConfigFile(filepath.Join("metrics", "config-template.yml"), filepath.Join("metrics", "config.yml"), context)

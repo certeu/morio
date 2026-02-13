@@ -22,9 +22,7 @@ var startCmd = &cobra.Command{
     morio start logs`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			if runtime.GOOS == "linux" {
-				ChangeAgentState("audit", "start")
-			}
+			ChangeAgentState("audit", "start")
 			ChangeAgentState("logs", "start")
 			ChangeAgentState("metrics", "start")
 			if runtime.GOOS == "windows" {
@@ -32,10 +30,6 @@ var startCmd = &cobra.Command{
 			}
 			ShowStatus()
 		} else if args[0] == "audit" {
-			if runtime.GOOS != "linux" {
-				fmt.Println("Audit agent is only available on Linux")
-				return
-			}
 			ChangeAgentState("audit", "start")
 			ShowStatus()
 		} else if args[0] == "logs" {
@@ -69,17 +63,11 @@ var stopCmd = &cobra.Command{
     morio stop logs`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			if runtime.GOOS == "linux" {
-				ChangeAgentState("audit", "stop")
-			}
+			ChangeAgentState("audit", "stop")
 			ChangeAgentState("logs", "stop")
 			ChangeAgentState("metrics", "stop")
 			ShowStatus()
 		} else if args[0] == "audit" {
-			if runtime.GOOS != "linux" {
-				fmt.Println("Audit agent is only available on Linux")
-				return
-			}
 			ChangeAgentState("audit", "stop")
 			ShowStatus()
 		} else if args[0] == "logs" {
@@ -113,17 +101,11 @@ var restartCmd = &cobra.Command{
     morio restart logs`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			if runtime.GOOS == "linux" {
-				ChangeAgentState("audit", "restart")
-			}
+			ChangeAgentState("audit", "restart")
 			ChangeAgentState("logs", "restart")
 			ChangeAgentState("metrics", "restart")
 			ShowStatus()
 		} else if args[0] == "audit" {
-			if runtime.GOOS != "linux" {
-				fmt.Println("Audit agent is only available on Linux")
-				return
-			}
 			ChangeAgentState("audit", "restart")
 			ShowStatus()
 		} else if args[0] == "logs" {
@@ -159,10 +141,6 @@ var statusCmd = &cobra.Command{
 		if len(args) == 0 {
 			ShowStatus()
 		} else if args[0] == "audit" {
-			if runtime.GOOS != "linux" {
-				fmt.Println("Audit agent is only available on Linux")
-				return
-			}
 			PrintAgentStatus("audit")
 		} else if args[0] == "metrics" {
 			PrintAgentStatus("metrics")
@@ -187,10 +165,6 @@ var startAuditCmd = &cobra.Command{
 	Long:    "This starts the auditbeat service",
 	Example: "  morio start audit",
 	Run: func(cmd *cobra.Command, args []string) {
-		if runtime.GOOS != "linux" {
-			fmt.Println("Audit agent is only available on Linux")
-			return
-		}
 		ChangeAgentState("audit", "start")
 		ShowStatus()
 	},
@@ -239,10 +213,6 @@ var stopAuditCmd = &cobra.Command{
 	Long:    "This stops the auditbeat service",
 	Example: "  morio stop audit",
 	Run: func(cmd *cobra.Command, args []string) {
-		if runtime.GOOS != "linux" {
-			fmt.Println("Audit agent is only available on Linux")
-			return
-		}
 		ChangeAgentState("audit", "stop")
 		ShowStatus()
 	},
@@ -291,10 +261,6 @@ var restartAuditCmd = &cobra.Command{
 	Long:    "This restarts the auditbeat service",
 	Example: "  morio restart audit",
 	Run: func(cmd *cobra.Command, args []string) {
-		if runtime.GOOS != "linux" {
-			fmt.Println("Audit agent is only available on Linux")
-			return
-		}
 		ChangeAgentState("audit", "restart")
 		ShowStatus()
 	},
@@ -522,9 +488,7 @@ func PrintAgentStatus(agent string) {
 }
 
 func ShowStatus() {
-	if runtime.GOOS == "linux" {
-		PrintAgentStatus("audit")
-	}
+	PrintAgentStatus("audit")
 	if runtime.GOOS == "windows" {
 		PrintAgentStatus("eventlogs")
 	}

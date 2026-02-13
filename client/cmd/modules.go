@@ -48,7 +48,7 @@ var modulesEnableCmd = &cobra.Command{
 	Short:   "Enable a local module",
 	Long:    `Enables a client module.`,
 	Args:    cobra.ExactArgs(1),
-	Example: `  morio modules enable linux-apache2`,
+	Example: `  morio modules enable linux-system`,
 	Run: func(cmd *cobra.Command, args []string) {
 		enableModule(args[0])
 		ShowModulesList(false, false)
@@ -61,7 +61,7 @@ var modulesDisableCmd = &cobra.Command{
 	Short:   "Disable a local module",
 	Long:    `Disables a client module.`,
 	Args:    cobra.ExactArgs(1),
-	Example: `  morio modules disable linux-apache2`,
+	Example: `  morio modules disable linux-system`,
 	Run: func(cmd *cobra.Command, args []string) {
 		disableModule(args[0])
 		ShowModulesList(false, false)
@@ -99,7 +99,7 @@ var modulesEnableRemoteCmd = &cobra.Command{
 	Short:   "Enable a remote module",
 	Long:    `Enables a module for this client on the Morio cluster.`,
 	Args:    cobra.ExactArgs(1),
-	Example: `  morio modules enable-remote linux-apache2`,
+	Example: `  morio modules enable-remote linux-system`,
 	Run: func(cmd *cobra.Command, args []string) {
 		EnableRemoteModule(args[0])
 	},
@@ -111,7 +111,7 @@ var modulesDisableRemoteCmd = &cobra.Command{
 	Short:   "Disable a remote module",
 	Long:    `Disables a module for this client on the Morio cluster.`,
 	Args:    cobra.ExactArgs(1),
-	Example: `  morio modules disable-remote linux-apache2`,
+	Example: `  morio modules disable-remote linux-system`,
 	Run: func(cmd *cobra.Command, args []string) {
 		DisableRemoteModule(args[0])
 	},
@@ -167,11 +167,7 @@ func GetEnabledModules() []string {
 	// Gather all enabled modules
 	var enabled []string
 
-	// Only check audit on Linux
-	if runtime.GOOS == "linux" {
-		enabled, _ = ModuleList("audit/module-templates.d")
-	}
-
+	enabled, _ = ModuleList("audit/module-templates.d")
 	enabledLogs, _ := ModuleList("logs/module-templates.d")
 	enabledLogsInputs, _ := ModuleList("logs/input-templates.d")
 	enabledMetrics, _ := ModuleList("metrics/module-templates.d")
@@ -224,9 +220,7 @@ func ShowModuleListSummary(table bool) {
 func ShowModulesList(verbose bool, table bool) {
 	if verbose {
 		ShowModuleListSummary(table)
-		if runtime.GOOS == "linux" {
-			ShowModuleList("audit")
-		}
+		ShowModuleList("audit")
 		ShowModuleList("logs")
 		ShowModuleList("metrics")
 	} else {
@@ -261,9 +255,7 @@ func ModuleList(folder string) ([]string, []string) {
 }
 
 func enableModule(module string) {
-	if runtime.GOOS == "linux" {
-		enableAuditModule(module)
-	}
+	enableAuditModule(module)
 	enableLogsModule(module)
 	enableMetricsModule(module)
 }
@@ -292,9 +284,7 @@ func enableModuleFile(base, module string) {
 }
 
 func disableModule(module string) {
-	if runtime.GOOS == "linux" {
-		disableAuditModule(module)
-	}
+	disableAuditModule(module)
 	disableLogsModule(module)
 	disableMetricsModule(module)
 }
@@ -334,14 +324,9 @@ func ModuleNameFromFile(file string) string {
 }
 
 func ModuleInfo(module string) {
-	if runtime.GOOS == "linux" {
-		AuditModuleInfo(module, true)
-		LogsModuleInfo(module, false)
-		MetricsModuleInfo(module, false)
-	} else {
-		LogsModuleInfo(module, true)
-		MetricsModuleInfo(module, false)
-	}
+	AuditModuleInfo(module, true)
+	LogsModuleInfo(module, false)
+	MetricsModuleInfo(module, false)
 }
 
 func AuditModuleInfo(module string, printHeader bool) {
@@ -450,10 +435,8 @@ func joinUnique(slice1, slice2 []string) []string {
 }
 
 func ClearModules() {
-	if runtime.GOOS == "linux" {
-		ClearModuleFiles("audit/module-templates.d")
-		ClearModuleFiles("audit/rule-templates.d")
-	}
+	ClearModuleFiles("audit/module-templates.d")
+	ClearModuleFiles("audit/rule-templates.d")
 	ClearModuleFiles("logs/module-templates.d")
 	ClearModuleFiles("logs/input-templates.d")
 	ClearModuleFiles("metrics/module-templates.d")
