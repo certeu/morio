@@ -31,10 +31,10 @@ output:
     ssl:
       enabled: true
       certificate_authorities:
-        - /etc/morio/ca.pem
+        - /opt/morio/etc/ca.pem
       verification_mode: full
-      certificate: /etc/morio/cert.pem
-      key: /etc/morio/key.pem
+      certificate: /opt/morio/etc/cert.pem
+      key: /opt/morio/etc/key.pem
     topic: audit
     version: 2.0.0
 logging:
@@ -51,4 +51,3 @@ logging:
   metrics:
     enabled: false
   json: true
-
