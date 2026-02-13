@@ -50,6 +50,7 @@ download_beat() {
     unzip -q -j "${zip_file}" "${beat}-${BEATS_VERSION}-windows-x86_64/${beat}.exe" -d "${PKG_ROOT}/bin/"
     rm "${zip_file}"
 }
+download_beat "auditbeat"
 download_beat "filebeat"
 download_beat "metricbeat"
 download_beat "winlogbeat"

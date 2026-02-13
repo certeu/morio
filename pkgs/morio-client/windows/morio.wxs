@@ -26,6 +26,26 @@
               <File Id='MorioExe' Source='bin/morio.exe' KeyPath='yes' />
             </Component>
 
+            <Component Id='AuditbeatExe' Guid='*'>
+              <File Id='AuditbeatExe' Source='bin/auditbeat.exe' KeyPath='yes' />
+
+              <ServiceInstall
+                Id='AuditbeatService'
+                Name='MorioAudit'
+                DisplayName='Morio Audit'
+                Description='Morio audit data shipping service'
+                Type='ownProcess'
+                Start='demand'
+                ErrorControl='normal'
+                Arguments='run -c &quot;[INSTALLFOLDER]etc\audit\config.yml&quot;' />
+
+              <ServiceControl
+                Id='AuditbeatServiceControl'
+                Name='MorioAudit'
+                Stop='both'
+                Remove='uninstall' />
+            </Component>
+
             <Component Id='FilebeatExe' Guid='*'>
               <File Id='FilebeatExe' Source='bin/filebeat.exe' KeyPath='yes' />
 
@@ -103,6 +123,27 @@
                 <CreateFolder />
                 <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
               </Component>
+            </Directory>
+
+            <!-- audit configuration -->
+            <Directory Id='AuditConfigDir' Name='audit'>
+              <Component Id='AuditConfigTemplate' Guid='*'>
+                <File Id='AuditConfigYml' Source='etc/audit/config-template.yml' KeyPath='yes' />
+              </Component>
+
+              <Directory Id='AuditModulesDir' Name='modules.d'>
+                <Component Id='CreateAuditModulesDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
+
+              <Directory Id='AuditModuleTemplatesDir' Name='module-templates.d'>
+                <Component Id='CreateAuditModuleTemplatesDir' Guid='*'>
+                  <CreateFolder />
+                  <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+                </Component>
+              </Directory>
             </Directory>
 
             <!-- logs configuration -->
@@ -187,6 +228,14 @@
           <!-- Data directory for beats -->
           <Directory Id='DataDir' Name='data'>
 
+            <!-- auditbeat directory -->
+            <Directory Id='AuditbeatDir' Name='auditbeat'>
+              <Component Id='CreateAuditbeatDir' Guid='*'>
+                <CreateFolder />
+                <RegistryValue Root='HKCU' Key='Software\Morio\Client' Type='string' Value='' KeyPath='yes' />
+              </Component>
+            </Directory>
+
             <!-- filebeat directory -->
             <Directory Id='FilebeatDir' Name='filebeat'>
               <Component Id='CreateFilebeatDir' Guid='*'>
@@ -230,18 +279,21 @@
     <Feature Id='Complete' Level='1' Title='Morio Client' Description='Complete Morio Client installation'>
       <!-- Binaries -->
       <ComponentRef Id='MorioExe' />
+      <ComponentRef Id='AuditbeatExe' />
       <ComponentRef Id='FilebeatExe' />
       <ComponentRef Id='MetricbeatExe' />
       <ComponentRef Id='WinlogbeatExe' />
 
       <!-- Config files -->
       <ComponentRef Id='MorioTick' />
+      <ComponentRef Id='AuditConfigTemplate' />
       <ComponentRef Id='LogsConfigTemplate' />
       <ComponentRef Id='EventLogsConfigTemplate' />
       <ComponentRef Id='MetricsConfigTemplate' />
 
       <!-- Directories -->
-      <ComponentRef Id='CreateVarsDir' />
+      <ComponentRef Id='CreateAuditModulesDir' />
+      <ComponentRef Id='CreateAuditModuleTemplatesDir' />
       <ComponentRef Id='CreateLogsInputsDir' />
       <ComponentRef Id='CreateLogsInputTemplatesDir' />
       <ComponentRef Id='CreateLogsModulesDir' />
@@ -254,6 +306,7 @@
       <ComponentRef Id='CreateMetricbeatDir' />
       <ComponentRef Id='CreateWinlogbeatDir' />
       <ComponentRef Id='CreateLogsDir' />
+      <ComponentRef Id='CreateVarsDir' />
     </Feature>
 
   </Product>
