@@ -3,7 +3,7 @@ set -e
 
 # Versions
 VERSION=$(cat ./VERSION | xargs)
-BEATS_VERSION=9.2.4
+BEATS_VERSION=9.3.0
 
 # Directories
 PKG_ROOT="./local/builds/macos/src"
@@ -23,17 +23,23 @@ cp -R $PKG_SRC/* $PKG_ROOT
 cp $PKG_ROOT/../../morio-macos-arm64 $PKG_ROOT/bin/morio
 
 # Download and extract Elastic beats
+echo "Downloading Auditbeat from elastic.co..."
+curl -L -o "$PKG_BUILD/auditbeat.tar.gz" \
+    "https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-${BEATS_VERSION}-darwin-aarch64.tar.gz"
+tar -xzf "$PKG_BUILD/auditbeat.tar.gz" -C "$PKG_BUILD"
+cp "$PKG_BUILD/auditbeat-${BEATS_VERSION}-darwin-aarch64/auditbeat" "$PKG_ROOT/bin/"
+
 echo "Downloading Filebeat from elastic.co..."
 curl -L -o "$PKG_BUILD/filebeat.tar.gz" \
-    "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-darwin-x86_64.tar.gz"
+    "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-darwin-aarch64.tar.gz"
 tar -xzf "$PKG_BUILD/filebeat.tar.gz" -C "$PKG_BUILD"
-cp "$PKG_BUILD/filebeat-${BEATS_VERSION}-darwin-x86_64/filebeat" "$PKG_ROOT/bin/"
+cp "$PKG_BUILD/filebeat-${BEATS_VERSION}-darwin-aarch64/filebeat" "$PKG_ROOT/bin/"
 
 echo "Downloading Metricbeat from elastic.co..."
 curl -L -o "$PKG_BUILD/metricbeat.tar.gz" \
-    "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-${BEATS_VERSION}-darwin-x86_64.tar.gz"
+    "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-${BEATS_VERSION}-darwin-aarch64.tar.gz"
 tar -xzf "$PKG_BUILD/metricbeat.tar.gz" -C "$PKG_BUILD"
-cp "$PKG_BUILD/metricbeat-${BEATS_VERSION}-darwin-x86_64/metricbeat" "$PKG_ROOT/bin/"
+cp "$PKG_BUILD/metricbeat-${BEATS_VERSION}-darwin-aarch64/metricbeat" "$PKG_ROOT/bin/"
 
 # Build package
 echo "Building MacOS morio package..."

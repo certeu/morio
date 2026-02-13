@@ -1,4 +1,0 @@
-# This is the configuration file for the Morio client
-agents:
-  logs: /opt/morio/bin/filebeat
-  metrics: /opt/morio/bin/metricbeat
