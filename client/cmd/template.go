@@ -383,12 +383,22 @@ func AddDefaultProcessorsToInputs(inputs []map[string]interface{}, from string) 
 				"fields": map[string]interface{}{
 					"id": GetVar("MORIO_CLIENT_UUID"),
 				},
+				"when": map[string]interface{}{
+					"not": map[string]interface{}{
+						"has_fields": []string{"host.id"},
+					},
+				},
 			},
 		},
 		{
 			"add_labels": map[string]interface{}{
 				"labels": map[string]interface{}{
 					"morio.module": ModuleNameFromFile(from),
+				},
+				"when": map[string]interface{}{
+					"not": map[string]interface{}{
+						"has_fields": []string{"labels.morio.module"},
+					},
 				},
 			},
 		},
