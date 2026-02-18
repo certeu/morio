@@ -1,8 +1,0 @@
-{
-  "visibility": {
-    "mrt": "icon",
-    "local": "icon",
-    "apikey": "icon"
-  },
-  "order": ["ad", "local", "apikey", "mrt"]
-}

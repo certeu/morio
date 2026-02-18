@@ -1,5 +1,0 @@
-# This is the configuration file for the Morio client
-agents:
-  audit: /usr/bin/auditbeat
-  logs: /usr/bin/filebeat
-  metrics: /usr/bin/metricbeat

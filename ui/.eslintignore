@@ -1,6 +1,0 @@
-**/*.json
-**/*.md
-**/*.sh
-Containerfile.*
-Containerfile
-.next

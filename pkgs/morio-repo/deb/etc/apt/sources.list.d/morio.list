@@ -1,3 +1,0 @@
-# Morio repository - __MORIO_CHANNEL__ channel
-# See https://apt.repo.morio.it/
-deb [signed-by=/usr/share/keyrings/morio.gpg] https://apt.repo.morio.it/__MORIO_CHANNEL__ __MORIO_CHANNEL__ main

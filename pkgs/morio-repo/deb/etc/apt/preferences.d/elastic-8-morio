@@ -1,7 +1,0 @@
-# This repository is configured with half (250) of the default priority (500).
-# This ensures the Morio client's dependencies are available without breaking
-# any other Elastic packages or expectations on where apt will find them.
-# See: https://morio.it/docs/guides/install-client/#elastic-apt-repo-priority
-Package: *
-Pin: release o=elastic-8-morio
-Pin-Priority: 250
